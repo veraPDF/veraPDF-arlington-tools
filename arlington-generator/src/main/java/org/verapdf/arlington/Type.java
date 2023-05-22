@@ -9,15 +9,15 @@ import javax.xml.bind.annotation.XmlType;
 public enum Type {
 	@XmlEnumValue("array") ARRAY("array", "Array", "COS_ARRAY", "COSArray", true, false,
 			null, null,  null),
-	@XmlEnumValue("bitmask") BITMASK("bitmask", "Bitmask", "COS_INTEGER", null, false, true,
+	@XmlEnumValue("bitmask") BITMASK("bitmask", "Bitmask", "COS_INTEGER", "COSInteger", false, true,
 			"Integer", "Long",  "getInteger"),
-	@XmlEnumValue("boolean") BOOLEAN("boolean", "Boolean", "COS_BOOLEAN", null, false, true,
+	@XmlEnumValue("boolean") BOOLEAN("boolean", "Boolean", "COS_BOOLEAN", "COSBoolean", false, true,
 			"Boolean", "Boolean",  "getBoolean"),
 	@XmlEnumValue("date") DATE("date", "Date", "COS_STRING", null, false, true,
 			"String", "String",  "getString"),
 	@XmlEnumValue("dictionary") DICTIONARY("dictionary", "Dictionary", "COS_DICT", "COSDictionary", true, false,
 			null, null,  null),
-	@XmlEnumValue("integer") INTEGER("integer", "Integer", "COS_INTEGER", null, false, true,
+	@XmlEnumValue("integer") INTEGER("integer", "Integer", "COS_INTEGER", "COSInteger", false, true,
 			"Integer", "Long",  "getInteger"),
 	@XmlEnumValue("matrix") MATRIX("matrix", "Matrix", "COS_ARRAY", null, false, true,
 			null, null,  null),
@@ -27,7 +27,7 @@ public enum Type {
 			null, null,  null),
 	@XmlEnumValue("null") NULL("null", "Null", "COS_NULL", null, false, true,
 			null, null,  null),
-	@XmlEnumValue("number") NUMBER("number", "Number", "COS_REAL", null, false, true,
+	@XmlEnumValue("number") NUMBER("number", "Number", "COS_REAL", "COSReal", false, true,
 			"Decimal", "Double",  "getReal"),
 	@XmlEnumValue("number-tree") NUMBER_TREE("number-tree", "NumberTree", "COS_DICT", "COSDictionary", true, false,
 			null, null,  null),
@@ -35,13 +35,13 @@ public enum Type {
 			null, null,  null),
 	@XmlEnumValue("stream") STREAM("stream", "Stream", "COS_STREAM", "COSStream", true, false,
 			null, null,  null),
-	@XmlEnumValue("string") STRING("string", "String", "COS_STRING", null, false, true,
+	@XmlEnumValue("string") STRING("string", "String", "COS_STRING", "COSString", false, true,
 			"String", "String",  "getString"),
-	@XmlEnumValue("string-ascii") STRING_ASCII("string-ascii", "StringAscii", "COS_STRING", null, false, true,
+	@XmlEnumValue("string-ascii") STRING_ASCII("string-ascii", "StringAscii", "COS_STRING", "COSString", false, true,
 			"String", "String",  "getString"),
-	@XmlEnumValue("string-byte") STRING_BYTE("string-byte", "StringByte", "COS_STRING", null, false, true,
+	@XmlEnumValue("string-byte") STRING_BYTE("string-byte", "StringByte", "COS_STRING", "COSString", false, true,
 			"String", "String",  "getString"),
-	@XmlEnumValue("string-text") STRING_TEXT("string-text", "StringText", "COS_STRING", null, false, true,
+	@XmlEnumValue("string-text") STRING_TEXT("string-text", "StringText", "COS_STRING", "COSString", false, true,
 			"String", "String",  "getString"),
 	@XmlEnumValue("entry") ENTRY("entry", "Entry", null, null, true, false,
 			null, null,  null),
@@ -138,5 +138,15 @@ public enum Type {
 
 	public String getTsvType() {
 		return tsvType;
+	}
+
+	public String getCreationCOSObject(String obj) {
+		if (this == Type.STRING || this == Type.STRING_TEXT || this == Type.STRING_ASCII || this == Type.STRING_BYTE) {
+			return getParserClassName() + ".construct(" + obj + ".getBytes())";
+		} else if (this == Type.NAME || this == Type.BOOLEAN || this == Type.INTEGER || this == Type.NUMBER ||
+				this == Type.BITMASK) {
+			return getParserClassName() + ".construct(" + obj + ")";
+		}
+		return obj;
 	}
 }

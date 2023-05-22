@@ -149,6 +149,10 @@ public class Object {
 		return multiObject.getEntriesValuesProperties();
 	}
 
+	public Map<String, Type> getEntriesHasTypeProperties() {
+		return multiObject.getEntriesHasTypeProperties();
+	}
+
 	public Set<String> getContainsEntriesProperties() {
 		return multiObject.getContainsEntriesProperties();
 	}

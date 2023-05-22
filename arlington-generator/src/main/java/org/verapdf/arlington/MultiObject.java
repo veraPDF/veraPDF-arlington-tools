@@ -14,6 +14,7 @@ public class MultiObject extends Object {
 	private final Set<String> entriesStringProperties = new HashSet<>();
 	private final Set<String> containsEntriesProperties = new HashSet<>();
 	private final Map<String, Type> entriesValuesProperties = new HashMap<>();
+	private final Map<String, Type> entriesHasTypeProperties = new HashMap<>();
 	private final Map<String, String> entryNameToArlingtonObjectMap = new HashMap<>();
 
 	private final SortedSet<MultiEntry> entries;
@@ -65,6 +66,10 @@ public class MultiObject extends Object {
 
 	public Map<String, Type> getEntriesValuesProperties() {
 		return entriesValuesProperties;
+	}
+
+	public Map<String, Type> getEntriesHasTypeProperties() {
+		return entriesHasTypeProperties;
 	}
 
 	public Set<String> getContainsEntriesProperties() {

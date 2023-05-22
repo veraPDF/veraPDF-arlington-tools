@@ -13,7 +13,7 @@ public class Properties {
 				addIndirect(multiObject, multiEntry);
 			}
 			for (Type type : multiEntry.getHasTypeProperties()) {
-				addHasType(multiObject, multiEntry, type);
+				addHasType(multiObject, multiEntry.getName(), type);
 			}
 			for (Type type : multiEntry.getTypeValueProperties()) {
 				addgetValue(multiObject, multiEntry.getName(), type);
@@ -66,6 +66,9 @@ public class Properties {
 		}
 		for (Map.Entry<String,Type> entry : multiObject.getEntriesValuesProperties().entrySet()) {
 			addgetValue(multiObject, entry.getKey(), entry.getValue());
+		}
+		for (Map.Entry<String,Type> entry : multiObject.getEntriesHasTypeProperties().entrySet()) {
+			addHasType(multiObject, entry.getKey(), entry.getValue());
 		}
 		for (String entryName : multiObject.getContainsEntriesProperties()) {
 			addContains(multiObject, entryName);
@@ -143,9 +146,9 @@ public class Properties {
 		multiObject.getJavaGeneration().addKeysStringMethod(entryName);
 	}
 
-	private static void addHasType(MultiObject multiObject, Entry entry, Type type) {
-		ModelGeneration.addProperty(entry.getHasTypePropertyName(type), Type.BOOLEAN.getModelType());
-		multiObject.getJavaGeneration().addHasTypeMethod(multiObject, entry, type);
+	private static void addHasType(MultiObject multiObject, String entryName, Type type) {
+		ModelGeneration.addProperty(Entry.getHasTypePropertyName(entryName, type), Type.BOOLEAN.getModelType());
+		multiObject.getJavaGeneration().addHasTypeMethod(multiObject, entryName, type);
 	}
 
 	private static void addContains(MultiObject multiObject, String entryName) {
