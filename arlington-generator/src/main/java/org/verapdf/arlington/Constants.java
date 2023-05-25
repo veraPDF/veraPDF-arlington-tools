@@ -10,6 +10,11 @@ public class Constants {
 	//arlington objects
 	public static final String STREAM = "Stream";
 	public static final String STRUCTURE_ATTRIBUTE_DICTIONARY = "StructureAttributesDict";
+	public static final String FONT_FILE_2 = "FontFile2";
+	public static final String FILE_TRAILER = "FileTrailer";
+	public static final String OBJECT_REFERENCE = "ObjectReference";
+	public static final String ARRAY_OF_DECODE_PARAMS_ENTRY = "ArrayOfDecodeParamsEntry";
+
 
 	//propertiesNames
 	public static final String FILE_SIZE = "fileSize";
