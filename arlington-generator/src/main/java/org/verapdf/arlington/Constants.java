@@ -7,6 +7,10 @@ public class Constants {
 	public static final String PACKAGE = "package";
 	public static final String IMPORT = "import";
 
+	//arlington objects
+	public static final String STREAM = "Stream";
+	public static final String STRUCTURE_ATTRIBUTE_DICTIONARY = "StructureAttributesDict";
+
 	//propertiesNames
 	public static final String FILE_SIZE = "fileSize";
 	public static final String KEY_NAME = "keyName";
