@@ -99,7 +99,7 @@ public class JSONEntry {
 					if (value.getValue() != null) {
 						result.add(value.getValue());
 					} else {
-						result.add("[" + String.join(",", value.getValues()) + "]");
+						result.add(getStingFromArray(value.getValues()));
 					}
 				}
 				return result;
@@ -136,14 +136,27 @@ public class JSONEntry {
 		for (int i = 0; i < defaultValue.size(); i++) {
 			JSONValue value = defaultValue.get(i);
 			if (value != null) {
-				return new Pair<>(getTypes().get(i), value.getValue());
+				String str = value.getValue() != null ? value.getValue() : getStingFromArray(value.getValues());
+				return new Pair<>(getTypes().get(i), str);
 			}
 		}
 		return null;
 	}
 
+	public static String getStingFromArray(List<String> list) {
+		return "[" + String.join(",", list) + "]";
+	}
+
+	public static String[] getArrayFromString(String string) {
+		return string.substring(1, string.length() - 1).split(",");
+	}
+
 	public String getDeprecatedString() {
 		return deprecatedValue != null ? deprecatedValue.getValue() : null;
+	}
+
+	public String getSinceString() {
+		return sinceVersion != null ? sinceVersion.getValue() : null;
 	}
 
 	public String getSpecialCase(int i) {

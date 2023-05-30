@@ -1,5 +1,7 @@
 package org.verapdf.arlington;
 
+import org.verapdf.arlington.json.JSONEntry;
+
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,9 +74,7 @@ public class Rules {
 		if (test == null) {
 			return;
 		}
-		if (PredicatesParser.containsBrackets(test)) {
-			test = test.substring(1, test.length() - 1);
-		}
+		test = PredicatesParser.removeBrackets(test);
 		String neededValue = PredicatesParser.getPredicateLastArgument(propertyValue);
 		ProfileGeneration.writeRule(version, 15, object.getModelType(), getClause(object, entry, type, neededValue), test,
 				ProfileGeneration.getErrorMessageStart(true, object, entry) + " shall have " +
@@ -155,9 +155,7 @@ public class Rules {
 			if (test == null || Constants.TRUE.equals(test)) {
 				return;
 			}
-			if (PredicatesParser.containsBrackets(test)) {
-				test = test.substring(1, test.length() - 1);
-			}
+			test = PredicatesParser.removeBrackets(test);
 			ProfileGeneration.writeRule(version, 11, object.getModelType(), getClause(object, entry), test,
 					ProfileGeneration.getErrorMessageStart(true, object, entry) +
 							" is required, when " + entry.getRequired(),

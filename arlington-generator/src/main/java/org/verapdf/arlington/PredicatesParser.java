@@ -486,6 +486,13 @@ public class PredicatesParser {
 		return true;
 	}
 
+	public static String removeBrackets(String str) {
+		if (containsBrackets(str)) {
+			return str.substring(1, str.length() - 1);
+		}
+		return str;
+	}
+
 	private void arrayLength() {
 		if (arguments.size() != 1) {
 			throw new RuntimeException("Invalid number of arguments of arrayLength");

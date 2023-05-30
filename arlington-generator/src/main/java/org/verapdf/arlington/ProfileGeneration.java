@@ -41,8 +41,8 @@ public class ProfileGeneration {
 		profileWriter.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
 		profileWriter.println("<profile xmlns=\"http://www.verapdf.org/ValidationProfile\" flavour=\"" + profileVersion + "\">");
 		profileWriter.println("\t<details creator=\"veraPDF Consortium\" created=\"2022-05-23T21:45:28.872+03:00\">");
-		profileWriter.println("\t\t<name>Arlington PDF " + version.getString() + " validation profile</name>");
-		profileWriter.println("\t\t<description>Validation rules against PDF " + version.getString() + " Specification</description>");
+		profileWriter.println("\t\t<name>Arlington PDF " + version.getString() + " profile</name>");
+		profileWriter.println("\t\t<description>Rules against PDF " + version.getString() + " Specification</description>");
 		profileWriter.println("\t</details>");
 		profileWriter.println("\t<hash></hash>");
 		profileWriter.println("\t<rules>");

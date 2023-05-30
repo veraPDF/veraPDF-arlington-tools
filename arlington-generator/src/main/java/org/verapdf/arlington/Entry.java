@@ -34,8 +34,11 @@ public class Entry implements Comparable<Entry> {
 		this.types = new LinkedList<>(entry.types);
 		this.typesPredicates = new LinkedList<>(entry.typesPredicates);
 		this.deprecatedVersion = entry.deprecatedVersion;
+		this.sinceString = entry.sinceString;
 		this.requiredString = entry.requiredString;
 		this.indirectReference = new HashMap<>(entry.indirectReference);
+		this.inheritable = entry.inheritable;
+		this.defaultValue = entry.defaultValue;
 		this.possibleValues = new HashMap<>(entry.possibleValues);
 		this.specialCases = new HashMap<>(entry.specialCases);
 		this.links = new HashMap<>(entry.links);
@@ -46,6 +49,7 @@ public class Entry implements Comparable<Entry> {
 		entry.name = jsonEntry.getName();
 		entry.types = jsonEntry.getTypes();
 		entry.typesPredicates = jsonEntry.getTypesPredicates();
+		entry.sinceString = jsonEntry.getSinceString();
 		entry.deprecatedVersion = jsonEntry.getDeprecatedVersion();
 		entry.requiredString = jsonEntry.getRequired();
 		entry.inheritable = jsonEntry.getInheritable();
@@ -401,6 +405,10 @@ public class Entry implements Comparable<Entry> {
 
 	public Boolean getInheritable() {
 		return inheritable;
+	}
+
+	public String getSinceString() {
+		return sinceString;
 	}
 
 	@Override

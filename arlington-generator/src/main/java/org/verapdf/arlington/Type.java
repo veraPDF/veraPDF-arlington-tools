@@ -1,5 +1,7 @@
 package org.verapdf.arlington;
 
+import org.verapdf.arlington.json.JSONEntry;
+
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
@@ -19,7 +21,7 @@ public enum Type {
 			null, null,  null),
 	@XmlEnumValue("integer") INTEGER("integer", "Integer", "COS_INTEGER", "COSInteger", false, true,
 			"Integer", "Long",  "getInteger"),
-	@XmlEnumValue("matrix") MATRIX("matrix", "Matrix", "COS_ARRAY", null, false, true,
+	@XmlEnumValue("matrix") MATRIX("matrix", "Matrix", "COS_ARRAY", "COSArray", false, true,
 			null, null,  null),
 	@XmlEnumValue("name") NAME("name", "Name", "COS_NAME", "COSName", false, true,
 			"String", "String",  "getString"),
@@ -31,7 +33,7 @@ public enum Type {
 			"Decimal", "Double",  "getReal"),
 	@XmlEnumValue("number-tree") NUMBER_TREE("number-tree", "NumberTree", "COS_DICT", "COSDictionary", true, false,
 			null, null,  null),
-	@XmlEnumValue("rectangle") RECTANGLE("rectangle", "Rectangle", "COS_ARRAY", null, false, true,
+	@XmlEnumValue("rectangle") RECTANGLE("rectangle", "Rectangle", "COS_ARRAY", "COSArray", false, true,
 			null, null,  null),
 	@XmlEnumValue("stream") STREAM("stream", "Stream", "COS_STREAM", "COSStream", true, false,
 			null, null,  null),
@@ -146,6 +148,9 @@ public enum Type {
 		} else if (this == Type.NAME || this == Type.BOOLEAN || this == Type.INTEGER || this == Type.NUMBER ||
 				this == Type.BITMASK) {
 			return getParserClassName() + ".construct(" + obj + ")";
+		} else if (this == Type.MATRIX || this == Type.RECTANGLE) {
+			String[] values = JSONEntry.getArrayFromString(obj);
+			return getParserClassName() + ".construct(" + values.length + ", new double[]{" + String.join(",", values) + "})";
 		}
 		return obj;
 	}
