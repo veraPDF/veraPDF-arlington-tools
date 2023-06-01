@@ -7,7 +7,7 @@ public class Constants {
 	public static final String PACKAGE = "package";
 	public static final String IMPORT = "import";
 
-	//arlington objects
+	//arlington objects and entries
 	public static final String STREAM = "Stream";
 	public static final String STRUCTURE_ATTRIBUTE_DICTIONARY = "StructureAttributesDict";
 	public static final String FONT_FILE_2 = "FontFile2";

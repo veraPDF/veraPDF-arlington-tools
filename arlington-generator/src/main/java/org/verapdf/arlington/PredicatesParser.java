@@ -380,6 +380,9 @@ public class PredicatesParser {
 				break;
 //			case "fn:IsAssociatedFile":
 //				break;
+			case "fn:IsDictionary":
+				isDictionary();
+				break;
 			case "fn:IsEncryptedWrapper":
 				isEncryptedWrapped();
 				break;

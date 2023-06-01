@@ -32,6 +32,7 @@ public class Rules {
 				hasWrongType(version, object, entry);
 				typesPredicates(version, object, entry);
 				requiredEntry(version, object, entry);
+				checkSince(version, object, entry);
 				if (!object.isArray()) {
 					deprecatedEntry(version, object, entry);
 				}
