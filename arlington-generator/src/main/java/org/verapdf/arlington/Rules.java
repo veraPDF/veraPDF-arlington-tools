@@ -71,7 +71,7 @@ public class Rules {
 	}
 
 	private static void requiredValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
-		String test = new PredicatesParser(object, entry, version, type, "RequiredValue").parse(propertyValue);
+		String test = new PredicatesParser(object, entry, version, type, Constants.REQUIRED_VALUE_COLUMN).parse(propertyValue);
 		if (test == null) {
 			return;
 		}
@@ -86,7 +86,7 @@ public class Rules {
 	}
 
 	private static boolean isDeprecatedValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
-		String info = new PredicatesParser(object, entry, version, type, "PossibleValues").parse(propertyValue);
+		String info = new PredicatesParser(object, entry, version, type, Constants.POSSIBLE_VALUES_COLUMN).parse(propertyValue);
 		if (info == null || !info.startsWith(PredicatesParser.DEPRECATED_PREDICATE.replace(":", "/")) ||
 				Objects.equals(PredicatesParser.DEPRECATED_PREDICATE.replace(":", "/") + "false", info)) {
 			return false;
@@ -152,7 +152,7 @@ public class Rules {
 					Constants.KEY_NAME);
 			entry.setContainsProperty(true);
 		} else if (!Constants.CURRENT_ENTRY.equals(entry.getName()) && entry.getRequired().contains(PredicatesParser.PREDICATE_PREFIX)) {
-			String test = new PredicatesParser(object, entry, version, null, "Required").parse(entry.getRequired());
+			String test = new PredicatesParser(object, entry, version, null, Constants.REQUIRED_COLUMN).parse(entry.getRequired());
 			if (test == null || Constants.TRUE.equals(test)) {
 				return;
 			}
@@ -163,6 +163,23 @@ public class Rules {
 					ProfileGeneration.getErrorMessageStart(false, object, entry) +
 							" is missing", Constants.KEY_NAME);
 		}
+	}
+
+	private static void checkSince(PDFVersion version, Object object, Entry entry) {
+		if (entry.getSinceString() == null || !entry.getSinceString().contains(PredicatesParser.PREDICATE_PREFIX)) {
+			return;
+		}
+		String result = new PredicatesParser(object, entry, version, null, Constants.SINCE_COLUMN).parse(entry.getSinceString());
+		if (result == null || Constants.TRUE.equals(result)) {
+			return;
+		}
+		result = PredicatesParser.removeBrackets(result);
+		String test = Entry.getContainsPropertyName(entry.getName()) + " == false || " + result;
+		ProfileGeneration.writeRule(version, 23, object.getModelType(), getClause(object, entry), test,
+					ProfileGeneration.getErrorMessageStart(true, object, entry) +
+							" can only be present, if satisfy predicate " + entry.getSinceString(),
+					ProfileGeneration.getErrorMessageStart(false, object, entry) +
+							" is present", Constants.KEY_NAME);
 	}
 
 	private static void deprecatedEntry(PDFVersion version, Object object, Entry entry) {

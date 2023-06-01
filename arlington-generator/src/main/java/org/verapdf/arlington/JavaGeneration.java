@@ -1,11 +1,13 @@
 package org.verapdf.arlington;
 
+import javafx.util.Pair;
 import org.verapdf.arlington.linkHelpers.*;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class JavaGeneration {
 
@@ -276,7 +278,7 @@ public class JavaGeneration {
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tLong lastNumber = null;");
 		javaWriter.println("\t\tfor (int i = 0; i < object.size(); i += " + number + ") {");
-		javaWriter.println("\t\t\tCOSObject elem = this.baseObject.at(i);");
+		javaWriter.println("\t\t\tCOSObject elem = object.at(i);");
 		javaWriter.println("\t\t\tif (elem == null || elem.getType() != " + Type.INTEGER.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\t\treturn false;");
 		javaWriter.println("\t\t\t}");
@@ -538,7 +540,10 @@ public class JavaGeneration {
 		boolean addDefault = multiObject.getJavaGeneration().getDefaultObject(multiObject, entryName);
 		printMethodSignature(false, "public", false, "COSObject",
 				getMethodName(Entry.getValuePropertyName(entryName)));
-		if (Constants.CURRENT_ENTRY.equals(entryName)) {
+		if (Constants.FILE_TRAILER.equals(multiObject.getId()) && Constants.XREF_STREAM.equals(entryName)) {
+			javaWriter.println("\t\tLong offset = " + getMethodName(Entry.getTypeValuePropertyName(Constants.XREF_STM, Type.INTEGER)) + "();");
+			javaWriter.println("\t\tCOSObject object = offset != null ? StaticResources.getDocument().getDocument().getObject(offset) : null;");
+		} else if (Constants.CURRENT_ENTRY.equals(entryName)) {
 			javaWriter.println("\t\tCOSObject object = new COSObject(this.baseObject);");
 		} else if (Entry.isNumber(entryName)) {
 			javaWriter.println("\t\tif (this.baseObject.size() <= " + entryName + ") {");

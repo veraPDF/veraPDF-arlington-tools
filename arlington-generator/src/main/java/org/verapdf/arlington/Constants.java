@@ -15,6 +15,15 @@ public class Constants {
 	public static final String OBJECT_REFERENCE = "ObjectReference";
 	public static final String ARRAY_OF_DECODE_PARAMS_ENTRY = "ArrayOfDecodeParamsEntry";
 
+	//column names
+	public static final String SINCE_COLUMN = "Since";
+	public static final String REQUIRED_COLUMN = "Required";
+	public static final String DEFAULT_VALUE_COLUMN = "DefaultValue";
+	public static final String POSSIBLE_VALUES_COLUMN = "PossibleValues";
+	public static final String REQUIRED_VALUE_COLUMN = "RequiredValue";
+	public static final String SPECIAL_CASE_COLUMN = "SpecialCase";
+	public static final String INDIRECT_REFERENCE_COLUMN = "IndirectReference";
+	public static final String LINKS_COLUMN = "Links";
 
 	//propertiesNames
 	public static final String FILE_SIZE = "fileSize";
@@ -35,6 +44,7 @@ public class Constants {
 	public static final String NUMBER_REGEX = "\\d+";
 	public static final String DOUBLE_REGEX = "\\d+\\.\\d+";
 	public static final String NUMBER_WITH_STAR_REGEX = "\\d+\\*";
+
 	public static final String STAR = "*";
 	public static final String TRUE = "true";
 	public static final String FALSE = "false";

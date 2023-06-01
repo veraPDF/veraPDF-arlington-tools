@@ -185,6 +185,18 @@ public class PredicatesParser {
 		return null;
 	}
 
+	private String getBooleanFromVersion(String string) {
+		PDFVersion version = PDFVersion.getPDFVersion(string);
+		if (version != null) {
+			if (PDFVersion.compare(this.version, version) >= 0) {
+				 return "true";
+			} else {
+				return "false";
+			}
+		}
+		return string;
+	}
+
 	private void or(Part firstArgument, Part secondArgument, boolean isOriginal) {
 		if (isDefault() && EVAL_PREDICATE.equals(getCurrentFunction())) {
 			output.add(getNewPart(firstArgument, secondArgument));
@@ -454,7 +466,7 @@ public class PredicatesParser {
 				break;
 			default:
 				StringBuilder result = new StringBuilder();
-				if (!token.isEmpty()) {
+				if (!token.getString().isEmpty()) {
 					output.push(token);
 				}
 				if (!functionName.isEmpty()) {
@@ -885,7 +897,7 @@ public class PredicatesParser {
 	}
 
 	public boolean isDefault() {
-		return "DefaultValue".equals(columnName);
+		return Constants.DEFAULT_VALUE_COLUMN.equals(columnName);
 	}
 
 	public static class Part {
