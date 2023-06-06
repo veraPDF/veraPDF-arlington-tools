@@ -1,5 +1,7 @@
 package org.verapdf.arlington;
 
+import org.verapdf.arlington.linkHelpers.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 

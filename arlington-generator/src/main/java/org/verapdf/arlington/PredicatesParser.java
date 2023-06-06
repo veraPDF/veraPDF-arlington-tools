@@ -621,6 +621,35 @@ public class PredicatesParser {
 		output.push(getNewPart(arguments));
 	}
 
+	private void extension() {
+		if (arguments.size() < 1) {
+			throw new RuntimeException("Invalid number of arguments of " + EXTENSION_PREDICATE);
+		}
+		String extensionName = removeQuotes(arguments.get(0).getString());
+		if (isDefault()) {
+			methods(getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "?",
+					type.getCreationCOSObject(arguments.get(1).getString()), ":");
+			object.getExtensionProperties().add(extensionName);
+			return;
+		}
+		if (arguments.size() == 1) {
+			output.push("(" + getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)) + " == true)");
+			object.getExtensionProperties().add(extensionName);
+		} else if (!isProfile || Constants.SINCE_COLUMN.equals(columnName)) {
+			PDFVersion version = PDFVersion.getPDFVersion(getEntryName(arguments.get(1).getString()));
+			if (version == null || PDFVersion.compare(this.version, version) >= 0) {
+				output.push("(" + getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)) + " == true)");
+				object.getExtensionProperties().add(extensionName);
+			} else {
+				output.push("false");
+			}
+		} else {
+			methods("(", "(", getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "==",
+					"true", ")", "&&", getNewPart(arguments.subList(1, arguments.size())), ")");
+			object.getExtensionProperties().add(extensionName);
+		}
+	}
+
 	private void fileSize() {
 		output.push(getPropertyOrMethodName(Constants.FILE_SIZE));
 	}

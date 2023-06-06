@@ -44,6 +44,196 @@ public class Main {
 		writer.println(Constants.IMPORT + " " + importName + ";");
 	}
 
+	private static void addXRef() {
+		Entry entry = new Entry();
+		entry.setName(Constants.XREF_STREAM);
+		entry.getTypes().add(Type.STREAM);
+		List<String> links = new LinkedList<>();
+		links.add(Constants.XREF_STREAM);
+		entry.getLinks().put(Type.STREAM, links);
+		entry.getTypesPredicates().add("");
+		entry.setRequired("");
+		for (PDFVersion version : PDFVersion.values()) {
+			if (PDFVersion.compare(version, PDFVersion.VERSION1_5) >= 0) {
+				Object object = version.getObjectIdMap().get(Constants.FILE_TRAILER);
+				object.addEntry(entry);
+			}
+		}
+	}
+
+	private static void addStarObjects() {
+		for (PDFVersion version : PDFVersion.values()) {
+			List<String> newObjectsNames = new LinkedList<>();
+			for (String objectName : objectNames) {
+				Object object = version.getObjectIdMap().get(objectName);
+				if (object == null) {
+					continue;
+				}
+				for (Entry entry : object.getEntries()) {
+					if (entry.getUniqLinkTypes().contains(Type.NAME_TREE)) {
+						addTreeObject(object, entry, version, Type.NAME_TREE);
+						newObjectsNames.add(object.getId() + Type.NAME_TREE.getType() + entry.getName());
+					}
+					if (entry.getUniqLinkTypes().contains(Type.NUMBER_TREE)) {
+						addTreeObject(object, entry, version, Type.NUMBER_TREE);
+						newObjectsNames.add(object.getId() + Type.NUMBER_TREE.getType() + entry.getName());
+					}
+				}
+				if (object.isArray()) {
+					addSubArrayObject(object, version, newObjectsNames);
+				}
+			}
+			objectNames.addAll(newObjectsNames);
+		}
+		for (PDFVersion version : PDFVersion.values()) {
+			List<String> newObjectsNames = new LinkedList<>();
+			for (String objectName : objectNames) {
+				Object object = version.getObjectIdMap().get(objectName);
+				if (object == null) {
+					continue;
+				}
+				for (Entry entry : object.getEntries()) {
+					if (entry.isStar()) {
+						addStarEntryObject(object, entry, version);
+						newObjectsNames.add(object.getId() + Type.ENTRY.getType());
+					}
+				}
+			}
+			objectNames.addAll(newObjectsNames);
+		}
+	}
+
+	private static void findParents() {
+		for (PDFVersion version : PDFVersion.values()) {
+			for (String objectName : objectNames) {
+				Object object = version.getObjectIdMap().get(objectName);
+				if (object == null) {
+					continue;
+				}
+				for (Entry entry : object.getEntries()) {
+					for (Type linkType : entry.getUniqLinkTypes()) {
+						for (String link : entry.getLinks(linkType)) {
+							Object childObject = version.getObjectIdMap().get(link);
+							if (childObject == null) {
+								continue;
+							}
+							childObject.getPossibleParents().add(objectName);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static void addTreeObject(Object object, Entry entry, PDFVersion version, Type type) {
+		String newObjectName = object.getId() + type.getType() + entry.getName();
+		Entry newEntry = new Entry();
+		newEntry.setName(Constants.STAR);
+		for (String link : entry.getLinks(type)) {
+			Object currentObject = version.getObjectIdMap().get(link);
+			Type currentType = Type.DICTIONARY;
+			if (currentObject.isArray()) {
+				currentType = Type.ARRAY;
+			} else if (currentObject.isStream()) {
+				currentType = Type.STREAM;
+			}
+			newEntry.getTypes().add(currentType);
+			newEntry.getTypesPredicates().add(currentType.getType());
+			newEntry.setIndirectReference(currentType, entry.getIndirectReference(type));
+			List<String> links = newEntry.getLinks(currentType);
+			if (links.isEmpty()) {
+				links = new LinkedList<>();
+				links.add(link);
+				newEntry.getLinks().put(currentType, links);
+			} else {
+				links.add(link);
+			}
+		}
+		entry.getLinks().clear();
+		List<String> links = new LinkedList<>();
+		links.add(newObjectName);
+		entry.getLinks().put(type, links);
+		SortedSet<Entry> entries = new TreeSet<>();
+		entries.add(newEntry);
+		version.getObjectIdMap().put(newObjectName, new Object(newObjectName, entries,
+				object.getPossibleParents()));
+	}
+
+	private static void addStarEntryObject(Object object, Entry entry, PDFVersion version) {
+		String newObjectName = object.getId() + Type.ENTRY.getType();
+		Entry newEntry = new Entry(entry);
+		newEntry.setName(Constants.CURRENT_ENTRY);
+		entry.setRequired(Constants.FALSE);
+		List<String> links = new LinkedList<>();
+		links.add(newObjectName);
+		entry.getLinks().clear();
+		entry.getTypes().clear();
+		entry.getTypesPredicates().clear();
+		entry.getPossibleValues().clear();
+		entry.getIndirectReference().clear();
+		entry.getLinks().put(Type.ENTRY, links);
+		entry.getTypes().add(Type.ENTRY);
+		SortedSet<Entry> entries = new TreeSet<>();
+		entries.add(newEntry);
+		version.getObjectIdMap().put(newObjectName, new Object(newObjectName, entries, object.getPossibleParents()));
+	}
+
+	private static void addSubArrayObject(Object object, PDFVersion version, List<String> newObjectsNames) {
+		List<? extends Entry> numberStarEntries = object.getNumberStarEntries();
+		if (!numberStarEntries.isEmpty()) {
+			String newObjectName = object.getId() + Type.SUB_ARRAY.getType();
+			newObjectsNames.add(newObjectName);
+			List<Integer> numbers = new LinkedList<>();
+			for (Entry entry : numberStarEntries) {
+				numbers.add(entry.getNumberWithStar());
+			}
+			Collections.sort(numbers);
+			SortedSet<Entry> entries = new TreeSet<>();
+			for (int i = 0; i < numbers.size(); i++) {
+				Entry originalEntry = numberStarEntries.get(i);
+				Entry newEntry = new Entry();
+				newEntry.setName(Integer.toString(i));
+				for (Map.Entry<Type, String> entry : originalEntry.getIndirectReference().entrySet()) {
+					newEntry.getIndirectReference().put(entry.getKey(), replace(entry.getValue(), numbers.get(0), numbers.size()));
+				}
+				newEntry.getTypes().addAll(originalEntry.getTypes());
+				newEntry.getTypesPredicates().addAll(originalEntry.getTypesPredicates());
+				for (Map.Entry<Type, List<String>> entry : originalEntry.getPossibleValues().entrySet()) {
+					List<String> possibleValues = new LinkedList<>();
+					for (String possibleValue : entry.getValue()) {
+						possibleValues.add(replace(possibleValue, numbers.get(0), numbers.size()));
+					}
+					newEntry.getPossibleValues().put(entry.getKey(), possibleValues);
+				}
+				for (Map.Entry<Type, List<String>> entry : originalEntry.getLinks().entrySet()) {
+					List<String> links = new LinkedList<>();
+					for (String link : entry.getValue()) {
+						links.add(replace(link, numbers.get(0), numbers.size()));
+					}
+					newEntry.getLinks().put(entry.getKey(), links);
+				}
+				for (Map.Entry<Type, String> entry : originalEntry.getIndirectReference().entrySet()) {
+					newEntry.getIndirectReference().put(entry.getKey(), replace(entry.getValue(), numbers.get(0), numbers.size()));
+				}
+				for (Map.Entry<Type, String> entry : originalEntry.getSpecialCases().entrySet()) {
+					newEntry.getSpecialCases().put(entry.getKey(), replace(entry.getValue(), numbers.get(0), numbers.size()));
+				}
+				newEntry.setRequired(replace(originalEntry.getRequired(), numbers.get(0), numbers.size()));
+				entries.add(newEntry);
+			}
+			Entry newEntry = new Entry();
+			newEntry.setName(Constants.SUB_ARRAYS);
+			List<String> links = new LinkedList<>();
+			links.add(newObjectName);
+			newEntry.setRequired(Constants.FALSE);
+			newEntry.getLinks().put(Type.SUB_ARRAY, links);
+			newEntry.getTypes().add(Type.SUB_ARRAY);
+			newEntry.getTypesPredicates().add(Type.SUB_ARRAY.getType());
+			object.addEntry(newEntry);
+			version.getObjectIdMap().put(newObjectName, new Object(newObjectName, entries, object.getPossibleParents()));
+		}
+	}
+
 	private static String replace(String string, int startNumber, int numbers) {
 		String newString = string;
 		for (int i = 0; i < numbers; i++) {
@@ -53,7 +243,8 @@ public class Main {
 	}
 
 	public static String getString(PDFVersion version, Object object, Entry entry, Type type) {
-		return "Version " + version.getString() + " object " + object.getId() + " entry " + entry.getName() + (type != null ?  (" type " + type.getType()) : "");
+		return "Version " + version.getString() + " object " + object.getId() + " entry " + entry.getName() +
+				(type != null ?  (" type " + type.getType()) : "");
 	}
 
 	public static String getString(PDFVersion version, Object object, Entry entry) {
