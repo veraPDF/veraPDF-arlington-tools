@@ -294,11 +294,13 @@ public class PredicatesParser {
 	}
 
 	private void nonEqual(Part firstArgument, Part secondArgument) {
-		if (("false".equals(firstArgument.getString()) && "true".equals(secondArgument.getString())) || ("true".equals(firstArgument.getString()) && "false".equals(secondArgument.getString()))) {
+		if (("false".equals(firstArgument.getString()) && "true".equals(secondArgument.getString())) ||
+				("true".equals(firstArgument.getString()) && "false".equals(secondArgument.getString()))) {
 			output.add("true");
 			return;
 		}
-		if (("false".equals(firstArgument.getString()) && "false".equals(secondArgument.getString())) || ("true".equals(firstArgument.getString()) && "true".equals(secondArgument.getString()))) {
+		if (("false".equals(firstArgument.getString()) && "false".equals(secondArgument.getString())) ||
+				("true".equals(firstArgument.getString()) && "true".equals(secondArgument.getString()))) {
 			output.add("false");
 			return;
 		}
@@ -600,7 +602,8 @@ public class PredicatesParser {
 		if (!isDefault()) {
 			throw new RuntimeException("defaultValue used not in DefaultValue column");
 		}
-		methods(getNewPart(arguments.subList(0, arguments.size() - 1)), "?", type.getCreationCOSObject(arguments.get(arguments.size() - 1).getString()), ":");
+		methods(getNewPart(arguments.subList(0, arguments.size() - 1)), "?",
+				type.getCreationCOSObject(arguments.get(arguments.size() - 1).getString()), ":");
 	}
 
 	private void deprecated() {

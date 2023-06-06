@@ -112,11 +112,13 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getMethodName(Constants.NOT_STANDARD_14_FONT));
 		javaWriter.println("\t\tCOSObject type = baseObject.getKey(ASAtom.TYPE);");
-		javaWriter.println("\t\tif (type == null || type.getType() != " + Type.NAME.getCosObjectType() + " || type.getName() != ASAtom.FONT) {");
+		javaWriter.println("\t\tif (type == null || type.getType() != " + Type.NAME.getCosObjectType() +
+				" || type.getName() != ASAtom.FONT) {");
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tCOSObject subtype = baseObject.getKey(ASAtom.SUBTYPE);");
-		javaWriter.println("\t\tif (subtype == null || subtype.getType() != " + Type.NAME.getCosObjectType() + " || subtype.getName() != ASAtom.TYPE1) {");
+		javaWriter.println("\t\tif (subtype == null || subtype.getType() != " + Type.NAME.getCosObjectType() +
+				" || subtype.getName() != ASAtom.TYPE1) {");
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tCOSObject baseFont = baseObject.getKey(ASAtom.BASE_FONT);");
@@ -216,6 +218,56 @@ public class JavaGeneration {
 		javaWriter.close();
 	}
 
+	public void addClassStart(Object object) {
+		javaWriter.println("public class " + object.getJavaClassName() + " extends GFAObject implements " +
+				object.getModelType() + " {");
+		javaWriter.println();
+		if (Constants.FONT_FILE_2.equals(object.getId())) {
+			javaWriter.println("\tprivate COSBase parentParentObject;");
+			javaWriter.println();
+			javaWriter.println("\tpublic " + object.getJavaClassName() +
+					"(COSBase baseObject, COSBase parentObject, COSBase parentParentObject, String keyName) {");
+			javaWriter.println("\t\tsuper(baseObject, parentObject, keyName, \"" + object.getModelType() + "\");");
+			javaWriter.println("\t\tthis.parentParentObject = parentParentObject;");
+		} else if (object.isEntry()) {
+			javaWriter.println("\tprivate COSBase parentParentObject;");
+			javaWriter.println("\tprivate String collectionName;");
+			javaWriter.println();
+			javaWriter.println("\tpublic " + object.getJavaClassName() +
+					"(COSBase baseObject, COSBase parentObject, COSBase parentParentObject, String collectionName, String keyName) {");
+			javaWriter.println("\t\tsuper(baseObject, parentObject, keyName, \"" + object.getModelType() + "\");");
+			javaWriter.println("\t\tthis.parentParentObject = parentParentObject;");
+			javaWriter.println("\t\tthis.collectionName = collectionName;");
+		} else {
+			javaWriter.println("\tpublic " + object.getJavaClassName() + "(COSBase baseObject, COSBase parentObject, String keyName) {");
+			javaWriter.println("\t\tsuper(baseObject, parentObject, keyName, \"" + object.getModelType() + "\");");
+		}
+		if (Constants.FILE_TRAILER.equals(object.getId())) {
+			javaWriter.println("\t\tGFAObject.clearAllContainers();");
+		} else if (Constants.OBJECT_REFERENCE.equals(object.getId())) {
+			javaWriter.println("\t\tCOSObject obj = this.baseObject.getKey(ASAtom.OBJ);");
+			javaWriter.println("\t\tif (obj != null && obj.getKey() != null) {");
+			javaWriter.println("\t\t\tGFAObject.getKeysSet().add(obj.getKey());");
+			javaWriter.println("\t\t}");
+		}
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addSize(Object object) {
+		if (object.isNameTree() || object.isNumberTree()) {
+			printMethodSignature(true, "public", false, Type.INTEGER.getJavaType(),
+					getMethodName(Constants.SIZE));
+			if (Object.isNameTree(object.getId())) {
+				javaWriter.println("\t\treturn PDNameTreeNode.create(new COSObject(baseObject)).size();");
+			} else {
+				javaWriter.println("\t\treturn new PDNumberTreeNode(new COSObject(baseObject)).size();");
+			}
+			javaWriter.println("\t}");
+			javaWriter.println();
+		}
+	}
+
 	public void addPackageAndImportsToClass() {
 		Main.addPackage(javaWriter, "org.verapdf.gf.model.impl.arlington");
 		javaWriter.println();
@@ -309,7 +361,8 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
 		String nameTreeFinalEntry = getComplexObject(nameTreeEntryName);
-		javaWriter.println("\t\tif (" + nameTreeFinalEntry + " == null || " + nameTreeFinalEntry + ".getType() != " + Type.DICTIONARY.getCosObjectType() + ") {");
+		javaWriter.println("\t\tif (" + nameTreeFinalEntry + " == null || " + nameTreeFinalEntry + ".getType() != " +
+				Type.DICTIONARY.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tPDNameTreeNode nameTreeNode = PDNameTreeNode.create(" + nameTreeFinalEntry + ");");
@@ -320,7 +373,8 @@ public class JavaGeneration {
 
 	public void addgetLinkedObjectsMethod(SortedMap<String, String> entries) {
 		printMethodSignature(true, "public", false,
-				"List<? extends org.verapdf.model.baselayer.Object>", "getLinkedObjects", "String link");
+				"List<? extends org.verapdf.model.baselayer.Object>", "getLinkedObjects",
+				"String link");
 		javaWriter.println("\t\tswitch (link) {");
 		for (String entry : entries.keySet()) {
 			String linkName = Links.getLinkName(entry);
@@ -386,7 +440,8 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, Type.INTEGER.getJavaType(),
 				getMethodName(Entry.getArrayLengthPropertyName(entryName)));
 		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
-		javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " + Type.ARRAY.getCosObjectType() + ") {");
+		javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " +
+				Type.ARRAY.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\treturn (long) " + objectName + ".size();");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\treturn null;");
@@ -425,15 +480,18 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, Type.NUMBER.getJavaType(),
 				getMethodName(entry.getRectWidthPropertyName()));
 		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\tif (object == null || object.getType() != " + Type.ARRAY.getCosObjectType() + " || object.size() != 4) {");
+		javaWriter.println("\t\tif (object == null || object.getType() != " + Type.ARRAY.getCosObjectType() +
+				" || object.size() != 4) {");
 		javaWriter.println("\t\t\treturn null;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tCOSObject left = object.at(0);");
 		javaWriter.println("\t\tCOSObject right = object.at(2);");
-		javaWriter.println("\t\tif (left == null || (left.getType() != " + Type.INTEGER.getCosObjectType() + " && left.getType() != " + Type.NUMBER.getCosObjectType() + ")) {");
+		javaWriter.println("\t\tif (left == null || (left.getType() != " + Type.INTEGER.getCosObjectType() +
+				" && left.getType() != " + Type.NUMBER.getCosObjectType() + ")) {");
 		javaWriter.println("\t\t\treturn null;");
 		javaWriter.println("\t\t}");
-		javaWriter.println("\t\tif (right == null || (right.getType() != " + Type.INTEGER.getCosObjectType() + " && right.getType() != " + Type.NUMBER.getCosObjectType() + ")) {");
+		javaWriter.println("\t\tif (right == null || (right.getType() != " + Type.INTEGER.getCosObjectType() +
+				" && right.getType() != " + Type.NUMBER.getCosObjectType() + ")) {");
 		javaWriter.println("\t\t\treturn null;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\treturn right.getReal() - left.getReal();");
@@ -445,15 +503,18 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, Type.NUMBER.getJavaType(),
 				getMethodName(entry.getRectHeightPropertyName()));
 		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\tif (object == null || object.getType() != " + Type.ARRAY.getCosObjectType() + " || object.size() != 4) {");
+		javaWriter.println("\t\tif (object == null || object.getType() != " + Type.ARRAY.getCosObjectType() +
+				" || object.size() != 4) {");
 		javaWriter.println("\t\t\treturn null;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tCOSObject bottom = object.at(1);");
 		javaWriter.println("\t\tCOSObject top = object.at(3);");
-		javaWriter.println("\t\tif (bottom == null || (bottom.getType() != " + Type.INTEGER.getCosObjectType() + " && bottom.getType() != " + Type.NUMBER.getCosObjectType() + ")) {");
+		javaWriter.println("\t\tif (bottom == null || (bottom.getType() != " + Type.INTEGER.getCosObjectType() +
+				" && bottom.getType() != " + Type.NUMBER.getCosObjectType() + ")) {");
 		javaWriter.println("\t\t\treturn null;");
 		javaWriter.println("\t\t}");
-		javaWriter.println("\t\tif (top == null || (top.getType() != " + Type.INTEGER.getCosObjectType() + " && top.getType() != " + Type.NUMBER.getCosObjectType() + ")) {");
+		javaWriter.println("\t\tif (top == null || (top.getType() != " + Type.INTEGER.getCosObjectType() +
+				" && top.getType() != " + Type.NUMBER.getCosObjectType() + ")) {");
 		javaWriter.println("\t\t\treturn null;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\treturn top.getReal() - bottom.getReal();");
@@ -465,7 +526,8 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getMethodName(entry.getIsHexStringPropertyName()));
 		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\treturn object != null && object.getType() == " + Type.STRING.getCosObjectType() + " && ((COSString)object.getDirectBase()).isHexadecimal();");
+		javaWriter.println("\t\treturn object != null && object.getType() == " + Type.STRING.getCosObjectType() +
+				" && ((COSString)object.getDirectBase()).isHexadecimal();");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -474,7 +536,8 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getMethodName(Entry.getIsFieldNamePropertyName(entry.getName())));
 		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\treturn object != null && object.getType() == " + Type.STRING.getCosObjectType() + " && !object.getString().contains(\".\");");
+		javaWriter.println("\t\treturn object != null && object.getType() == " + Type.STRING.getCosObjectType() +
+				" && !object.getString().contains(\".\");");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -541,7 +604,8 @@ public class JavaGeneration {
 		printMethodSignature(false, "public", false, "COSObject",
 				getMethodName(Entry.getValuePropertyName(entryName)));
 		if (Constants.FILE_TRAILER.equals(multiObject.getId()) && Constants.XREF_STREAM.equals(entryName)) {
-			javaWriter.println("\t\tLong offset = " + getMethodName(Entry.getTypeValuePropertyName(Constants.XREF_STM, Type.INTEGER)) + "();");
+			javaWriter.println("\t\tLong offset = " + getMethodName(Entry.getTypeValuePropertyName(Constants.XREF_STM,
+					Type.INTEGER)) + "();");
 			javaWriter.println("\t\tCOSObject object = offset != null ? StaticResources.getDocument().getDocument().getObject(offset) : null;");
 		} else if (Constants.CURRENT_ENTRY.equals(entryName)) {
 			javaWriter.println("\t\tCOSObject object = new COSObject(this.baseObject);");
@@ -588,8 +652,8 @@ public class JavaGeneration {
 		return "get" + propertyName;
 	}
 
-	public void printMethodSignature(boolean isOverride, String accessModifier,
-											boolean isStatic, String returnType, String methodName, String ... arguments) {
+	public void printMethodSignature(boolean isOverride, String accessModifier, boolean isStatic,
+									 String returnType, String methodName, String ... arguments) {
 		if (isOverride) {
 			javaWriter.println("\t@Override");
 		}
@@ -617,7 +681,8 @@ public class JavaGeneration {
 		string.append(stringName);
 		string.append(".split(\"&\")).filter(elem -> ");
 		for (String value : values) {
-			string.append(equals ? "" : "!").append("Objects.equals(elem, ").append(value).append(")").append(" ").append(equals ? "||" : "&&").append(" ");
+			string.append(equals ? "" : "!").append("Objects.equals(elem, ").append(value).append(")").append(" ")
+					.append(equals ? "||" : "&&").append(" ");
 		}
 		string.delete(string.length() - 4, string.length());
 		string.append(").count()");
@@ -639,11 +704,12 @@ public class JavaGeneration {
 		return result.toString();
 	}
 
-	public static String constructorGFAObject(String entryName, String arlingtonObjectName, String objectName, String parentObject, String keyName) {
+	public static String constructorGFAObject(String entryName, String arlingtonObjectName, String objectName,
+											  String parentObject, String keyName) {
 		List<String> arguments = new LinkedList<>();
 		arguments.add(objectName);
 		arguments.add(parentObject);
-		if ("FontFile2".equals(arlingtonObjectName)) {
+		if (Constants.FONT_FILE_2.equals(arlingtonObjectName)) {
 			arguments.add("this.parentObject");
 		} else if (Constants.STAR.equals(entryName)) {
 			arguments.add("this.parentObject");
