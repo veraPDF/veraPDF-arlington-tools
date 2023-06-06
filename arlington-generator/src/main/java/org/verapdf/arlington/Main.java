@@ -1,12 +1,64 @@
 package org.verapdf.arlington;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.verapdf.arlington.json.ItemDeserializer;
+import org.verapdf.arlington.json.JSONEntry;
+import org.verapdf.arlington.json.JSONValue;
+
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Main {
 
 	private static final SortedSet<String> objectNames = new TreeSet<>();
 	private static final Map<String, MultiObject> objectIdMap = new HashMap<>();
+
+	public static void main(String[] args) throws IOException {
+		ModelGeneration.addPackageAndImportsToModel();
+		ModelGeneration.addAObject();
+		JavaGeneration gfaObjectGeneration = new JavaGeneration(new PrintWriter(new FileWriter(Main.folder + "GFAObject.java")));
+		gfaObjectGeneration.addGFAObject();
+		for (PDFVersion version : PDFVersion.values()) {
+			createObjectIdMapFromJSON(version);
+			ProfileGeneration.startProfile(version, version.getProfileWriter());
+			objectNames.addAll(version.getObjectIdMap().keySet());
+		}
+		findParents();
+		addXRef();
+		addStarObjects();
+		generate();
+		ModelGeneration.close();
+		for (PDFVersion version : PDFVersion.values()) {
+			ProfileGeneration.endProfile(version.getProfileWriter());
+			version.getProfileWriter().close();
+		}
+	}
+
+	public static void createObjectIdMapFromJSON(PDFVersion version) throws IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		InputStream jsonFileInputStream = new FileInputStream("arlington" + version.getString() + ".json");
+		TypeReference<HashMap<String, Map<String, JSONEntry>>> typeRef
+				= new TypeReference<HashMap<String, Map<String, JSONEntry>>>() {};
+		objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(JSONValue.class, new ItemDeserializer());
+		objectMapper.registerModule(module);
+		Map<String, Map<String, JSONEntry>> jsonMap = objectMapper.readValue(new InputStreamReader(jsonFileInputStream,
+				StandardCharsets.UTF_8), typeRef);
+		for (Map.Entry<String, Map<String, JSONEntry>> mapEntry : jsonMap.entrySet()) {
+			SortedSet<Entry> entries = new TreeSet<>();
+			for (Map.Entry<String, JSONEntry> mapMapEntry : mapEntry.getValue().entrySet()) {
+				mapMapEntry.getValue().setName(mapMapEntry.getKey());
+				entries.add(Entry.getEntryFromJSON(mapMapEntry.getValue()));
+			}
+			version.getObjectIdMap().put(mapEntry.getKey(), new Object(mapEntry.getKey(), entries));
+		}
+		jsonFileInputStream.close();
+	}
 
 	private static void generate() throws IOException {
 		for (String objectName : objectNames) {

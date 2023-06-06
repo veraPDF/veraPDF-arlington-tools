@@ -45,6 +45,95 @@ public class Rules {
 		}
 	}
 
+	private static void checkLinks(PDFVersion version, Object object, Entry entry) {
+		if (entry.isNumberWithStar()) {
+			return;
+		}
+		SortedSet<Type> linkTypes = entry.getUniqLinkTypes();
+		if (linkTypes.isEmpty()) {
+			return;
+		}
+		if (entry.isStar()) {
+			if (!object.isNumberTree() && !object.isNameTree()) {
+				return;
+			}
+			List<String> links = new LinkedList<>();
+			for (List<String> currentLinks : entry.getLinks().values()) {
+				links.addAll(currentLinks);
+			}
+			String objectsString = String.join(", ", links);
+			StringBuilder test = new StringBuilder();
+			test.append("Entries_size == ");
+			if (object.isArray() || object.isNumberTree() || object.isNameTree() || (object.getEntries().size() == 1 &&
+					object.getEntries().iterator().next().isStar())) {
+				test.append("size");
+				if (object.getEntries().size() > 1) {
+					test.append(" - ").append(object.getEntries().size() - 1);
+				}
+			} else {
+				List<String> values = new LinkedList<>();
+				for (Entry currentEntry : object.getEntries()) {
+					if (!currentEntry.isStar()) {
+						values.add("'" + currentEntry.getName() + "'");
+					}
+				}
+				test.append("(keysString == '' ? 0 : ").append(ProfileGeneration.split("keysString",
+						false, values)).append(")");
+			}
+			ProfileGeneration.writeRule(version, 18, object.getModelType(), getClause(object, entry, null),
+					test.toString(), ProfileGeneration.getErrorMessageStart(true, object, entry) +
+							" shall be " + (links.size() == 1 ? "object " : "one of objects ") + objectsString,
+					ProfileGeneration.getErrorMessageStart(false, object, entry) + " is not " +
+							(links.size() == 1 ? "object " : "one of objects ") + objectsString, Constants.KEY_NAME);
+		} else {
+			for (Type type : linkTypes) {
+				List<String> links = entry.getLinks(type);
+				if (links.isEmpty()) {
+					continue;
+				}
+				if (type == Type.SUB_ARRAY) {
+					continue;
+				}
+				String objectsString = String.join(", ", links);
+				entry.addHasTypeProperty(type);
+				String linkName = Links.getLinkName(entry.getName());
+				ProfileGeneration.writeRule(version, 17, object.getModelType(), getClause(object, entry, type),
+						entry.getHasTypePropertyName(type) + " != true || " + linkName + "_size == 1",
+						ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
+								" shall be " + (links.size() == 1 ? "object " : "one of objects ") + objectsString,
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
+								" is not " + (links.size() == 1 ? "object " : "one of objects ") + objectsString, Constants.KEY_NAME);
+			}
+		}
+	}
+
+	private static void checkSpecialCase(PDFVersion version, Object object, Entry entry, Type type) {
+		String specialCase = entry.getSpecialCase(type);
+		if (specialCase == null || specialCase.isEmpty()) {
+			return;
+		}
+		String newSpecialCase = new PredicatesParser(object, entry, version, type, Constants.SPECIAL_CASE_COLUMN).parse(specialCase);
+		if (newSpecialCase == null || Constants.TRUE.equals(newSpecialCase)) {
+			return;
+		}
+		if (entry.getDefaultValue() != null) {
+			System.out.println(Main.getString(version, object, entry, type) + " default + specialCase");
+		}
+		StringBuilder test = new StringBuilder();
+		if (Constants.STRUCTURE_ATTRIBUTE_DICTIONARY.equals(object.getId())) {
+			test.append(entry.getContainsPropertyName()).append(" != true || ");
+			entry.setContainsProperty(true);
+		}
+		test.append(entry.getHasTypePropertyName(type)).append(" != true || ");
+		entry.addHasTypeProperty(type);
+		test.append(PredicatesParser.addBrackets(newSpecialCase));
+		ProfileGeneration.writeRule(version, 9, object.getModelType(), getClause(object, entry, type), test.toString(),
+				ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
+						" shall satisfy special case: " + specialCase,
+				ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
+						" does not satisfy special case: " + specialCase, Constants.KEY_NAME);
+	}
+
 	private static void hasWrongType(PDFVersion version, Object object, Entry entry) {
 		SortedSet<Type> currentTypes = new TreeSet<>(entry.getUniqActiveTypes());
 		if (currentTypes.isEmpty() || currentTypes.size() < entry.getTypes().size()) {
@@ -68,6 +157,211 @@ public class Rules {
 						(currentTypes.size() != 1 ? "one of types:" : "type") + " " + typesString,
 				ProfileGeneration.getErrorMessageStart(false, object, entry) + " is not " +
 						(currentTypes.size() != 1 ? "one of types:" : "of type") + " " + typesString, Constants.KEY_NAME);
+	}
+
+	private static void containsExtraEntries(PDFVersion version, Object object) {
+		if (Constants.STREAM.equals(object.getId())) {
+			return;
+		}
+		if (object.getEntries().stream().noneMatch(Entry::isStar)) {
+			StringBuilder test = new StringBuilder();
+			StringBuilder errorArgument = new StringBuilder();
+			StringBuilder keysString = new StringBuilder();
+			errorArgument.append(Constants.KEYS_STRING + ".split('&').filter(elem => ");
+			List<String> entries = new LinkedList<>();
+			Set<String> entryNamesSet = object.getEntriesNames();
+			if (Constants.FILE_TRAILER.equals(object.getId())) {
+				entryNamesSet.remove(Constants.XREF_STREAM);
+			}
+			for (String entryName : object.getMultiObject().getEntriesNames()) {
+				if (Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) {
+					continue;
+				}
+				if (entryNamesSet.contains(entryName)) {
+					keysString.append(entryName).append(", ");
+				}
+				entries.add("'" + entryName + "'");
+				errorArgument.append("elem != '").append(entryName).append("' && ");
+			}
+			if (!keysString.toString().isEmpty()) {
+				test.append(Constants.KEYS_STRING + " == '' || ");
+				test.append(ProfileGeneration.split(Constants.KEYS_STRING, false, entries)).append(" == 0");
+				keysString.deleteCharAt(keysString.length() - 1);
+				keysString.deleteCharAt(keysString.length() - 1);
+				errorArgument.delete(errorArgument.length() - 4, errorArgument.length());
+				errorArgument.append(").toString()");
+				ProfileGeneration.writeRule(version, 1, object.getModelType(), getClause(object), test.toString(),
+						object.getId() + " shall not contain entries except " + keysString,
+						object.getId() + " contains entry(ies) %1", errorArgument.toString());
+			}
+		}
+	}
+
+	private static void containsFutureEntries(PDFVersion version, Object object) {
+		if (Constants.STREAM.equals(object.getId())) {
+			return;
+		}
+		if (object.getEntries().stream().noneMatch(Entry::isStar)) {
+			StringBuilder test = new StringBuilder();
+			StringBuilder errorArgument = new StringBuilder();
+			StringBuilder keysString = new StringBuilder();
+			errorArgument.append(Constants.KEYS_STRING + ".split('&').filter(elem => ");
+			List<String> entries = new LinkedList<>();
+			Set<String> entryNamesSet = object.getEntriesNames();
+			for (String entryName : object.getMultiObject().getEntriesNames()) {
+				if (Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) {
+					continue;
+				}
+				if (!entryNamesSet.contains(entryName)) {
+					keysString.append(entryName).append(", ");
+					entries.add("'" + entryName + "'");
+					errorArgument.append("elem == '").append(entryName).append("' || ");
+				}
+			}
+			if (!keysString.toString().isEmpty()) {
+				test.append(Constants.KEYS_STRING + " == '' || ");
+				test.append(ProfileGeneration.split(Constants.KEYS_STRING, true, entries)).append(" == 0");
+				keysString.deleteCharAt(keysString.length() - 1);
+				keysString.deleteCharAt(keysString.length() - 1);
+				errorArgument.delete(errorArgument.length() - 4, errorArgument.length());
+				errorArgument.append(").toString()");
+				ProfileGeneration.writeRule(version, 22, object.getModelType(), getClause(object), test.toString(),
+						object.getId() + " shall not contain entries " + keysString + " in PDF" +
+								version.getString() + ". These entries appear in later pdf versions",
+						object.getId() + " contains entry(ies) %1", errorArgument.toString());
+			}
+		}
+	}
+
+	private static void addRuleAboutArraySize(PDFVersion version, Object object) {
+		Set<Integer> numbersWithoutStar = new TreeSet<>();
+		Set<Integer> numbersWithStar = new TreeSet<>();
+		boolean containsStar = false;
+		for (Entry entry : object.getEntries()) {
+			String name = entry.getName();
+			if (entry.isNumber()) {
+				numbersWithoutStar.add(entry.getNumber());
+			} else if (entry.isStar()) {
+				containsStar = true;
+			} else if (entry.isNumberWithStar()) {
+				numbersWithStar.add(entry.getNumberWithStar());
+			} else if (!Constants.SUB_ARRAYS.equals(name)) {
+				LOGGER.log(Level.SEVERE, Main.getString(version, object, entry) + " contains wrong entry");
+			}
+		}
+		int numberOfRequiredElements = 0;
+		for (Integer number : numbersWithoutStar) {
+			if (object.getEntry(number).isRequired()) {
+				numberOfRequiredElements++;
+			} else {
+				break;
+			}
+		}
+		int numberOfRequiredElementsWithStar = 0;
+		for (Integer number : numbersWithStar) {
+			if (object.getEntry(number + Constants.STAR).isRequired()) {
+				numberOfRequiredElementsWithStar++;
+			} else {
+				break;
+			}
+		}
+		if (numbersWithStar.isEmpty() && !containsStar && numberOfRequiredElements == numbersWithoutStar.size()) {
+			ProfileGeneration.writeRule(version, 2, object.getModelType(), getClause(object),
+					Constants.SIZE + " == " + numberOfRequiredElements, object.getId() +
+							" shall contain exactly " + numberOfRequiredElements + " element" +
+							(numberOfRequiredElements > 1 ? "s" : ""), object.getId() +
+							" contains %1 element(s) instead of " + numberOfRequiredElements, Constants.SIZE);
+		} else if (numberOfRequiredElementsWithStar > 0 && numberOfRequiredElementsWithStar == numbersWithStar.size() &&
+				!containsStar) {
+			ProfileGeneration.writeRule(version, 3, object.getModelType(), getClause(object),
+					Constants.SIZE + " > 0 && " + Constants.SIZE + " % " + numberOfRequiredElementsWithStar + " == " +
+							numberOfRequiredElements, object.getId() + " shall contain " +
+							(numberOfRequiredElements > 0 ? numberOfRequiredElements + " + " : "") +
+							numberOfRequiredElementsWithStar + "*n elements", object.getId() +
+							" contains %1 element(s)", Constants.SIZE);
+		} else if ((!numbersWithStar.isEmpty() || containsStar || numberOfRequiredElements < numbersWithoutStar.size()) &&
+				numberOfRequiredElements > 0) {
+			ProfileGeneration.writeRule(version, 4, object.getModelType(), getClause(object),
+					Constants.SIZE + " >= " + numberOfRequiredElements, object.getId() +
+							" shall contain at least " + numberOfRequiredElements + " element" +
+							(numberOfRequiredElements > 1 ? "s" : ""), object.getId() +
+							" contains %1 element(s)", Constants.SIZE);
+		}
+	}
+
+	private static void indirectAndDirect(PDFVersion version, Object object, Entry entry, Type type) {
+		if (entry.isIndirectReference(type) == true) {
+			StringBuilder test = new StringBuilder();
+			String propertyHasType = entry.getHasTypePropertyName(type);
+			test.append(propertyHasType).append(" != " + Constants.TRUE + " || ");
+			entry.addHasTypeProperty(type);
+			test.append(entry.getIndirectPropertyName()).append(" == ").append(entry.getIndirectReference(type));
+			entry.setIndirectProperty(true);
+			ProfileGeneration.writeRule(version, 10, object.getModelType(), getClause(object, entry, type),
+					test.toString(), ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
+							" shall be " + (entry.isIndirectReference(type) ? "indirect" : "direct"),
+					ProfileGeneration.getErrorMessageStart(false, object, entry, type) + " is " +
+							(entry.isIndirectReference(type) ? "direct" : "indirect"), Constants.KEY_NAME);
+		} else if (entry.getIndirectReference(type) != null &&
+				entry.getIndirectReference(type).contains(PredicatesParser.PREDICATE_PREFIX)) {
+			StringBuilder test = new StringBuilder();
+			String propertyHasType = entry.getHasTypePropertyName(type);
+			test.append(propertyHasType).append(" != " + Constants.TRUE + " || ");
+			entry.addHasTypeProperty(type);
+			String predicate = new PredicatesParser(object, entry, version, type,
+					Constants.INDIRECT_REFERENCE_COLUMN).parse(entry.getIndirectReference(type));
+			if (predicate == null || Constants.TRUE.equals(predicate)) {
+				return;
+			}
+			test.append(predicate);
+			if (entry.mustBeIndirect(type)) {
+				ProfileGeneration.writeRule(version, 12, object.getModelType(), getClause(object, entry, type),
+						test.toString(), "If " + ProfileGeneration.getErrorMessagePart(true, object,
+								entry, type) + " satisfies condition " + entry.getIndirectReference(type) +
+								", it shall be indirect", ProfileGeneration.getErrorMessageStart(false,
+								object, entry, type) + " is direct", Constants.KEY_NAME);
+			} else if (entry.mustBeDirect(type)) {
+				ProfileGeneration.writeRule(version, 16, object.getModelType(), getClause(object, entry, type),
+						test.toString(), "If " + ProfileGeneration.getErrorMessagePart(true, object,
+								entry, type) + " satisfies condition " + entry.getIndirectReference(type) + ", it shall be direct",
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
+								" is indirect", Constants.KEY_NAME);
+			}
+		}
+	}
+
+	private static void possibleValuesOfArray(PDFVersion version, Object object, Entry entry, Type type) {
+		StringBuilder test = new StringBuilder();
+		Set<String> possibleValues = new HashSet<>();
+		for (String value : entry.getPossibleValues(type)) {
+			if (value.contains(PredicatesParser.PREDICATE_PREFIX)) {
+				continue;
+			}
+			possibleValues.add(value);
+			String[] values = JSONEntry.getArrayFromString(value);
+			entry.setArraySizeProperty(true);
+			test.append("(").append(entry.getArrayLengthPropertyName()).append(" == ").append(values.length);
+			for (int i = 0; i < values.length; i++) {
+				String v = values[i];
+				Type currentType = Type.INTEGER;
+				String currentEntryName = entry.getName() + "::" + i;
+				object.getEntriesValuesProperties().put(currentEntryName, currentType);//fix
+				test.append(" && ").append(Entry.getTypeValuePropertyName(currentEntryName, currentType)).append(" == ").append(v);
+			}
+			test.append(") || ");
+		}
+		if (test.length() == 0) {
+			return;
+		}
+		test.delete(test.length() - 4, test.length());
+		String valuesString = String.join(", ", possibleValues);
+		ProfileGeneration.writeRule(version, 20, object.getModelType(), entry.getName(), test.toString(),
+				possibleValues.size() == 1 ? ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
+						" shall have value " + valuesString :
+						ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
+								" shall have one of values: " + valuesString,
+				ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
+						" has incorrect value instead of " + valuesString, Constants.KEY_NAME);
 	}
 
 	private static void requiredValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
