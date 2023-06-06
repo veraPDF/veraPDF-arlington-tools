@@ -27,6 +27,7 @@ public class Main {
 		multiObject.setJavaGeneration(new JavaGeneration(javaWriter));
 		multiObject.getJavaGeneration().addPackageAndImportsToClass();
 		multiObject.getJavaGeneration().addClassStart(multiObject);
+		multiObject.getJavaGeneration().addSize(multiObject);
 		ModelGeneration.addTypeToModel(Object.getModelType(objectName), Object.getModelType(Constants.OBJECT));
 		Links.addLinks(multiObject);
 		Properties.addProperties(multiObject);

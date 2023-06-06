@@ -198,13 +198,19 @@ public class PredicatesParser {
 	}
 
 	private void or(Part firstArgument, Part secondArgument, boolean isOriginal) {
+		String firstString = firstArgument.getString();
+		String secondString = secondArgument.getString();
+		if (Constants.SINCE_COLUMN.equals(columnName)) {
+			firstString = getBooleanFromVersion(firstString);
+			secondString = getBooleanFromVersion(secondString);
+		}
 		if (isDefault() && EVAL_PREDICATE.equals(getCurrentFunction())) {
 			output.add(getNewPart(firstArgument, secondArgument));
-		} else if ("true".equals(firstArgument.getString()) || "true".equals(secondArgument.getString())) {
+		} else if ("true".equals(firstString) || "true".equals(secondString)) {
 			output.add("true");
-		} else if ("false".equals(firstArgument.getString())) {
+		} else if ("false".equals(firstString)) {
 			output.add(secondArgument);
-		} else if ("false".equals(secondArgument.getString())) {
+		} else if ("false".equals(secondString)) {
 			output.add(firstArgument);
 		} else if (!isOriginal) {
 			output.add(getNewPart(firstArgument, "||", secondArgument));
@@ -587,6 +593,16 @@ public class PredicatesParser {
 		}
 	}
 
+	private void defaultValue() {
+		if (arguments.size() < 2) {
+			throw new RuntimeException("Invalid number of arguments of defaultValue");
+		}
+		if (!isDefault()) {
+			throw new RuntimeException("defaultValue used not in DefaultValue column");
+		}
+		methods(getNewPart(arguments.subList(0, arguments.size() - 1)), "?", type.getCreationCOSObject(arguments.get(arguments.size() - 1).getString()), ":");
+	}
+
 	private void deprecated() {
 		if (arguments.size() < 2) {
 			throw new RuntimeException("Invalid number of arguments of " + DEPRECATED_PREDICATE);
@@ -697,6 +713,23 @@ public class PredicatesParser {
 		}
 	}
 
+	private void isDictionary() {
+		if (arguments.size() != 1) {
+			throw new RuntimeException("Invalid number of arguments of isDictionary");
+		}
+		String entryName = getEntryName(arguments.get(0).getString());
+		Entry entry = object.getEntry(entryName);
+		if (entry != null) {
+			output.push(getPropertyOrMethodName(Entry.getHasTypePropertyName(entryName, Type.DICTIONARY)) + " == true");
+			entry.setFieldNameProperty(true);
+		} else if (entryName.contains("::")) {
+			output.push(getPropertyOrMethodName(Entry.getHasTypePropertyName(entryName, Type.DICTIONARY)) + " == true");
+			object.getEntriesHasTypeProperties().put(entryName, Type.DICTIONARY);
+		} else {
+			throw new RuntimeException("Invalid argument of isDictionary");
+		}
+	}
+
 	private void isEncryptedWrapped() {
 		output.push(getPropertyOrMethodName(Constants.IS_ENCRYPTED_WRAPPER));
 	}
@@ -709,8 +742,93 @@ public class PredicatesParser {
 		entry.setHexStringProperty(true);
 	}
 
+	private void isPresent() {
+		if (arguments.size() < 1) {
+			throw new RuntimeException("Invalid number of arguments of isPresent");
+		}
+		String entryName = getEntryName(arguments.get(0).getString());
+		Entry entry = object.getEntry(entryName);
+		if ((entry != null || entryName.matches(ENTRY_REGEX)) && !arguments.get(0).getString().contains("@")) {
+			if (arguments.size() == 1) {
+				methods("(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "true", ")");
+			} else {
+				methods("(", "(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "false",
+						")", "||", "(", getNewPart(arguments.subList(1, arguments.size())), ")", "==", "true", ")");
+			}
+			if (entry != null) {
+				entry.setContainsProperty(true);
+			} else {
+				MultiEntry multiEntry = (MultiEntry) object.getMultiObject().getEntry(entryName);
+				if (multiEntry != null) {
+					multiEntry.setContainsProperty(true);
+				} else {
+					object.getContainsEntriesProperties().add(entryName);
+				}
+			}
+		} else {
+			if (output.size() > 1 && "fn:Not".equals(output.get(output.size() - 2).getString())) {
+				methods("(", "(", getNewPart(arguments), ")", "==", "true", "&&",
+						getPropertyOrMethodName(this.entry.getContainsPropertyName()), "==", "true", ")");
+				this.entry.setContainsProperty(true);
+			} else {
+				methods("(", "(", getNewPart(arguments), ")", "==", "false", "||",
+						getPropertyOrMethodName(this.entry.getContainsPropertyName()), "==", "true", ")");
+				this.entry.setContainsProperty(true);
+			}
+		}
+	}
+
+	private void isRequired() {
+		if (arguments.size() < 1) {
+			throw new RuntimeException("Invalid number of arguments of isRequired");
+		}
+		methods("(", getPropertyOrMethodName(entry.getContainsPropertyName()), "==", "true", "||", "(",
+				getNewPart(arguments), ")", "==", "false", ")");
+		entry.setContainsProperty(true);
+	}
+
 	private void isPDFTagged() {
 		output.push(getPropertyOrMethodName(Constants.IS_PDF_TAGGED));
+	}
+
+	private void isPDFVersion() {
+		if (arguments.size() < 1) {
+			throw new RuntimeException("Invalid number of arguments of isPDFVersion");
+		}
+		PDFVersion version = PDFVersion.getPDFVersion(getEntryName(arguments.get(0).getString()));
+		if (PDFVersion.compare(this.version, version) == 0) {
+			if (arguments.size() == 1) {
+				output.push("true");
+			} else {
+				output.push(getNewPart(arguments.subList(1, arguments.size())));
+			}
+		} else {
+			if (arguments.size() == 1 || Constants.REQUIRED_COLUMN.equals(columnName)) {
+				output.push("false");
+			} else {
+				output.push("true");
+			}
+		}
+	}
+
+	private void mustBeDirect() {
+		if (arguments.size() < 1) {
+			output.push("(" + getPropertyOrMethodName(entry.getIndirectPropertyName()) + " == false)");
+		} else {
+			methods("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "false", "||", "(",
+					getNewPart(arguments), ")", "==", "false", ")");
+		}
+		entry.setIndirectProperty(true);
+	}
+
+	private void mustBeIndirect() {
+		if (arguments.size() < 1) {
+			methods("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "true", ")");
+		} else {
+			methods("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "true", "||", "(",
+					getNewPart(arguments), ")", "==", "false", ")");
+		}
+		entry.setIndirectProperty(true);
 	}
 
 	private void noCycle() {
@@ -772,6 +890,37 @@ public class PredicatesParser {
 		}
 		output.push(part);
 		rectangleEntry.setRectWidthProperty(true);
+	}
+
+	private void requiredValue() {
+		if (arguments.size() < 2) {
+			throw new RuntimeException("Invalid number of arguments of " + REQUIRED_VALUE_PREDICATE);
+		}
+		String separator = type.getSeparator();
+		entry.addTypeValueProperty(type);
+		methods("(", "(", getNewPart(arguments.subList(0, arguments.size() - 1)), ")", "==", "false", "||",
+				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "==",
+				separator + arguments.get(arguments.size() - 1).getString() + separator, ")");
+	}
+
+	private void sinceVersion() {
+		if (arguments.size() < 1) {
+			throw new RuntimeException("Invalid number of arguments of sinceVersion");
+		}
+		PDFVersion version = PDFVersion.getPDFVersion(getEntryName(arguments.get(0).getString()));
+		if (PDFVersion.compare(this.version, version) >= 0) {
+			if (arguments.size() == 1) {
+				output.push("true");
+			} else {
+				output.push(getNewPart(arguments.subList(1, arguments.size())));
+			}
+		} else {
+			if (arguments.size() == 1 || Constants.REQUIRED_COLUMN.equals(columnName)) {
+				output.push("false");
+			} else {
+				output.push("true");
+			}
+		}
 	}
 
 	private void streamLength() {

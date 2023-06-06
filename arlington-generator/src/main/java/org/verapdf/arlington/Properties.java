@@ -9,6 +9,9 @@ public class Properties {
 			if (multiEntry.getContainsProperty()) {
 				addContains(multiObject, multiEntry.getName());
 			}
+			if (!multiEntry.isStar() && !multiEntry.isNumberWithStar() && !Constants.SUB_ARRAYS.equals(multiEntry.getName())) {
+				multiObject.getJavaGeneration().getEntryCOSObject(multiObject, multiEntry.getName());
+			}
 			if (multiEntry.getIndirectProperty()) {
 				addIndirect(multiObject, multiEntry);
 			}

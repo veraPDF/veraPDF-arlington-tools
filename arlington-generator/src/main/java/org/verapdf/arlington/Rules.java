@@ -99,7 +99,7 @@ public class Rules {
 		String propertyHasType = entry.getHasTypePropertyName(type);
 		test.append(propertyHasType).append(" != " + Constants.TRUE + " || ");
 		entry.addHasTypeProperty(type);
-		String predicate = new PredicatesParser(object, entry, version, type, "PossibleValues").parse(value);
+		String predicate = new PredicatesParser(object, entry, version, type, Constants.POSSIBLE_VALUES_COLUMN).parse(value);
 		if (predicate == null) {
 			return;
 		}
@@ -222,5 +222,4 @@ public class Rules {
 		}
 		return clause.toString();
 	}
-
 }
