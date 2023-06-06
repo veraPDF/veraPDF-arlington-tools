@@ -257,6 +257,37 @@ public class PredicatesParser {
 		}
 	}
 
+	private Part getDefined(Part part, boolean and, Map<String, Type> undefinedEntries) {
+		List<java.lang.Object> result = new LinkedList<>();
+		result.add("(");
+		Map<String, Type> undefinedEntriesNames = new HashMap<>();
+		for (Map.Entry<String, Type> undefinedEntry : part.getUndefinedEntries().entrySet()) {
+			if (undefinedEntries.containsKey(undefinedEntry.getKey())) {
+				undefinedEntriesNames.put(undefinedEntry.getKey(), undefinedEntry.getValue());
+				continue;
+			}
+			if (undefinedEntry.getKey().contains("::")) {
+				object.getEntriesHasTypeProperties().put(undefinedEntry.getKey(), undefinedEntry.getValue());
+			} else {
+				Entry entry = object.getEntry(undefinedEntry.getKey());
+				entry.addHasTypeProperty(undefinedEntry.getValue());
+			}
+			result.add(Entry.getHasTypePropertyName(undefinedEntry.getKey(), undefinedEntry.getValue()));
+			result.add("==");
+			if (and) {
+				result.add("false");
+				result.add("||");
+			} else {
+				result.add("true");
+				result.add("&&");
+			}
+		}
+		result.add(new Part(part.getString(), undefinedEntriesNames));
+		result.add(")");
+		methods1(result.toArray());
+		return output.pop();
+	}
+
 	private void mod(Part argument1, Part argument2) {
 		output.add(getNewPart(argument1, "%", argument2));
 	}
@@ -562,6 +593,36 @@ public class PredicatesParser {
 		}
 		arrayEntry.getArraySortAscendingProperties().add(number);
 		output.push(getPropertyOrMethodName(arrayEntry.getArraySortAscendingPropertyName(number) + " == true"));
+	}
+
+	private void beforeVersion() {
+		if (arguments.size() < 1) {
+			throw new RuntimeException("Invalid number of arguments of beforeVersion");
+		}
+		PDFVersion version = PDFVersion.getPDFVersion(getEntryName(arguments.get(0).getString()));
+		if (isDefault()) {
+			if (PDFVersion.compare(this.version, version) < 0) {
+				if (arguments.size() == 2) {
+					methods("true", "?", type.getCreationCOSObject(arguments.get(1).getString()), ":");
+				}
+			} else {
+				output.push("");
+			}
+			return;
+		}
+		if (PDFVersion.compare(this.version, version) < 0) {
+			if (arguments.size() == 1) {
+				output.push("true");
+			} else {
+				output.push(getNewPart(arguments.subList(1, arguments.size())));
+			}
+		} else {
+			if (arguments.size() == 1 || Constants.REQUIRED_COLUMN.equals(columnName)) {
+				output.push("false");
+			} else {
+				output.push("true");
+			}
+		}
 	}
 
 	private void bitClear() {
@@ -1045,6 +1106,30 @@ public class PredicatesParser {
 			}
 		}
 		return getNewPart(list);
+	}
+
+	public Part getNewPart(List<Part> parts) {
+		StringBuilder result = new StringBuilder();
+		Map<String, Type> undefinedEntries = new HashMap<>();
+		if (!parts.isEmpty()) {
+			for (Part part : parts) {
+				if (part.getString().isEmpty()) {
+					continue;
+				}
+				if (result.length() > 0 && (",".equals(part.getString()) || ")".equals(part.getString()))) {
+					result.deleteCharAt(result.length() - 1);
+				}
+				Part argument = processArgument(part.getString());
+				result.append(argument.getString());
+				undefinedEntries.putAll(argument.getUndefinedEntries());
+				if (!part.getString().endsWith("(")) {
+					result.append(" ");
+				}
+				undefinedEntries.putAll(part.getUndefinedEntries());
+			}
+			result.deleteCharAt(result.length() - 1);
+		}
+		return new Part(result.toString(), undefinedEntries);
 	}
 
 	public String getEntryName(String name) {

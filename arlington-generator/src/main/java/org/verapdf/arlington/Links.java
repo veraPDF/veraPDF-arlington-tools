@@ -29,6 +29,37 @@ public class Links {
 		return entries;
 	}
 
+	public static void addLinks(MultiObject multiObject) {
+		SortedMap<String, String> commonEntries = new TreeMap<>();
+		for (PDFVersion version : PDFVersion.values()) {
+			Object object = version.getObjectIdMap().get(multiObject.getId());
+			if (object == null) {
+				continue;
+			}
+			Map<String, String> entries = getLinksEntries(object);
+			for (Map.Entry<String, String> mapEntry : entries.entrySet()) {
+				if (commonEntries.containsKey(mapEntry.getKey())) {
+					if (!Objects.equals(commonEntries.get(mapEntry.getKey()), mapEntry.getValue())) {
+						commonEntries.put(mapEntry.getKey(), Constants.OBJECT);
+					}
+				} else {
+					commonEntries.put(mapEntry.getKey(), mapEntry.getValue());
+				}
+			}
+		}
+		if (commonEntries.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<String, String> mapEntry : commonEntries.entrySet()) {
+			ModelGeneration.addLink(getLinkName(mapEntry.getKey()), mapEntry.getValue(),
+					Constants.STAR.equals(mapEntry.getKey()) ? Constants.STAR : "?");
+		}
+		multiObject.getJavaGeneration().addgetLinkedObjectsMethod(commonEntries);
+		for (Map.Entry<String, String> mapEntry : commonEntries.entrySet()) {
+			generateGetters(mapEntry, multiObject);
+		}
+	}
+
 	public static List<List<PDFVersion>> getVersions(String objectName, String entryName) {
 		List<List<PDFVersion>> versions = new LinkedList<>();
 		for (PDFVersion version : PDFVersion.values()) {
