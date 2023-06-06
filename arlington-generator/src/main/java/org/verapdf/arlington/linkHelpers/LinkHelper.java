@@ -448,6 +448,13 @@ public class LinkHelper {
 		helpers.put("ShadingType7", new DifferentKeysLinkHelper("ShadingType7", "ShadingType"));
 		helpersList.add(helpers);
 
+		helpers = new HashMap<>();
+		helpers.put("DestDict", new DifferentKeysLinkHelper("DestDict", null));
+		helpers.put("ActionGoTo", new DifferentKeysLinkHelper("ActionGoTo", "S"));
+		helpers.put("ActionGoToR", new DifferentKeysLinkHelper("ActionGoToR", "S"));
+		helpers.put("ActionGoToE", new DifferentKeysLinkHelper("ActionGoToE", "S"));
+		helpersList.add(helpers);
+
 		//CryptFilterMap,CryptFilterPublicKeyMap
 	}
 }

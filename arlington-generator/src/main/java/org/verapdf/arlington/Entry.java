@@ -11,6 +11,7 @@ public class Entry implements Comparable<Entry> {
 	private MultiEntry multiEntry;
 	private List<Type> types;
 	private List<String> typesPredicates;
+	private String sinceString;
 	private PDFVersion deprecatedVersion;
 	private String requiredString;
 	private Map<Type, String> indirectReference;

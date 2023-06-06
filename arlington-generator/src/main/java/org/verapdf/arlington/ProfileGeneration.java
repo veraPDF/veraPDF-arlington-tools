@@ -72,7 +72,9 @@ public class ProfileGeneration {
 			stringBuilder.append("entry");
 		}
 		if (!Constants.CURRENT_ENTRY.equals(entry.getName())) {
-			stringBuilder.append(" ").append(entry.getName());
+			if (!Constants.STAR.equals(entry.getName()) || (!object.isNameTree() && !object.isNumberTree())) {
+				stringBuilder.append(" ").append(entry.getName());
+			}
 		} else if (!isDescription) {
 			stringBuilder.append(" ").append("%1");
 		}

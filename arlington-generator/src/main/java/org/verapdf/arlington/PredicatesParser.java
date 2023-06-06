@@ -508,6 +508,13 @@ public class PredicatesParser {
 		return str;
 	}
 
+	public static String addBrackets(String str) {
+		if (containsBrackets(str) || !str.contains(" ")) {
+			return str;
+		}
+		return "(" + str + ")";
+	}
+
 	private void arrayLength() {
 		if (arguments.size() != 1) {
 			throw new RuntimeException("Invalid number of arguments of arrayLength");
