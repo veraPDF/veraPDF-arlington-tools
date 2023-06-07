@@ -392,6 +392,14 @@ public class Entry implements Comparable<Entry> {
 		multiEntry.setEntriesStringProperty(entriesStringProperty);
 	}
 
+	public boolean mustBeDirect(Type type) {
+		return getIndirectReference(type).contains(PredicatesParser.MUST_BE_DIRECT_PREDICATE);
+	}
+
+	public boolean mustBeIndirect(Type type) {
+		return getIndirectReference(type).contains(PredicatesParser.MUST_BE_INDIRECT_PREDICATE);
+	}
+
 	public Set<String> getInNameTreeProperties() {
 		return multiEntry.getInNameTreeProperties();
 	}

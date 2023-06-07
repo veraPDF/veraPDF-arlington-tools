@@ -16,6 +16,8 @@ public class Constants {
 	public static final String XREF_STREAM = "XRefStream";
 	public static final String XREF_STM = "XRefStm";
 	public static final String ARRAY_OF_DECODE_PARAMS_ENTRY = "ArrayOfDecodeParamsEntry";
+	public static final String PAGE_OBJECT = "PageObject";
+	public static final String PARENT = "Parent";
 
 	//column names
 	public static final String SINCE_COLUMN = "Since";

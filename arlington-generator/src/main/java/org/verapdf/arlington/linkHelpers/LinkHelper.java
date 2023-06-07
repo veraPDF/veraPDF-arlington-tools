@@ -14,7 +14,7 @@ public class LinkHelper {
 		this.objectName = objectName;
 	}
 
-	public static Map<String, LinkHelper> contains(Set<String> values) {
+	public static Map<String, LinkHelper> getMap(Set<String> values) {
 		for (Map<String, LinkHelper> map : helpersList) {
 			if (map.keySet().containsAll(values)) {
 				return map;

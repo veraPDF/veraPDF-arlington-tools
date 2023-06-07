@@ -20,8 +20,8 @@ public class PredicatesParser {
 	public static final String REQUIRED_VALUE_PREDICATE = "fn:RequiredValue";
 
 	private boolean isProfile = true;//false if java code
-	private PartStack output = new PartStack();
-	private Stack<String> operators = new Stack<>();
+	private final PartStack output = new PartStack();
+	private final Stack<String> operators = new Stack<>();
 	private List<Part> arguments = new LinkedList<>();
 	private Object object = new Object();
 	private String columnName;
@@ -603,7 +603,7 @@ public class PredicatesParser {
 		if (isDefault()) {
 			if (PDFVersion.compare(this.version, version) < 0) {
 				if (arguments.size() == 2) {
-					methods("true", "?", type.getCreationCOSObject(arguments.get(1).getString()), ":");
+					processTokens("true", "?", type.getCreationCOSObject(arguments.get(1).getString()), ":");
 				}
 			} else {
 				output.push("");
@@ -663,7 +663,7 @@ public class PredicatesParser {
 		if (!isDefault()) {
 			throw new RuntimeException("defaultValue used not in DefaultValue column");
 		}
-		methods(getNewPart(arguments.subList(0, arguments.size() - 1)), "?",
+		processTokens(getNewPart(arguments.subList(0, arguments.size() - 1)), "?",
 				type.getCreationCOSObject(arguments.get(arguments.size() - 1).getString()), ":");
 	}
 
@@ -691,7 +691,7 @@ public class PredicatesParser {
 		}
 		String extensionName = removeQuotes(arguments.get(0).getString());
 		if (isDefault()) {
-			methods(getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "?",
+			processTokens(getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "?",
 					type.getCreationCOSObject(arguments.get(1).getString()), ":");
 			object.getExtensionProperties().add(extensionName);
 			return;
@@ -708,7 +708,7 @@ public class PredicatesParser {
 				output.push("false");
 			}
 		} else {
-			methods("(", "(", getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "==",
+			processTokens("(", "(", getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "==",
 					"true", ")", "&&", getNewPart(arguments.subList(1, arguments.size())), ")");
 			object.getExtensionProperties().add(extensionName);
 		}
@@ -843,9 +843,9 @@ public class PredicatesParser {
 		Entry entry = object.getEntry(entryName);
 		if ((entry != null || entryName.matches(ENTRY_REGEX)) && !arguments.get(0).getString().contains("@")) {
 			if (arguments.size() == 1) {
-				methods("(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "true", ")");
+				processTokens("(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "true", ")");
 			} else {
-				methods("(", "(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "false",
+				processTokens("(", "(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "false",
 						")", "||", "(", getNewPart(arguments.subList(1, arguments.size())), ")", "==", "true", ")");
 			}
 			if (entry != null) {
@@ -860,11 +860,11 @@ public class PredicatesParser {
 			}
 		} else {
 			if (output.size() > 1 && "fn:Not".equals(output.get(output.size() - 2).getString())) {
-				methods("(", "(", getNewPart(arguments), ")", "==", "true", "&&",
+				processTokens("(", "(", getNewPart(arguments), ")", "==", "true", "&&",
 						getPropertyOrMethodName(this.entry.getContainsPropertyName()), "==", "true", ")");
 				this.entry.setContainsProperty(true);
 			} else {
-				methods("(", "(", getNewPart(arguments), ")", "==", "false", "||",
+				processTokens("(", "(", getNewPart(arguments), ")", "==", "false", "||",
 						getPropertyOrMethodName(this.entry.getContainsPropertyName()), "==", "true", ")");
 				this.entry.setContainsProperty(true);
 			}
@@ -875,7 +875,7 @@ public class PredicatesParser {
 		if (arguments.size() < 1) {
 			throw new RuntimeException("Invalid number of arguments of isRequired");
 		}
-		methods("(", getPropertyOrMethodName(entry.getContainsPropertyName()), "==", "true", "||", "(",
+		processTokens("(", getPropertyOrMethodName(entry.getContainsPropertyName()), "==", "true", "||", "(",
 				getNewPart(arguments), ")", "==", "false", ")");
 		entry.setContainsProperty(true);
 	}
@@ -908,7 +908,7 @@ public class PredicatesParser {
 		if (arguments.size() < 1) {
 			output.push("(" + getPropertyOrMethodName(entry.getIndirectPropertyName()) + " == false)");
 		} else {
-			methods("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "false", "||", "(",
+			processTokens("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "false", "||", "(",
 					getNewPart(arguments), ")", "==", "false", ")");
 		}
 		entry.setIndirectProperty(true);
@@ -916,9 +916,9 @@ public class PredicatesParser {
 
 	private void mustBeIndirect() {
 		if (arguments.size() < 1) {
-			methods("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "true", ")");
+			processTokens("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "true", ")");
 		} else {
-			methods("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "true", "||", "(",
+			processTokens("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "true", "||", "(",
 					getNewPart(arguments), ")", "==", "false", ")");
 		}
 		entry.setIndirectProperty(true);
@@ -930,7 +930,7 @@ public class PredicatesParser {
 	}
 
 	private void not() {
-		methods("(", getNewPart(arguments), ")", "!=", "true");
+		processTokens("(", getNewPart(arguments), ")", "!=", "true");
 	}
 
 	private void notStandard14Font() {
@@ -991,7 +991,7 @@ public class PredicatesParser {
 		}
 		String separator = type.getSeparator();
 		entry.addTypeValueProperty(type);
-		methods("(", "(", getNewPart(arguments.subList(0, arguments.size() - 1)), ")", "==", "false", "||",
+		processTokens("(", "(", getNewPart(arguments.subList(0, arguments.size() - 1)), ")", "==", "false", "||",
 				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "==",
 				separator + arguments.get(arguments.size() - 1).getString() + separator, ")");
 	}
@@ -1202,5 +1202,9 @@ public class PredicatesParser {
 		public Map<String, Type> getUndefinedEntries() {
 			return undefinedEntries;
 		}
+	}
+
+	private String getString() {
+		return Main.getString(version, object, entry, type) + " column name " + columnName;
 	}
 }

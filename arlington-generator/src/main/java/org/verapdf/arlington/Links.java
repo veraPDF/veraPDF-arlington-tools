@@ -56,7 +56,7 @@ public class Links {
 		}
 		multiObject.getJavaGeneration().addgetLinkedObjectsMethod(commonEntries);
 		for (Map.Entry<String, String> mapEntry : commonEntries.entrySet()) {
-			generateGetters(mapEntry, multiObject);
+			generateLinkGetters(mapEntry, multiObject);
 		}
 	}
 
