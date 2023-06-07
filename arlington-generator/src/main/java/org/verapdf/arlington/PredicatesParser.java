@@ -111,6 +111,70 @@ public class PredicatesParser {
 		}
 	}
 
+	public static boolean isOperator(String string) {
+		return "+".equals(string) || "-".equals(string) || "<=".equals(string) || "<".equals(string) ||
+				">".equals(string) || ">=".equals(string) || "||".equals(string) || "==".equals(string) ||
+				"&&".equals(string) || "!=".equals(string) || "mod".equals(string);
+	}
+
+	private void processToken(String token) {
+		processToken(new Part(token), true);
+	}
+
+	private void processTokens(java.lang.Object ... tokens) {
+		processTokensArray(tokens);
+	}
+
+	private void processTokensArray(java.lang.Object[] tokens) {
+		for (java.lang.Object token : tokens) {
+			if (token instanceof String) {
+				processToken(new Part((String)token), false);
+			} else {
+				processToken((Part)token, false);
+			}
+		}
+	}
+
+	private void processToken(Part part, boolean isOriginal) {
+		switch (part.getString()) {
+			case "":
+				return;
+			case "(":
+				operators.add(part.getString());
+				output.add(part);
+				break;
+			case ")":
+				while (!operators.isEmpty() && !"(".equals(operators.peek())) {
+					executeOperator(operators.pop(), isOriginal);
+				}
+				operators.pop();
+				executeFunction(!operators.isEmpty() ? operators.pop() : "");
+				break;
+			case ",":
+				while (!"(".equals(operators.peek())) {
+					executeOperator(operators.pop(), isOriginal);
+				}
+				break;
+			default:
+				if (part.getString().startsWith(PREDICATE_PREFIX)) {
+					operators.push(part.getString());
+					output.push(part);
+				} else {
+					Operator operator = Operator.getOperator(part.getString());
+					if (operator != null) {
+						while (!operators.isEmpty() && Operator.getOperator(operators.peek()) != null &&
+								operator.getPrecedence() <= Operator.getOperator(operators.peek()).getPrecedence() &&
+								operator.isHasLeftAssociativity()) {
+							executeOperator(operators.pop(), isOriginal);
+						}
+						operators.push(operator.getOperator());
+					} else {
+						output.add(isOriginal ? new Part(addQuotes(part.getString())) : part);
+					}
+				}
+		}
+	}
+
 	private void executeOperator(String operatorName, boolean isOriginal) {
 		Part secondArgument = output.pop();
 		Part firstArgument = output.pop();
@@ -284,7 +348,7 @@ public class PredicatesParser {
 		}
 		result.add(new Part(part.getString(), undefinedEntriesNames));
 		result.add(")");
-		methods1(result.toArray());
+		processTokensArray(result.toArray());
 		return output.pop();
 	}
 
