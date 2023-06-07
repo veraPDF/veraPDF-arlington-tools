@@ -63,6 +63,83 @@ public class PredicatesParser {
 		}
 	}
 
+	public String parse(String str) {
+		try {
+			String result = parseString(str);
+			if (result.contains("@") || result.contains("::")) {
+				LOGGER.log(Level.WARNING, getString() + " result: " + result + " original: " + str);
+				return null;
+			}
+			if (result.contains(PREDICATE_PREFIX)) {
+				return null;
+			}
+			return result;
+		} catch (RuntimeException e) {
+			LOGGER.log(Level.WARNING, getString() + ". Error: " + e.getMessage());
+		}
+		return null;
+	}
+
+	public String parseString(String str) {
+		StringBuilder currentString = new StringBuilder();
+		boolean flag = false;
+		for (int i = 0; i < str.length(); i++) {
+			switch (str.charAt(i)) {
+				case '(':
+					processToken(currentString.toString());
+					currentString = new StringBuilder();
+					processToken("(");
+					break;
+				case ')':
+					processToken(currentString.toString());
+					currentString = new StringBuilder();
+					processToken(")");
+					break;
+				case ',':
+					processToken(currentString.toString());
+					currentString = new StringBuilder();
+					processToken(",");
+					break;
+				case ' ':
+					processToken(currentString.toString());
+					currentString = new StringBuilder();
+					break;
+				default:
+					boolean newFlag = String.valueOf(str.charAt(i)).matches(ENTRY_REGEX);
+					if (currentString.length() > 0) {
+						if (flag && !newFlag) {
+							processToken(currentString.toString());
+							currentString = new StringBuilder();
+						}
+						if (!flag && newFlag) {
+							processToken(currentString.toString());
+							currentString = new StringBuilder();
+						}
+					}
+					currentString.append(str.charAt(i));
+					flag = newFlag;
+					break;
+			}
+		}
+		while (!operators.isEmpty()) {
+			if ("(".equals(operators.peek())) {
+				throw new RuntimeException("This expression is invalid");
+			}
+			executeOperator(operators.pop(), true);
+		}
+		Part result = getNewPart(output);
+		String res = result.getString();
+		if (result.isUndefined()) {
+			output.clear();
+			result = getDefined(result, true, Collections.EMPTY_MAP);
+			res = result.getString();
+		}
+		if (isDefault()) {
+			res = res + " null";
+		}
+		return res;
+	}
+
 	public enum Operator {
 		OR("||", 2),
 		AND("&&", 3),

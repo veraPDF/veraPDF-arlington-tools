@@ -43,7 +43,6 @@ public class Constants {
 	public static final String SUB_ARRAYS = "subArrays";
 	public static final String HAS_CYCLE = "hasCycle";
 
-
 	//regex
 	public static final String NUMBER_REGEX = "\\d+";
 	public static final String DOUBLE_REGEX = "\\d+\\.\\d+";

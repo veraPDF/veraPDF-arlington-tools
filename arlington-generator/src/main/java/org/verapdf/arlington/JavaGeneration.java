@@ -177,6 +177,30 @@ public class JavaGeneration {
 		javaWriter.println("\t}");
 		javaWriter.println();
 
+		printMethodSignature(false, "protected", true, "COSObject",
+				Constants.PAGE_OBJECT, "COSObject object");
+		javaWriter.println("\t\tLong pageNumber = null;");
+		javaWriter.println("\t\tif (object != null && object.getType() == " + Type.STRING_BYTE.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\tPDNamesDictionary names = StaticResources.getDocument().getCatalog().getNamesDictionary();");
+		javaWriter.println("\t\t\tif (names == null) {");
+		javaWriter.println("\t\t\t\treturn null;");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t\tPDNameTreeNode dests = names.getDests();");
+		javaWriter.println("\t\t\tif (dests == null) {");
+		javaWriter.println("\t\t\t\treturn null;");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t\tobject = dests.getObject(object" + Type.STRING_BYTE.getParserMethod() + ");");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tif (object != null && object.getType() == " + Type.INTEGER.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\tpageNumber = object" + Type.INTEGER.getParserMethod() + ";");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tif (pageNumber == null || pageNumber >= StaticResources.getDocument().getPages().size()) {");
+		javaWriter.println("\t\t\treturn null;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn StaticResources.getDocument().getPages().get(pageNumber.intValue()).getObject();");
+		javaWriter.println("\t}");
+		javaWriter.println();
+
 		javaWriter.println("\tpublic static Set<COSKey> getKeysSet() {");
 		javaWriter.println("\t\tif (keysSet.get() == null) {");
 		javaWriter.println("\t\t\tkeysSet.set(new HashSet<>());");
@@ -266,6 +290,46 @@ public class JavaGeneration {
 			javaWriter.println("\t}");
 			javaWriter.println();
 		}
+	}
+
+	public boolean getDefaultObject(Object multiObject, String entryName) {
+		Map<Pair<Type, String>, List<PDFVersion>> map = getDefaultValueMap(multiObject, entryName);
+		if (map.isEmpty()) {
+			return false;
+		}
+		printMethodSignature(false, "public", false, "COSObject",
+				getMethodName(Entry.getDefaultValuePropertyName(entryName)));
+		javaWriter.println("\t\tswitch (StaticContainers.getFlavour()) {");
+		for (Map.Entry<Pair<Type, String>, List<PDFVersion>> value : map.entrySet()) {
+			for (PDFVersion version : value.getValue()) {
+				javaWriter.println("\t\t\tcase ARLINGTON" + version.getStringWithUnderScore() + ":");
+			}
+			String obj = value.getKey().getValue();
+			javaWriter.println("\t\t\t\treturn " + obj + ";");
+		}
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn null;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+		return true;
+	}
+
+	public static Boolean isInheritable(String objectName, String entryName) {
+		Boolean isInheritable = null;
+		for (PDFVersion version : PDFVersion.values()) {
+			Object object = version.getObjectIdMap().get(objectName);
+			if (object == null) {
+				continue;
+			}
+			Entry entry = object.getEntry(entryName);
+			if (entry == null) {
+				continue;
+			}
+			if (entry.getInheritable() != null) {
+				isInheritable = entry.getInheritable();
+			}
+		}
+		return isInheritable != null ? isInheritable : false;
 	}
 
 	public void addPackageAndImportsToClass() {
