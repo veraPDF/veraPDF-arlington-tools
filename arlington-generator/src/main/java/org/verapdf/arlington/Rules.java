@@ -468,8 +468,13 @@ public class Rules {
 			return;
 		}
 		result = PredicatesParser.removeBrackets(result);
-		String test = Entry.getContainsPropertyName(entry.getName()) + " == false || " + result;
-		ProfileGeneration.writeRule(version, 23, object.getModelType(), getClause(object, entry), test,
+		StringBuilder test = new StringBuilder();
+		if (!object.isEntry()) {
+			test.append(Entry.getContainsPropertyName(entry.getName())).append(" == false || ");
+			entry.setContainsProperty(true);
+		}
+		test.append(result);
+		ProfileGeneration.writeRule(version, 23, object.getModelType(), getClause(object, entry), test.toString(),
 					ProfileGeneration.getErrorMessageStart(true, object, entry) +
 							" can only be present, if satisfy predicate " + entry.getSinceString(),
 					ProfileGeneration.getErrorMessageStart(false, object, entry) +

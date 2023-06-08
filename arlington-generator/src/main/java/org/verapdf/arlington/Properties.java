@@ -96,7 +96,7 @@ public class Properties {
 
 	private static void addArraySize(MultiObject multiObject, String entryName) {
 		ModelGeneration.addProperty(Entry.getArrayLengthPropertyName(entryName), Type.INTEGER.getModelType());
-		multiObject.getJavaGeneration().addArrayLengthMethod(entryName);
+		multiObject.getJavaGeneration().addArrayLengthMethod(multiObject, entryName);
 	}
 
 	private static void addStringSize(MultiObject multiObject, Entry entry) {
@@ -136,7 +136,7 @@ public class Properties {
 
 	private static void addEntriesString(MultiObject multiObject, String entryName) {
 		ModelGeneration.addProperty(Entry.getEntriesStringPropertyName(entryName), Type.STRING.getModelType());
-		multiObject.getJavaGeneration().addEntriesStringMethod(entryName);
+		multiObject.getJavaGeneration().addEntriesStringMethod(multiObject, entryName);
 	}
 
 	private static void addHasExtension(MultiObject multiObject, String extensionName) {
@@ -146,7 +146,7 @@ public class Properties {
 
 	private static void addKeysString(MultiObject multiObject, String entryName) {
 		ModelGeneration.addProperty(Entry.getKeysStringPropertyName(entryName), Type.STRING.getModelType());
-		multiObject.getJavaGeneration().addKeysStringMethod(entryName);
+		multiObject.getJavaGeneration().addKeysStringMethod(multiObject, entryName);
 	}
 
 	private static void addHasType(MultiObject multiObject, String entryName, Type type) {
@@ -176,6 +176,6 @@ public class Properties {
 
 	private static void addNameTreeContainsString(MultiObject multiObject, Entry entry, String entryName) {
 		ModelGeneration.addProperty(entry.getNameTreeContainsStringPropertyName(entryName), Type.BOOLEAN.getModelType());
-		multiObject.getJavaGeneration().addNameTreeContainsStringMethod(entry, entryName);
+		multiObject.getJavaGeneration().addNameTreeContainsStringMethod(multiObject, entry, entryName);
 	}
 }

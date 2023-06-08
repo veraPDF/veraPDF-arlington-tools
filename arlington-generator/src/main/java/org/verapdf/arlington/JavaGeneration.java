@@ -178,7 +178,7 @@ public class JavaGeneration {
 		javaWriter.println();
 
 		printMethodSignature(false, "protected", true, "COSObject",
-				Constants.PAGE_OBJECT, "COSObject object");
+				getMethodName(Constants.PAGE_OBJECT), "COSObject object");
 		javaWriter.println("\t\tLong pageNumber = null;");
 		javaWriter.println("\t\tif (object != null && object.getType() == " + Type.STRING_BYTE.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\tPDNamesDictionary names = StaticResources.getDocument().getCatalog().getNamesDictionary();");
@@ -360,7 +360,7 @@ public class JavaGeneration {
 		javaWriter.println("\t\tswitch (base.size()) {");
 		for (String link : entry.getLinks(type)) {
 			if (link.contains(PredicatesParser.PREDICATE_PREFIX)) {
-				System.out.println("!!! fn");
+				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " link contains predicate");
 			}
 			SizeLinkHelper helper = (SizeLinkHelper)map.get(link);
 			if (helper != null) {
@@ -417,14 +417,14 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	public void addNameTreeContainsStringMethod(Entry entry, String nameTreeEntryName) {
+	public void addNameTreeContainsStringMethod(Object object, Entry entry, String nameTreeEntryName) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getMethodName(entry.getNameTreeContainsStringPropertyName(nameTreeEntryName)));
 		getObjectByEntryName(entry.getName());
 		javaWriter.println("\t\tif (object == null || object.getType() != " + Type.STRING.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
-		String nameTreeFinalEntry = getComplexObject(nameTreeEntryName);
+		String nameTreeFinalEntry = getComplexObject(object, nameTreeEntryName);
 		javaWriter.println("\t\tif (" + nameTreeFinalEntry + " == null || " + nameTreeFinalEntry + ".getType() != " +
 				Type.DICTIONARY.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\treturn false;");
@@ -500,10 +500,10 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	public void addArrayLengthMethod(String entryName) {
+	public void addArrayLengthMethod(Object object, String entryName) {
 		printMethodSignature(true, "public", false, Type.INTEGER.getJavaType(),
 				getMethodName(Entry.getArrayLengthPropertyName(entryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String objectName = entryName.contains("::") ? getComplexObject(object, entryName) : getObjectByEntryName(entryName);
 		javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " +
 				Type.ARRAY.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\treturn (long) " + objectName + ".size();");
@@ -623,10 +623,10 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	public void addEntriesStringMethod(String entryName) {
+	public void addEntriesStringMethod(Object object, String entryName) {
 		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
 				getMethodName(Entry.getEntriesStringPropertyName(entryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String objectName = entryName.contains("::") ? getComplexObject(object, entryName) : getObjectByEntryName(entryName);
 		javaWriter.println("\t\tif (" + objectName + " == null) {");
 		javaWriter.println("\t\t\treturn null;");
 		javaWriter.println("\t\t}");
@@ -647,10 +647,10 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	public void addKeysStringMethod(String entryName) {
+	public void addKeysStringMethod(Object object, String entryName) {
 		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
 				getMethodName(Entry.getKeysStringPropertyName(entryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String objectName = entryName.contains("::") ? getComplexObject(object, entryName) : getObjectByEntryName(entryName);
 		javaWriter.println("\t\treturn " + objectName + ".getKeySet().stream()");
 		javaWriter.println("\t\t\t\t.map(ASAtom::getValue)");
 		javaWriter.println("\t\t\t\t.collect(Collectors.joining(\"&\"));");

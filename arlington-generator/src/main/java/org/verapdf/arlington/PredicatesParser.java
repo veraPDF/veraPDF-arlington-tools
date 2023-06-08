@@ -75,7 +75,7 @@ public class PredicatesParser {
 			}
 			return result;
 		} catch (RuntimeException e) {
-			LOGGER.log(Level.WARNING, getString() + ". Error: " + e.getMessage());
+			LOGGER.log(Level.WARNING, getString() + ": " + str + ". Error: " + e.getMessage());
 		}
 		return null;
 	}
@@ -507,8 +507,9 @@ public class PredicatesParser {
 		output.pop(); //pop "("
 		Part token = !output.isEmpty() ? output.pop() : new Part("");//pop possible functionName
 		switch (functionName) {
-//			case "fn:AlwaysUnencrypted":
-//				break;
+			case "fn:AlwaysUnencrypted":
+				alwaysUnencrypted();
+				break;
 			case "fn:ArrayLength":
 				arrayLength();
 				break;
@@ -693,6 +694,10 @@ public class PredicatesParser {
 			return str;
 		}
 		return "(" + str + ")";
+	}
+
+	private void alwaysUnencrypted() {
+		output.push("true");//todo
 	}
 
 	private void arrayLength() {
