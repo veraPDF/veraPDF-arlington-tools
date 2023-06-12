@@ -11,6 +11,74 @@ public class Rules {
 
 	private static final Logger LOGGER = Logger.getLogger(Rules.class.getCanonicalName());
 
+	//descriptions and error messages
+	private static final String SPECIAL_CASE_DESCRIPTION = "%s shall satisfy special case: %s";
+	private static final String SPECIAL_CASE_ERROR_MESSAGE = "%s does not satisfy special case: %s";
+
+	private static final String REQUIRED_DESCRIPTION = "%s is required, when %s";
+	private static final String REQUIRED_ERROR_MESSAGE = "%s is missing";
+
+	private static final String DEPRECATED_ENTRY_DESCRIPTION = "%s is deprecated since PDF %s";
+	private static final String DEPRECATED_ENTRY_ERROR_MESSAGE = "%s is present";
+
+	private static final String SINCE_DESCRIPTION = "%s can only be present, if satisfy predicate %s";
+	private static final String SINCE_ERROR_MESSAGE = "%s is present";
+
+	private static final String DEPRECATED_TYPE_DESCRIPTION = "%s should not have deprecated type %s";
+	private static final String DEPRECATED_TYPE_ERROR_MESSAGE = "%s is present";
+
+	private static final String POSSIBLE_VALUE_CONDITION_DESCRIPTION = "%s shall satisfy possible value predicate: %s";
+	private static final String POSSIBLE_VALUE_ERROR_CONDITION_MESSAGE = "%s does not satisfy possible value predicate: %s";
+
+	private static final String DIRECT_CONDITION_DESCRIPTION = "If %s satisfies condition %s, it shall be direct";
+	private static final String DIRECT_DESCRIPTION = "%s shall be direct";
+	private static final String DIRECT_ERROR_MESSAGE = "%s is indirect";
+
+	private static final String INDIRECT_CONDITION_DESCRIPTION = "If %s satisfies condition %s, it shall be indirect";
+	private static final String INDIRECT_DESCRIPTION = "%s shall be indirect";
+	private static final String INDIRECT_ERROR_MESSAGE = "%s is direct";
+
+	private static final String EXTRA_ENTRIES_DESCRIPTION = "%s shall not contain entries except %s";
+	private static final String EXTRA_ENTRIES_ERROR_MESSAGE = "%s contains entry(ies) %s";
+
+	private static final String FUTURE_ENTRIES_DESCRIPTION = "%s shall not contain entries %s in PDF %s. These entries appear in later pdf versions";
+	private static final String FUTURE_ENTRIES_ERROR_MESSAGE = "%s contains entry(ies) %s";
+
+	private static final String REQUIRED_VALUE_DESCRIPTION = "%s shall have %s value %s, if this object satisfies condition %s";
+	private static final String REQUIRED_VALUE_ERROR_MESSAGE = "%s does not have value %s";
+
+	private static final String VALUE_ONLY_WHEN_DESCRIPTION = "%s may have %s value %s, only if this object satisfies condition %s";
+	private static final String VALUE_ONLY_WHEN_ERROR_MESSAGE = "%s has value %s, but not satisfy condition %s";
+
+	private static final String POSSIBLE_VALUE_DESCRIPTION = "%s shall have value %s";
+	private static final String POSSIBLE_VALUES_DESCRIPTION = "%s shall have one of values: %s";
+	private static final String POSSIBLE_VALUE_ERROR_MESSAGE = "%s has incorrect value %s instead of %s";
+	private static final String ARRAY_POSSIBLE_VALUE_ERROR_MESSAGE = "%s has incorrect value instead of %s";
+
+	private static final String DEPRECATED_VALUE_DESCRIPTION = "%s should not have deprecated value %s";
+	private static final String DEPRECATED_VALUES_DESCRIPTION = "%s should not have one of deprecated values: %s";
+	private static final String DEPRECATED_VALUE_ERROR_MESSAGE = "%s has deprecated value %s";
+
+	private static final String ARRAY_SIZE_DESCRIPTION = "%s shall contain %d * n + %d elements";
+	private static final String ARRAY_SIZE_ERROR_MESSAGE = "%s contains %s element(s)";
+	private static final String CERTAIN_ARRAY_SIZE_DESCRIPTION = "%s shall contain exactly %d elements";
+	private static final String CERTAIN_ARRAY_SIZE_ONE_ELEMENT_DESCRIPTION = "%s shall contain exactly %d element";
+	private static final String CERTAIN_ARRAY_SIZE_ERROR_MESSAGE = "%s contains %s element(s) instead of %s";
+	private static final String INTERVAL_ARRAY_SIZE_DESCRIPTION = "%s shall contain %d to %d elements";
+	private static final String MINIMUM_ARRAY_SIZE_DESCRIPTION = "%s shall contain at least %d elements";
+	private static final String MINIMUM_ARRAY_SIZE_ONE_ELEMENT_DESCRIPTION = "%s shall contain at least %d element";
+	private static final String MULTIPLY_ARRAY_SIZE_DESCRIPTION = "%s shall contain %d * n elements";
+
+	private static final String POSSIBLE_TYPE_DESCRIPTION = "%s shall have type %s";
+	private static final String POSSIBLE_TYPE_ERROR_MESSAGE = "%s is not of type %s";
+	private static final String POSSIBLE_TYPES_DESCRIPTION = "%s shall have one of types: %s";
+	private static final String POSSIBLE_TYPES_ERROR_MESSAGE = "%s is not one of types: %s";
+
+	private static final String LINK_DESCRIPTION = "%s shall be object %s";
+	private static final String LINK_ERROR_MESSAGE = "%s is not object %s";
+	private static final String LINKS_DESCRIPTION = "%s shall be one of objects %s";
+	private static final String LINKS_ERROR_MESSAGE = "%s is not one of objects %s";
+
 	static void addRules(MultiObject multiObject) {
 		for (PDFVersion version : PDFVersion.values()) {
 			Object object = version.getObjectIdMap().get(multiObject.getId());
@@ -81,10 +149,12 @@ public class Rules {
 						false, values)).append(")");
 			}
 			ProfileGeneration.writeRule(version, 18, object.getModelType(), getClause(object, entry, null),
-					test.toString(), ProfileGeneration.getErrorMessageStart(true, object, entry) +
-							" shall be " + (links.size() == 1 ? "object " : "one of objects ") + objectsString,
-					ProfileGeneration.getErrorMessageStart(false, object, entry) + " is not " +
-							(links.size() == 1 ? "object " : "one of objects ") + objectsString, Constants.KEY_NAME);
+					test.toString(),
+					String.format(links.size() == 1 ? LINK_DESCRIPTION : LINKS_DESCRIPTION,
+							ProfileGeneration.getErrorMessageStart(true, object, entry), objectsString),
+					String.format(links.size() == 1 ? LINK_ERROR_MESSAGE : LINKS_ERROR_MESSAGE,
+							ProfileGeneration.getErrorMessageStart(false, object, entry), objectsString),
+					Constants.KEY_NAME);
 		} else {
 			for (Type type : linkTypes) {
 				List<String> links = entry.getLinks(type);
@@ -99,10 +169,11 @@ public class Rules {
 				String linkName = Links.getLinkName(entry.getName());
 				ProfileGeneration.writeRule(version, 17, object.getModelType(), getClause(object, entry, type),
 						entry.getHasTypePropertyName(type) + " != true || " + linkName + "_size == 1",
-						ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
-								" shall be " + (links.size() == 1 ? "object " : "one of objects ") + objectsString,
-						ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
-								" is not " + (links.size() == 1 ? "object " : "one of objects ") + objectsString, Constants.KEY_NAME);
+						String.format(links.size() == 1 ? LINK_DESCRIPTION : LINKS_DESCRIPTION,
+								ProfileGeneration.getErrorMessageStart(true, object, entry, type), objectsString),
+						String.format(links.size() == 1 ? LINK_ERROR_MESSAGE : LINKS_ERROR_MESSAGE,
+								ProfileGeneration.getErrorMessageStart(false, object, entry, type), objectsString),
+						Constants.KEY_NAME);
 			}
 		}
 	}
@@ -128,10 +199,11 @@ public class Rules {
 		entry.addHasTypeProperty(type);
 		test.append(PredicatesParser.addBrackets(newSpecialCase));
 		ProfileGeneration.writeRule(version, 9, object.getModelType(), getClause(object, entry, type), test.toString(),
-				ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
-						" shall satisfy special case: " + specialCase,
-				ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
-						" does not satisfy special case: " + specialCase, Constants.KEY_NAME);
+				String.format(SPECIAL_CASE_DESCRIPTION,
+						ProfileGeneration.getErrorMessageStart(true, object, entry, type), specialCase),
+				String.format(SPECIAL_CASE_ERROR_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type), specialCase),
+				Constants.KEY_NAME);
 	}
 
 	private static void hasWrongType(PDFVersion version, Object object, Entry entry) {
@@ -153,10 +225,11 @@ public class Rules {
 		test.delete(test.length() - 4, test.length());
 		String typesString = currentTypes.stream().map(Type::getType).collect(Collectors.joining(", "));
 		ProfileGeneration.writeRule(version, 8, object.getModelType(), getClause(object, entry, null), test.toString(),
-				ProfileGeneration.getErrorMessageStart(true, object, entry) + " shall have " +
-						(currentTypes.size() != 1 ? "one of types:" : "type") + " " + typesString,
-				ProfileGeneration.getErrorMessageStart(false, object, entry) + " is not " +
-						(currentTypes.size() != 1 ? "one of types:" : "of type") + " " + typesString, Constants.KEY_NAME);
+				String.format(currentTypes.size() != 1 ? POSSIBLE_TYPES_DESCRIPTION : POSSIBLE_TYPE_DESCRIPTION,
+						ProfileGeneration.getErrorMessageStart(true, object, entry), typesString),
+				String.format(currentTypes.size() != 1 ? POSSIBLE_TYPES_ERROR_MESSAGE : POSSIBLE_TYPE_ERROR_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry), typesString),
+				Constants.KEY_NAME);
 	}
 
 	private static void containsExtraEntries(PDFVersion version, Object object) {
@@ -191,8 +264,9 @@ public class Rules {
 				errorArgument.delete(errorArgument.length() - 4, errorArgument.length());
 				errorArgument.append(").toString()");
 				ProfileGeneration.writeRule(version, 1, object.getModelType(), getClause(object), test.toString(),
-						object.getId() + " shall not contain entries except " + keysString,
-						object.getId() + " contains entry(ies) %1", errorArgument.toString());
+						String.format(EXTRA_ENTRIES_DESCRIPTION, object.getId(), keysString),
+						String.format(EXTRA_ENTRIES_ERROR_MESSAGE, object.getId(), "%1"),
+						errorArgument.toString());
 			}
 		}
 	}
@@ -226,9 +300,9 @@ public class Rules {
 				errorArgument.delete(errorArgument.length() - 4, errorArgument.length());
 				errorArgument.append(").toString()");
 				ProfileGeneration.writeRule(version, 22, object.getModelType(), getClause(object), test.toString(),
-						object.getId() + " shall not contain entries " + keysString + " in PDF" +
-								version.getString() + ". These entries appear in later pdf versions",
-						object.getId() + " contains entry(ies) %1", errorArgument.toString());
+						String.format(FUTURE_ENTRIES_DESCRIPTION, object.getId(), keysString, version.getString()),
+						String.format(FUTURE_ENTRIES_ERROR_MESSAGE, object.getId(), "%1"),
+						errorArgument.toString());
 			}
 		}
 	}
@@ -267,25 +341,37 @@ public class Rules {
 		}
 		if (numbersWithStar.isEmpty() && !containsStar && numberOfRequiredElements == numbersWithoutStar.size()) {
 			ProfileGeneration.writeRule(version, 2, object.getModelType(), getClause(object),
-					Constants.SIZE + " == " + numberOfRequiredElements, object.getId() +
-							" shall contain exactly " + numberOfRequiredElements + " element" +
-							(numberOfRequiredElements > 1 ? "s" : ""), object.getId() +
-							" contains %1 element(s) instead of " + numberOfRequiredElements, Constants.SIZE);
+					Constants.SIZE + " == " + numberOfRequiredElements,
+					String.format(numberOfRequiredElements != 1 ?
+									CERTAIN_ARRAY_SIZE_DESCRIPTION : CERTAIN_ARRAY_SIZE_ONE_ELEMENT_DESCRIPTION,
+							object.getId(), numberOfRequiredElements),
+					String.format(CERTAIN_ARRAY_SIZE_ERROR_MESSAGE, object.getId(), "%1", numberOfRequiredElements),
+					Constants.SIZE);
 		} else if (numberOfRequiredElementsWithStar > 0 && numberOfRequiredElementsWithStar == numbersWithStar.size() &&
 				!containsStar) {
 			ProfileGeneration.writeRule(version, 3, object.getModelType(), getClause(object),
 					Constants.SIZE + " > 0 && " + Constants.SIZE + " % " + numberOfRequiredElementsWithStar + " == " +
-							numberOfRequiredElements, object.getId() + " shall contain " +
-							(numberOfRequiredElements > 0 ? numberOfRequiredElements + " + " : "") +
-							numberOfRequiredElementsWithStar + "*n elements", object.getId() +
-							" contains %1 element(s)", Constants.SIZE);
+							numberOfRequiredElements,
+					String.format(numberOfRequiredElements > 0 ? ARRAY_SIZE_DESCRIPTION : MULTIPLY_ARRAY_SIZE_DESCRIPTION,
+							object.getId(), numberOfRequiredElementsWithStar, numberOfRequiredElements),
+					String.format(ARRAY_SIZE_ERROR_MESSAGE, object.getId(), "%1"),
+					Constants.SIZE);
+		} else if (!containsStar && numbersWithStar.isEmpty() && numberOfRequiredElements < numbersWithoutStar.size()) {
+			ProfileGeneration.writeRule(version, 24, object.getModelType(), getClause(object),
+					Constants.SIZE + " >= " + numberOfRequiredElements + " && " + Constants.SIZE + " <= " + numbersWithoutStar.size(),
+					String.format(INTERVAL_ARRAY_SIZE_DESCRIPTION,
+							object.getId(), numberOfRequiredElements, numbersWithoutStar.size()),
+					String.format(ARRAY_SIZE_ERROR_MESSAGE, object.getId(), "%1"),
+					Constants.SIZE);
 		} else if ((!numbersWithStar.isEmpty() || containsStar || numberOfRequiredElements < numbersWithoutStar.size()) &&
 				numberOfRequiredElements > 0) {
 			ProfileGeneration.writeRule(version, 4, object.getModelType(), getClause(object),
-					Constants.SIZE + " >= " + numberOfRequiredElements, object.getId() +
-							" shall contain at least " + numberOfRequiredElements + " element" +
-							(numberOfRequiredElements > 1 ? "s" : ""), object.getId() +
-							" contains %1 element(s)", Constants.SIZE);
+					Constants.SIZE + " >= " + numberOfRequiredElements,
+					String.format(numberOfRequiredElements == 1 ?
+									MINIMUM_ARRAY_SIZE_ONE_ELEMENT_DESCRIPTION : MINIMUM_ARRAY_SIZE_DESCRIPTION,
+							object.getId(), numberOfRequiredElements),
+					String.format(ARRAY_SIZE_ERROR_MESSAGE, object.getId(), "%1"),
+					Constants.SIZE);
 		}
 	}
 
@@ -298,10 +384,12 @@ public class Rules {
 			test.append(entry.getIndirectPropertyName()).append(" == ").append(entry.getIndirectReference(type));
 			entry.setIndirectProperty(true);
 			ProfileGeneration.writeRule(version, 10, object.getModelType(), getClause(object, entry, type),
-					test.toString(), ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
-							" shall be " + (entry.isIndirectReference(type) ? "indirect" : "direct"),
-					ProfileGeneration.getErrorMessageStart(false, object, entry, type) + " is " +
-							(entry.isIndirectReference(type) ? "direct" : "indirect"), Constants.KEY_NAME);
+					test.toString(),
+					String.format(entry.isIndirectReference(type) ? INDIRECT_DESCRIPTION : DIRECT_DESCRIPTION,
+							ProfileGeneration.getErrorMessageStart(true, object, entry, type)),
+					String.format(entry.isIndirectReference(type) ? INDIRECT_ERROR_MESSAGE : DIRECT_ERROR_MESSAGE,
+							ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
+					Constants.KEY_NAME);
 		} else if (entry.getIndirectReference(type) != null &&
 				entry.getIndirectReference(type).contains(PredicatesParser.PREDICATE_PREFIX)) {
 			StringBuilder test = new StringBuilder();
@@ -316,16 +404,22 @@ public class Rules {
 			test.append(predicate);
 			if (entry.mustBeIndirect(type)) {
 				ProfileGeneration.writeRule(version, 12, object.getModelType(), getClause(object, entry, type),
-						test.toString(), "If " + ProfileGeneration.getErrorMessagePart(true, object,
-								entry, type) + " satisfies condition " + entry.getIndirectReference(type) +
-								", it shall be indirect", ProfileGeneration.getErrorMessageStart(false,
-								object, entry, type) + " is direct", Constants.KEY_NAME);
+						test.toString(),
+						String.format(INDIRECT_CONDITION_DESCRIPTION,
+								ProfileGeneration.getErrorMessagePart(true, object, entry, type),
+								entry.getIndirectReference(type)),
+						String.format(INDIRECT_ERROR_MESSAGE,
+								ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
+						Constants.KEY_NAME);
 			} else if (entry.mustBeDirect(type)) {
 				ProfileGeneration.writeRule(version, 16, object.getModelType(), getClause(object, entry, type),
-						test.toString(), "If " + ProfileGeneration.getErrorMessagePart(true, object,
-								entry, type) + " satisfies condition " + entry.getIndirectReference(type) + ", it shall be direct",
-						ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
-								" is indirect", Constants.KEY_NAME);
+						test.toString(),
+						String.format(DIRECT_CONDITION_DESCRIPTION,
+								ProfileGeneration.getErrorMessagePart(true, object, entry, type),
+								entry.getIndirectReference(type)),
+						String.format(DIRECT_ERROR_MESSAGE,
+								ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
+						Constants.KEY_NAME);
 			}
 		}
 	}
@@ -372,11 +466,29 @@ public class Rules {
 		test = PredicatesParser.removeBrackets(test);
 		String neededValue = PredicatesParser.getPredicateLastArgument(propertyValue);
 		ProfileGeneration.writeRule(version, 15, object.getModelType(), getClause(object, entry, type, neededValue), test,
-				ProfileGeneration.getErrorMessageStart(true, object, entry) + " shall have " +
-						type.getType() + " value " + neededValue + ", if this object satisfies condition " +
-						PredicatesParser.getPredicateFirstArgument(propertyValue),
-				ProfileGeneration.getErrorMessageStart(false, object, entry) +
-						" does not have value " + neededValue, Constants.KEY_NAME);
+				String.format(REQUIRED_VALUE_DESCRIPTION,
+						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType(),
+						neededValue, PredicatesParser.getPredicateFirstArgument(propertyValue)),
+				String.format(REQUIRED_VALUE_ERROR_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry), neededValue),
+				Constants.KEY_NAME);
+	}
+
+	private static void valueOnlyWhen(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
+		String test = new PredicatesParser(object, entry, version, type, Constants.POSSIBLE_VALUES_COLUMN).parse(propertyValue);
+		if (test == null) {
+			return;
+		}
+		test = PredicatesParser.removeBrackets(test);
+		String neededValue = PredicatesParser.getPredicateFirstArgument(propertyValue);
+		ProfileGeneration.writeRule(version, 13, object.getModelType(), getClause(object, entry, type, neededValue), test,
+				String.format(VALUE_ONLY_WHEN_DESCRIPTION,
+						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType(),
+						neededValue, PredicatesParser.getPredicateLastArgument(propertyValue)),
+				String.format(VALUE_ONLY_WHEN_ERROR_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry), neededValue,
+						PredicatesParser.getPredicateLastArgument(propertyValue)),
+				Constants.KEY_NAME);
 	}
 
 	private static boolean isDeprecatedValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
@@ -399,10 +511,11 @@ public class Rules {
 		}
 		test.append(predicate);
 		ProfileGeneration.writeRule(version, 14, object.getModelType(), getClause(object, entry, type), test.toString(),
-				ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
-						" shall satisfy possible value predicate: " + value,
-				ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
-						" does not satisfy possible value predicate: " + value, Constants.KEY_NAME);
+				String.format(POSSIBLE_VALUE_CONDITION_DESCRIPTION,
+						ProfileGeneration.getErrorMessageStart(true, object, entry, type), value),
+				String.format(POSSIBLE_VALUE_ERROR_CONDITION_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type), value),
+				Constants.KEY_NAME);
 	}
 
 	private static void typesPredicates(PDFVersion version, Object object, Entry entry) {
@@ -430,10 +543,11 @@ public class Rules {
 		entry.addHasTypeProperty(type);
 		ProfileGeneration.writeRule(version, 21, object.getModelType(), getClause(object, entry, type),
 				entry.getHasTypePropertyName(type) + " != true",
-				ProfileGeneration.getErrorMessageStart(true, object, entry) +
-						"should not have deprecated type " + type.getType(),
-				ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
-						" is present", Constants.KEY_NAME);
+				String.format(DEPRECATED_TYPE_DESCRIPTION,
+						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType()),
+				String.format(DEPRECATED_TYPE_ERROR_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
+				Constants.KEY_NAME);
 	}
 
 	private static void requiredEntry(PDFVersion version, Object object, Entry entry) {
@@ -452,10 +566,11 @@ public class Rules {
 			}
 			test = PredicatesParser.removeBrackets(test);
 			ProfileGeneration.writeRule(version, 11, object.getModelType(), getClause(object, entry), test,
-					ProfileGeneration.getErrorMessageStart(true, object, entry) +
-							" is required, when " + entry.getRequired(),
-					ProfileGeneration.getErrorMessageStart(false, object, entry) +
-							" is missing", Constants.KEY_NAME);
+					String.format(REQUIRED_DESCRIPTION,
+							ProfileGeneration.getErrorMessageStart(true, object, entry), entry.getRequired()),
+					String.format(REQUIRED_ERROR_MESSAGE,
+							ProfileGeneration.getErrorMessageStart(false, object, entry)),
+					Constants.KEY_NAME);
 		}
 	}
 
@@ -475,10 +590,11 @@ public class Rules {
 		}
 		test.append(result);
 		ProfileGeneration.writeRule(version, 23, object.getModelType(), getClause(object, entry), test.toString(),
-					ProfileGeneration.getErrorMessageStart(true, object, entry) +
-							" can only be present, if satisfy predicate " + entry.getSinceString(),
-					ProfileGeneration.getErrorMessageStart(false, object, entry) +
-							" is present", Constants.KEY_NAME);
+				String.format(SINCE_DESCRIPTION,
+						ProfileGeneration.getErrorMessageStart(true, object, entry), entry.getSinceString()),
+				String.format(SINCE_ERROR_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry)),
+				Constants.KEY_NAME);
 	}
 
 	private static void deprecatedEntry(PDFVersion version, Object object, Entry entry) {
@@ -486,10 +602,12 @@ public class Rules {
 		if (entry.getDeprecatedVersion() != null && PDFVersion.compare(entry.getDeprecatedVersion(), version) < 0) {
 			String test = Constants.CURRENT_ENTRY.equals(entry.getName()) ? "false" : propertyName + " == false";
 			ProfileGeneration.writeRule(version, 5, object.getModelType(), getClause(object, entry), test,
-					ProfileGeneration.getErrorMessageStart(true, object, entry) +
-							" is deprecated since PDF " + entry.getDeprecatedVersion().getString(),
-					ProfileGeneration.getErrorMessageStart(false, object, entry) +
-							" is present", Constants.KEY_NAME);
+					String.format(DEPRECATED_ENTRY_DESCRIPTION,
+							ProfileGeneration.getErrorMessageStart(true, object, entry),
+							entry.getDeprecatedVersion().getString()),
+					String.format(DEPRECATED_ENTRY_ERROR_MESSAGE,
+							ProfileGeneration.getErrorMessageStart(false, object, entry)),
+					Constants.KEY_NAME);
 			entry.setContainsProperty(true);
 		}
 	}

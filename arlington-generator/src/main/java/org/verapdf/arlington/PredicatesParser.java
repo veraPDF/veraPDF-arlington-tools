@@ -18,6 +18,7 @@ public class PredicatesParser {
 	public static final String MUST_BE_DIRECT_PREDICATE = "fn:MustBeDirect";
 	public static final String MUST_BE_INDIRECT_PREDICATE = "fn:MustBeIndirect";
 	public static final String REQUIRED_VALUE_PREDICATE = "fn:RequiredValue";
+	public static final String VALUE_ONLY_WHEN_PREDICATE = "fn:ValueOnlyWhen";
 
 	private boolean isProfile = true;//false if java code
 	private final PartStack output = new PartStack();
@@ -645,6 +646,9 @@ public class PredicatesParser {
 			case "fn:StringLength":
 				stringLength();
 				break;
+			case VALUE_ONLY_WHEN_PREDICATE:
+				valueOnlyWhen();
+				break;
 			default:
 				StringBuilder result = new StringBuilder();
 				if (!token.getString().isEmpty()) {
@@ -1192,6 +1196,17 @@ public class PredicatesParser {
 		}
 		output.push(part);
 		stringEntry.setStringSizeProperty(true);
+	}
+
+	private void valueOnlyWhen() {
+		if (arguments.size() < 2) {
+			throw new RuntimeException("Invalid number of arguments of " + VALUE_ONLY_WHEN_PREDICATE);
+		}
+		String separator = type.getSeparator();
+		entry.addTypeValueProperty(type);
+		processTokens("(", "(", getNewPart(arguments.subList(1, arguments.size())), ")", "==", "true", "||",
+				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "!=",
+				separator + arguments.get(0).getString() + separator, ")");
 	}
 
 	private void checkBit(int bitValue) {
