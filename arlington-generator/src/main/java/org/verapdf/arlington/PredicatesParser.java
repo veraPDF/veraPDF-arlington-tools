@@ -135,6 +135,9 @@ public class PredicatesParser {
 			result = getDefined(result, true, Collections.EMPTY_MAP);
 			res = result.getString();
 		}
+		if (Constants.UNDEFINED.equals(res)) {
+			return null;
+		}
 		if (isDefault()) {
 			res = res + " null";
 		}
@@ -350,9 +353,9 @@ public class PredicatesParser {
 			output.add(getNewPart(firstArgument, secondArgument));
 		} else if ("true".equals(firstString) || "true".equals(secondString)) {
 			output.add("true");
-		} else if ("false".equals(firstString)) {
+		} else if ("false".equals(firstString) || Constants.UNDEFINED.equals(firstString)) {
 			output.add(secondArgument);
-		} else if ("false".equals(secondString)) {
+		} else if ("false".equals(secondString) || Constants.UNDEFINED.equals(secondString)) {
 			output.add(firstArgument);
 		} else if (!isOriginal) {
 			output.add(getNewPart(firstArgument, "||", secondArgument));
@@ -376,9 +379,9 @@ public class PredicatesParser {
 	private void and(Part firstArgument, Part secondArgument, boolean isOriginal) {
 		if ("false".equals(firstArgument.getString()) || "false".equals(secondArgument.getString())) {
 			output.add("false");
-		} else if ("true".equals(firstArgument.getString())) {
+		} else if ("true".equals(firstArgument.getString()) || Constants.UNDEFINED.equals(firstArgument.getString())) {
 			output.add(secondArgument);
-		} else if ("true".equals(secondArgument.getString())) {
+		} else if ("true".equals(secondArgument.getString()) || Constants.UNDEFINED.equals(secondArgument.getString())) {
 			output.add(firstArgument);
 		} else if (!isOriginal) {
 			output.add(getNewPart(firstArgument, "&&", secondArgument));
@@ -435,6 +438,10 @@ public class PredicatesParser {
 	}
 
 	private void equal(Part firstArgument, Part secondArgument) {
+		if (Constants.UNDEFINED.equals(firstArgument.getString()) || Constants.UNDEFINED.equals(secondArgument.getString())) {
+			output.add(Constants.UNDEFINED);
+			return;
+		}
 		if (("false".equals(firstArgument.getString()) && "true".equals(secondArgument.getString())) || ("true".equals(firstArgument.getString()) && "false".equals(secondArgument.getString()))) {
 			output.add("false");
 			return;
@@ -467,6 +474,10 @@ public class PredicatesParser {
 	}
 
 	private void nonEqual(Part firstArgument, Part secondArgument) {
+		if (Constants.UNDEFINED.equals(firstArgument.getString()) || Constants.UNDEFINED.equals(secondArgument.getString())) {
+			output.add(Constants.UNDEFINED);
+			return;
+		}
 		if (("false".equals(firstArgument.getString()) && "true".equals(secondArgument.getString())) ||
 				("true".equals(firstArgument.getString()) && "false".equals(secondArgument.getString()))) {
 			output.add("true");
@@ -770,7 +781,7 @@ public class PredicatesParser {
 			if (arguments.size() == 1 || Constants.REQUIRED_COLUMN.equals(columnName)) {
 				output.push("false");
 			} else {
-				output.push("true");
+				output.push(Constants.UNDEFINED);
 			}
 		}
 	}
@@ -991,7 +1002,11 @@ public class PredicatesParser {
 		}
 		String entryName = getEntryName(arguments.get(0).getString());
 		Entry entry = object.getEntry(entryName);
-		if ((entry != null || entryName.matches(ENTRY_REGEX)) && !arguments.get(0).getString().contains("@")) {
+		if ((entry != null || entryName.matches(ENTRY_REGEX)) &&
+				!arguments.get(0).getString().contains("@")) {
+			if (entry == null && !entryName.contains("::")) {
+				throw new RuntimeException("Invalid entryName in isPresent");
+			}
 			if (arguments.size() == 1) {
 				processTokens("(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "true", ")");
 			} else {
@@ -1025,8 +1040,13 @@ public class PredicatesParser {
 		if (arguments.size() < 1) {
 			throw new RuntimeException("Invalid number of arguments of isRequired");
 		}
+		Part part = getNewPart(arguments);
+		if (Constants.UNDEFINED.equals(part.getString())) {
+			output.push(Constants.UNDEFINED);
+			return;
+		}
 		processTokens("(", getPropertyOrMethodName(entry.getContainsPropertyName()), "==", "true", "||", "(",
-				getNewPart(arguments), ")", "==", "false", ")");
+				part, ")", "==", "false", ")");
 		entry.setContainsProperty(true);
 	}
 
@@ -1049,7 +1069,7 @@ public class PredicatesParser {
 			if (arguments.size() == 1 || Constants.REQUIRED_COLUMN.equals(columnName)) {
 				output.push("false");
 			} else {
-				output.push("true");
+				output.push(Constants.UNDEFINED);
 			}
 		}
 	}
@@ -1100,7 +1120,12 @@ public class PredicatesParser {
 		if (arguments.size() != 2) {
 			throw new RuntimeException("Invalid number of arguments of pageProperty");
 		}
-		output.push("page::" + getEntryName(arguments.get(0).getString()) + "::" + getEntryName(arguments.get(1).getString()));
+		String entryName = getEntryName(arguments.get(0).getString());
+		Entry entry = object.getEntry(entryName);
+		if (entry == null && !entryName.contains("::")) {
+			throw new RuntimeException("Invalid entryName in pageProperty");
+		}
+		output.push("page::" + entryName + "::" + getEntryName(arguments.get(1).getString()));
 	}
 
 	private void rectHeight() {
@@ -1161,7 +1186,7 @@ public class PredicatesParser {
 			if (arguments.size() == 1 || Constants.REQUIRED_COLUMN.equals(columnName)) {
 				output.push("false");
 			} else {
-				output.push("true");
+				output.push(Constants.UNDEFINED);
 			}
 		}
 	}

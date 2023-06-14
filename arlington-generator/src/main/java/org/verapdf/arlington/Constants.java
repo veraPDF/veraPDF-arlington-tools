@@ -51,6 +51,7 @@ public class Constants {
 	public static final String STAR = "*";
 	public static final String TRUE = "true";
 	public static final String FALSE = "false";
+	public static final String UNDEFINED = "undefined";
 	public static final String OBJECT = "Object";
 	public static final String NULL = "null";
 	public static final String CURRENT_ENTRY = "";

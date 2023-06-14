@@ -460,7 +460,7 @@ public class Rules {
 
 	private static void requiredValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
 		String test = new PredicatesParser(object, entry, version, type, Constants.REQUIRED_VALUE_COLUMN).parse(propertyValue);
-		if (test == null) {
+		if (test == null || Constants.TRUE.equals(test)) {
 			return;
 		}
 		test = PredicatesParser.removeBrackets(test);
