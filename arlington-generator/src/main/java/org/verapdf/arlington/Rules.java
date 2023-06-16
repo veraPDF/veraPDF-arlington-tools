@@ -358,7 +358,8 @@ public class Rules {
 					Constants.SIZE);
 		} else if (!containsStar && numbersWithStar.isEmpty() && numberOfRequiredElements < numbersWithoutStar.size()) {
 			ProfileGeneration.writeRule(version, 24, object.getModelType(), getClause(object),
-					Constants.SIZE + " >= " + numberOfRequiredElements + " && " + Constants.SIZE + " <= " + numbersWithoutStar.size(),
+					Constants.SIZE + " >= " + numberOfRequiredElements + " && " + Constants.SIZE + " <= " +
+							numbersWithoutStar.size(),
 					String.format(INTERVAL_ARRAY_SIZE_DESCRIPTION,
 							object.getId(), numberOfRequiredElements, numbersWithoutStar.size()),
 					String.format(ARRAY_SIZE_ERROR_MESSAGE, object.getId(), "%1"),
@@ -472,6 +473,35 @@ public class Rules {
 				String.format(REQUIRED_VALUE_ERROR_MESSAGE,
 						ProfileGeneration.getErrorMessageStart(false, object, entry), neededValue),
 				Constants.KEY_NAME);
+	}
+
+	private static void deprecatedValues(Set<String> deprecatedValues, PDFVersion version, Object object, Entry entry, Type type) {
+		StringBuilder deprecatedTest = new StringBuilder();
+		for (String deprecatedValue : deprecatedValues) {
+			deprecatedTest.append(entry.getTypeValuePropertyName(type)).append(" != ").append(type.getSeparator())
+					.append(deprecatedValue).append(type.getSeparator()).append(" && ");
+		}
+		deprecatedTest.delete(deprecatedTest.length() - 4, deprecatedTest.length());
+		String valuesString = String.join(", ", deprecatedValues);
+		entry.addTypeValueProperty(type);
+		if (deprecatedValues.size() == 1) {
+			ProfileGeneration.writeRule(version, 19, object.getModelType(), getClause(object, entry, type),
+					deprecatedTest.toString(),
+					String.format(DEPRECATED_VALUE_DESCRIPTION,
+							ProfileGeneration.getErrorMessageStart(true, object, entry, type), valuesString),
+					String.format(DEPRECATED_VALUE_ERROR_MESSAGE,
+							ProfileGeneration.getErrorMessageStart(false, object, entry, type),
+							deprecatedValues.iterator().next()),
+					Constants.KEY_NAME);
+		} else {
+			ProfileGeneration.writeRule(version, 19, object.getModelType(), getClause(object, entry, type),
+					deprecatedTest.toString(),
+					String.format(DEPRECATED_VALUES_DESCRIPTION,
+							ProfileGeneration.getErrorMessageStart(true, object, entry, type), valuesString),
+					String.format(DEPRECATED_VALUE_ERROR_MESSAGE,
+							ProfileGeneration.getErrorMessageStart(false, object, entry, type), "%2"),
+					Constants.KEY_NAME, entry.getTypeValuePropertyName(type));
+		}
 	}
 
 	private static void valueOnlyWhen(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {

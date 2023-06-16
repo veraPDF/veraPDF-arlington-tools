@@ -77,7 +77,7 @@ public class Main {
 		MultiObject multiObject = objectIdMap.get(objectName);
 		PrintWriter javaWriter = new PrintWriter(new FileWriter(folder + Object.getJavaClassName(objectName) + ".java"));
 		multiObject.setJavaGeneration(new JavaGeneration(javaWriter));
-		multiObject.getJavaGeneration().addPackageAndImportsToClass();
+		multiObject.getJavaGeneration().addPackageAndImportsToClass(objectName);
 		multiObject.getJavaGeneration().addClassStart(multiObject);
 		multiObject.getJavaGeneration().addSize(multiObject);
 		ModelGeneration.addTypeToModel(Object.getModelType(objectName), Object.getModelType(Constants.OBJECT));

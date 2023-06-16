@@ -158,6 +158,20 @@ public class Entry implements Comparable<Entry> {
 		return result != null ? result : Collections.emptyList();
 	}
 
+	public Set<String> getLinksWithoutPredicatesSet(Type type) {
+		return getLinks(type).stream().map(link -> link.contains(PredicatesParser.PREDICATE_PREFIX) ?
+				PredicatesParser.getPredicateLastArgument(link) : link).collect(Collectors.toSet());
+	}
+
+	public List<String> getLinksWithoutPredicatesList(Type type) {
+		return getLinksWithoutPredicatesList(getLinks(type));
+	}
+
+	public List<String> getLinksWithoutPredicatesList(List<String> links) {
+		return links.stream().map(link -> link.contains(PredicatesParser.PREDICATE_PREFIX) ?
+				PredicatesParser.getPredicateLastArgument(link) : link).collect(Collectors.toList());
+	}
+
 	public Map<Type,List<String>> getLinks() {
 		return links;
 	}

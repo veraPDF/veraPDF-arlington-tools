@@ -116,4 +116,40 @@ public class Links {
 		}
 		return true;
 	}
+
+	public static Map<String, Set<String>> getDifferentKeysLinksMap(List<String> correctLinks,
+																		  Map<String, LinkHelper> map) {
+		Map<String, Set<String>> resultMap = new HashMap<>();
+		for (String link : correctLinks) {
+			DifferentKeysLinkHelper helper = (DifferentKeysLinkHelper)map.get(link);
+			for (String keyName : helper.getKeyNames()) {
+				if (resultMap.containsKey(keyName)) {
+					resultMap.get(keyName).add(link);
+				} else {
+					Set<String> valuesMap = new HashSet<>();
+					valuesMap.add(link);
+					resultMap.put(keyName, valuesMap);
+				}
+			}
+		}
+		return resultMap;
+	}
+
+	public static SortedMap<String, Set<String>> getDifferentKeysValuesLinksMap(List<String> correctLinks,
+																				Map<String, LinkHelper> map) {
+		SortedMap<String, Set<String>> resultMap = new TreeMap<>();
+		for (String link : correctLinks) {
+			DifferentKeysValuesLinkHelper helper = (DifferentKeysValuesLinkHelper)map.get(link);
+			for (String keyValue : helper.getKey().getKeyValues()) {
+				if (resultMap.containsKey(keyValue)) {
+					resultMap.get(keyValue).add(link);
+				} else {
+					Set<String> valuesMap = new HashSet<>();
+					valuesMap.add(link);
+					resultMap.put(keyValue, valuesMap);
+				}
+			}
+		}
+		return resultMap;
+	}
 }

@@ -20,7 +20,7 @@ public class JavaGeneration {
 	}
 
 	public void addGFAObject() {
-		addPackageAndImportsToClass();
+		addPackageAndImportsToClass(Constants.OBJECT);
 		javaWriter.println("public class GFAObject extends GenericModelObject implements AObject {");
 		javaWriter.println();
 		javaWriter.println("\tprivate final static List<String> standardFonts = new LinkedList<>();");
@@ -293,7 +293,7 @@ public class JavaGeneration {
 	}
 
 	public boolean getDefaultObject(Object multiObject, String entryName) {
-		Map<Pair<Type, String>, List<PDFVersion>> map = getDefaultValueMap(multiObject, entryName);
+		Map<Pair<Type, String>, List<PDFVersion>> map = MultiEntry.getDefaultValueMap(multiObject, entryName);
 		if (map.isEmpty()) {
 			return false;
 		}
@@ -332,31 +332,35 @@ public class JavaGeneration {
 		return isInheritable != null ? isInheritable : false;
 	}
 
-	public void addPackageAndImportsToClass() {
+	public void addPackageAndImportsToClass(String objectName) {
 		Main.addPackage(javaWriter, "org.verapdf.gf.model.impl.arlington");
 		javaWriter.println();
 		Main.addImport(javaWriter, "org.verapdf.cos.*");
-		Main.addImport(javaWriter, "org.verapdf.model.GenericModelObject");
 		Main.addImport(javaWriter, "org.verapdf.model.alayer.*");
 		Main.addImport(javaWriter, "org.verapdf.gf.model.impl.containers.StaticContainers");
-		Main.addImport(javaWriter, "org.verapdf.tools.StaticResources");
+		if (Constants.OBJECT.equals(objectName)) {
+			Main.addImport(javaWriter, "org.verapdf.model.GenericModelObject");
+			Main.addImport(javaWriter, "org.verapdf.tools.StaticResources");
+		}
 		Main.addImport(javaWriter, "java.util.*");
 		Main.addImport(javaWriter, "org.verapdf.pd.*");
 		Main.addImport(javaWriter, "org.verapdf.as.ASAtom");
 		Main.addImport(javaWriter, "java.util.stream.Collectors");
 		Main.addImport(javaWriter, "org.verapdf.pd.structure.PDNumberTreeNode");
-		Main.addImport(javaWriter, "org.verapdf.model.tools.constants.Operators");
-		Main.addImport(javaWriter, "org.verapdf.operator.Operator");
-		Main.addImport(javaWriter, "org.verapdf.as.io.ASInputStream");
-		Main.addImport(javaWriter, "org.verapdf.parser.PDFStreamParser");
-		Main.addImport(javaWriter, "org.verapdf.pd.structure.NameTreeIterator");
-		Main.addImport(javaWriter, "java.io.IOException");
+		if (Constants.PAGE_OBJECT.equals(objectName)) {
+			Main.addImport(javaWriter, "org.verapdf.model.tools.constants.Operators");
+			Main.addImport(javaWriter, "org.verapdf.operator.Operator");
+			Main.addImport(javaWriter, "org.verapdf.as.io.ASInputStream");
+			Main.addImport(javaWriter, "org.verapdf.parser.PDFStreamParser");
+			Main.addImport(javaWriter, "java.io.IOException");
+		}
 		javaWriter.println();
 	}
 
-	public void addGetterSize(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
+	public void addLinkGetterBySize(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
 		String linkName = Links.getLinkName(entry.getName());
-		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object get" + linkName + type.getType() + version.getStringWithUnderScore() + "(COSBase base, String keyName) {");
+		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object get" + linkName + type.getType() +
+				version.getStringWithUnderScore() + "(COSBase base, String keyName) {");
 		javaWriter.println("\t\tswitch (base.size()) {");
 		for (String link : entry.getLinks(type)) {
 			if (link.contains(PredicatesParser.PREDICATE_PREFIX)) {
@@ -364,9 +368,13 @@ public class JavaGeneration {
 			}
 			SizeLinkHelper helper = (SizeLinkHelper)map.get(link);
 			if (helper != null) {
-				javaWriter.println("\t\t\tcase " + helper.getSize() + ":");
-				javaWriter.println("\t\t\t\treturn " + constructorGFAObject(entry.getName(), link, "base", "this.baseObject", "keyName") + ";");
+				linksMap.put(helper.getSize(), link);
 			}
+		}
+		for (Map.Entry<Integer, String> mapEntry : linksMap.entrySet()) {
+			javaWriter.println("\t\t\tcase " + mapEntry.getKey() + ":");
+			javaWriter.println("\t\t\t\treturn " + constructorGFAObject(entry.getName(), mapEntry.getValue(),
+					"base", "this.baseObject", "keyName") + ";");
 		}
 		javaWriter.println("\t\t\tdefault:");
 		javaWriter.println("\t\t\t\treturn null;");
