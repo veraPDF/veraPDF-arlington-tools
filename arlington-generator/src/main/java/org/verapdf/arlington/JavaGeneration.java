@@ -340,8 +340,8 @@ public class JavaGeneration {
 		Main.addImport(javaWriter, "org.verapdf.gf.model.impl.containers.StaticContainers");
 		if (Constants.OBJECT.equals(objectName)) {
 			Main.addImport(javaWriter, "org.verapdf.model.GenericModelObject");
-			Main.addImport(javaWriter, "org.verapdf.tools.StaticResources");
 		}
+		Main.addImport(javaWriter, "org.verapdf.tools.StaticResources");
 		Main.addImport(javaWriter, "java.util.*");
 		Main.addImport(javaWriter, "org.verapdf.pd.*");
 		Main.addImport(javaWriter, "org.verapdf.as.ASAtom");

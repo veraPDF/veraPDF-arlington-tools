@@ -117,9 +117,9 @@ public class Links {
 		return true;
 	}
 
-	public static Map<String, Set<String>> getDifferentKeysLinksMap(List<String> correctLinks,
+	public static SortedMap<String, Set<String>> getDifferentKeysLinksMap(List<String> correctLinks,
 																		  Map<String, LinkHelper> map) {
-		Map<String, Set<String>> resultMap = new HashMap<>();
+		SortedMap<String, Set<String>> resultMap = new TreeMap<>();
 		for (String link : correctLinks) {
 			DifferentKeysLinkHelper helper = (DifferentKeysLinkHelper)map.get(link);
 			for (String keyName : helper.getKeyNames()) {
