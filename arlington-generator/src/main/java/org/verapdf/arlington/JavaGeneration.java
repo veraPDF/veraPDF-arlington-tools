@@ -479,6 +479,51 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	public void addSubArrayLink(Object object, Entry entry, String returnType, PDFVersion version) {
+		String linkName = entry.getCorrectEntryName();
+		printMethodSignature(false, "private", false, "List<" + returnType + ">",
+				"get" + linkName + version.getStringWithUnderScore());
+		javaWriter.println("\t\tList<" + returnType + "> list = new LinkedList<>();");
+		List<Integer> numbers = new LinkedList<>();
+		int requiredNumbers = 0;
+		for (Entry numberEntry : object.getNumberStarEntries()) {
+			if (numberEntry.isRequired()) {
+				requiredNumbers++;
+			}
+			numbers.add(numberEntry.getNumberWithStar());
+		}
+		Collections.sort(numbers);
+		javaWriter.println("\t\tCOSObject array = COSArray.construct();");
+		javaWriter.println("\t\tfor (int i = " + numbers.get(0) + "; i < baseObject.size(); i++) {");
+		javaWriter.println("\t\t\tCOSObject child = baseObject.at(i);");
+		for (int i = requiredNumbers; i < numbers.size(); i++) {
+			Entry number = object.getEntry(numbers.get(i) + "*");
+			javaWriter.println("\t\t\tif (array.size() == " + i + " && child.getType() != " +
+					number.getTypes().iterator().next().getCosObjectType() + ") {");
+			javaWriter.println("\t\t\t\tlist.add(" + constructorGFAObject(entry.getName(),
+					entry.getLinks(Type.SUB_ARRAY).iterator().next(), "array.getDirectBase()",
+					"this.parentObject", "null") + ");");
+			javaWriter.println("\t\t\t\tarray = COSArray.construct();");
+			javaWriter.println("\t\t\t}");
+		}
+		javaWriter.println("\t\t\tarray.add(child);");
+		javaWriter.println("\t\t\tif (array.size() == " + numbers.size() + ") {");
+		javaWriter.println("\t\t\t\tlist.add(" + constructorGFAObject(entry.getName(),
+				entry.getLinks(Type.SUB_ARRAY).iterator().next(), "array.getDirectBase()",
+				"this.parentObject", "null") + ");");
+		javaWriter.println("\t\t\t\tarray = COSArray.construct();");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tif (array.size() > 0) {");
+		javaWriter.println("\t\t\tlist.add(" + constructorGFAObject(entry.getName(),
+				entry.getLinks(Type.SUB_ARRAY).iterator().next(), "array.getDirectBase()",
+				"this.parentObject", "null") + ");");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn Collections.unmodifiableList(list);");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	public void addContainsMethod(Object object, String entryName) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getMethodName(Entry.getContainsPropertyName(entryName)));
