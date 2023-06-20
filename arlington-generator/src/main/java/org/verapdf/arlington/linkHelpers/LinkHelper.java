@@ -333,19 +333,19 @@ public class LinkHelper {
 
 		//page tree nodes
 		helpers = new HashMap<>();
-		helpers.put("Outline", new DifferentKeysLinkHelper("Outline", null));
+		helpers.put("Outline", new DifferentKeysLinkHelper("Outline", ""));
 		helpers.put("OutlineItem", new DifferentKeysLinkHelper("OutlineItem", "Parent"));
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("3DView", new DifferentKeysLinkHelper("3DView", null));
+		helpers.put("3DView", new DifferentKeysLinkHelper("3DView", ""));
 		helpers.put("3DViewAddEntries", new DifferentKeysLinkHelper("3DViewAddEntries", "Snapshot", "Params"));
 		helpersList.add(helpers);
 
 		//outlines
 		helpers = new HashMap<>();
 		helpers.put("PageTreeNode", new DifferentKeysLinkHelper("PageTreeNode", "Parent"));
-		helpers.put("PageTreeNodeRoot", new DifferentKeysLinkHelper("PageTreeNodeRoot", null));
+		helpers.put("PageTreeNodeRoot", new DifferentKeysLinkHelper("PageTreeNodeRoot", ""));
 		helpersList.add(helpers);
 
 		//opi
@@ -440,7 +440,7 @@ public class LinkHelper {
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("Stream", new DifferentKeysLinkHelper("Stream", null));
+		helpers.put("Stream", new DifferentKeysLinkHelper("Stream", ""));
 		helpers.put("PatternType1", new DifferentKeysLinkHelper("PatternType1", "Type"));
 		helpers.put("ShadingType4", new DifferentKeysLinkHelper("ShadingType4", "ShadingType"));
 		helpers.put("ShadingType5", new DifferentKeysLinkHelper("ShadingType5", "ShadingType"));
@@ -449,7 +449,7 @@ public class LinkHelper {
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("DestDict", new DifferentKeysLinkHelper("DestDict", null));
+		helpers.put("DestDict", new DifferentKeysLinkHelper("DestDict", ""));
 		helpers.put("ActionGoTo", new DifferentKeysLinkHelper("ActionGoTo", "S"));
 		helpers.put("ActionGoToR", new DifferentKeysLinkHelper("ActionGoToR", "S"));
 		helpers.put("ActionGoToE", new DifferentKeysLinkHelper("ActionGoToE", "S"));

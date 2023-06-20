@@ -3,7 +3,6 @@ package org.verapdf.arlington;
 import org.verapdf.arlington.linkHelpers.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Links {
 
@@ -60,7 +59,56 @@ public class Links {
 		}
 	}
 
-	public static List<List<PDFVersion>> getVersions(String objectName, String entryName) {
+	public static void generateLinkGetters(Map.Entry<String, String> mapEntry, MultiObject multiObject) {
+		String entryName = mapEntry.getKey();
+		List<List<PDFVersion>> versions = getLinkVersions(multiObject.getId(), entryName);
+		multiObject.getJavaGeneration().addCommonGetLink(entryName, mapEntry.getValue(), versions);
+		for (List<PDFVersion> versionsList : versions) {
+			PDFVersion version = versionsList.get(0);
+			Object object = version.getObjectIdMap().get(multiObject.getId());
+			if (object == null) {
+				continue;
+			}
+			Entry entry = object.getEntry(entryName);
+			if (entry == null) {
+				continue;
+			}
+			if (entry.isStar()) {
+				object.getJavaGeneration().addMultiLink(object, entry, mapEntry.getValue(), version);
+			} else if (Constants.SUB_ARRAYS.equals(entryName)) {
+				object.getJavaGeneration().addSubArrayLink(object, entry, mapEntry.getValue(), version);
+			} else {
+				object.getJavaGeneration().addOneLink(object, entry, mapEntry.getValue(), version);
+			}
+			for (Type type : entry.getUniqLinkTypes()) {
+				Set<String> correctLinks = entry.getLinksWithoutPredicatesSet(type);
+				if (correctLinks.size() <= 1) {
+					continue;
+				}
+				Map<String, LinkHelper> map = LinkHelper.getMap(correctLinks);
+				if (map == null) {
+					continue;
+				}
+				addGetter(map, object, entry, type, version);
+			}
+		}
+	}
+
+	private static void addGetter(Map<String, LinkHelper> map, Object object, Entry entry,
+								  Type type, PDFVersion version) {
+		LinkHelper linkHelper = map.values().iterator().next();
+		if (linkHelper instanceof DifferentKeysValuesLinkHelper)  {
+			object.getJavaGeneration().addLinkGetterByKeyValues(map, object, entry, type, version, 0, "");
+		} else if (linkHelper instanceof SizeLinkHelper) {
+			object.getJavaGeneration().addLinkGetterBySize(map, object, entry, type, version);
+		} else if (linkHelper instanceof DifferentKeysLinkHelper) {
+			object.getJavaGeneration().addLinkGetterByDifferentKeys(map, object, entry, type, version);
+		} else if (linkHelper instanceof KeyNameLinkHelper) {
+			object.getJavaGeneration().addLinkGetterByKeyName(map, object, entry, type, version);
+		}
+	}
+
+	public static List<List<PDFVersion>> getLinkVersions(String objectName, String entryName) {
 		List<List<PDFVersion>> versions = new LinkedList<>();
 		for (PDFVersion version : PDFVersion.values()) {
 			Object object = version.getObjectIdMap().get(objectName);
