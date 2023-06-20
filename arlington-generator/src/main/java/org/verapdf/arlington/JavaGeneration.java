@@ -395,6 +395,39 @@ public class JavaGeneration {
 		}
 	}
 
+	public void addLinkGetterByKeyName(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
+		String linkName = Links.getLinkName(entry.getName());
+		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object get" + linkName + type.getType() +
+				version.getStringWithUnderScore() + "(COSBase base, String keyName) {");
+		javaWriter.println("\t\tswitch (keyName) {");
+		String defaultLink = null;
+		for (String link : entry.getLinks(type)) {
+			if (link.contains(PredicatesParser.PREDICATE_PREFIX)) {
+				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " link contains predicate");
+			}
+			KeyNameLinkHelper helper = (KeyNameLinkHelper)map.get(link);
+			if (helper != null) {
+				if (helper.getKeyName() != null) {
+					javaWriter.println("\t\t\tcase \"" + helper.getKeyName() + "\":");
+					javaWriter.println("\t\t\t\treturn " + constructorGFAObject(entry.getName(), link, "base",
+							"this.baseObject", "keyName") + ";");
+				} else {
+					defaultLink = link;
+				}
+			}
+		}
+		javaWriter.println("\t\t\tdefault:");
+		if (defaultLink != null) {
+			javaWriter.println("\t\t\t\treturn " + constructorGFAObject(entry.getName(), defaultLink, "base",
+					"this.baseObject", "keyName") + ";");
+		} else {
+			javaWriter.println("\t\t\t\treturn null;");
+		}
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	public void addLinkGetterBySize(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
 		String linkName = Links.getLinkName(entry.getName());
 		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object get" + linkName + type.getType() +
