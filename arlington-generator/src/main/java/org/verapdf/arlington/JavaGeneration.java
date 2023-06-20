@@ -479,6 +479,26 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	private void linkPredicate(Object object, Entry entry, Type type, PDFVersion version, String link, Type returnType) {
+		String newLink = link;
+		if (newLink == null || !newLink.contains(PredicatesParser.PREDICATE_PREFIX)) {
+			return;
+		}
+		newLink = new PredicatesParser(object, entry, version, type, Constants.LINKS_COLUMN, false).parse(newLink);
+		if (newLink == null) {
+			return;
+		}
+		if (Type.ARRAY.equals(returnType)) {
+			javaWriter.println("\t\t\tif ((" + newLink + ") == false) {");
+			javaWriter.println("\t\t\t\treturn Collections.emptyList();");
+			javaWriter.println("\t\t\t}");
+		} else {
+			javaWriter.println("\t\t\t\tif ((" + newLink + ") == false) {");
+			javaWriter.println("\t\t\t\t\treturn null;");
+			javaWriter.println("\t\t\t\t}");
+		}
+	}
+
 	public void addSubArrayLink(Object object, Entry entry, String returnType, PDFVersion version) {
 		String linkName = entry.getCorrectEntryName();
 		printMethodSignature(false, "private", false, "List<" + returnType + ">",
