@@ -479,6 +479,43 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	public void addContainsMethod(Object object, String entryName) {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getMethodName(Entry.getContainsPropertyName(entryName)));
+		int index = entryName.lastIndexOf("::");
+		String objectName = index != -1 ? getComplexObject(object, entryName.substring(0, index)) : "this.baseObject";
+		String finalEntryName = index != -1 ? entryName.substring(index + 2) : entryName;
+		if (Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) {
+			javaWriter.println("\t\treturn " + getMethodName(Entry.getContainsPropertyName(Constants.XREF_STM)) + "();");
+		} else if (Constants.STAR.equals(finalEntryName)) {
+			javaWriter.println("\t\treturn " + objectName + ".getKeySet() != null && !" + objectName + ".getKeySet().isEmpty();");
+		} else if (Entry.isNumber(finalEntryName)) {
+			javaWriter.println("\t\treturn " + objectName + ".size() > " + finalEntryName + ";");
+		} else {
+			if (index == -1) {
+				objectName = addContainsInheritable(objectName, object.getId(), entryName);
+			}
+			javaWriter.println("\t\treturn " + objectName + ".knownKey(" + getASAtomFromString(finalEntryName) + ");");
+		}
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	private String addContainsInheritable(String objectName, String objectId, String entryName) {
+		if (isInheritable(objectId, entryName) && !Constants.STRUCTURE_ATTRIBUTE_DICTIONARY.equals(objectId)) {
+			javaWriter.println("\t\tCOSObject currentObject = new COSObject(this.baseObject);");
+			javaWriter.println("\t\twhile (currentObject != null && !currentObject.empty() && !currentObject.knownKey(" +
+					getASAtomFromString(entryName) + ")) {");
+			javaWriter.println("\t\t\tcurrentObject = currentObject.getKey(" + getASAtomFromString("Parent") + ");");
+			javaWriter.println("\t\t}");
+			javaWriter.println("\t\tif (currentObject == null || currentObject.empty()) {");
+			javaWriter.println("\t\t\treturn false;");
+			javaWriter.println("\t\t}");
+			return "currentObject";
+		}
+		return objectName;
+	}
+
 	public void addIndirectMethod(Entry entry) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getMethodName(entry.getIndirectPropertyName()));
