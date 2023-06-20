@@ -3,8 +3,12 @@ package org.verapdf.arlington;
 import org.verapdf.arlington.linkHelpers.*;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Links {
+
+	private static final Logger LOGGER = Logger.getLogger(Links.class.getCanonicalName());
 
 	private static Map<String, String> getLinksEntries(Object object) {
 		Map<String, String> entries = new HashMap<>();
@@ -196,6 +200,21 @@ public class Links {
 					valuesMap.add(link);
 					resultMap.put(keyValue, valuesMap);
 				}
+			}
+		}
+		return resultMap;
+	}
+
+	public static SortedMap<Integer, String> getSizeLinksMap(PDFVersion version, Object object, Entry entry, Type type,
+															 List<String> correctLinks, Map<String, LinkHelper> map) {
+		SortedMap<Integer, String> resultMap = new TreeMap<>();
+		for (String link : correctLinks) {
+			if (link.contains(PredicatesParser.PREDICATE_PREFIX)) {
+				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " link contains predicate");
+			}
+			SizeLinkHelper helper = (SizeLinkHelper)map.get(link);
+			if (helper != null) {
+				resultMap.put(helper.getSize(), link);
 			}
 		}
 		return resultMap;

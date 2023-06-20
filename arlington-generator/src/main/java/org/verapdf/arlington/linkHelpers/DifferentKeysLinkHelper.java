@@ -7,7 +7,7 @@ import java.util.List;
 
 public class DifferentKeysLinkHelper extends LinkHelper {
 
-	private final List<String> keyNames;//null if default
+	private final List<String> keyNames;//empty string if default
 
 	public DifferentKeysLinkHelper(String objectName, String ... keyNames) {
 		super(objectName);
