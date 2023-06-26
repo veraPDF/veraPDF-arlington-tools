@@ -42,7 +42,8 @@ public class Object {
 	}
 
 	public List<? extends Entry> getNumberStarEntries() {
-		return getEntries().stream().filter(Entry::isNumberWithStar).sorted(Comparator.comparingInt(Entry::getNumberWithStar)).collect(Collectors.toList());
+		return getEntries().stream().filter(Entry::isNumberWithStar)
+				.sorted(Comparator.comparingInt(Entry::getNumberWithStar)).collect(Collectors.toList());
 	}
 
 	public Set<String> getEntriesNames() {

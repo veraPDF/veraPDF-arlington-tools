@@ -258,11 +258,19 @@ public class Entry implements Comparable<Entry> {
 	}
 
 	public String getRectWidthPropertyName() {
-		return getCorrectEntryName(getName()) + "RectWidth";
+		return getRectWidthPropertyName(getName());
+	}
+
+	public static String getRectWidthPropertyName(String entryName) {
+		return getCorrectEntryName(entryName) + "RectWidth";
 	}
 
 	public String getRectHeightPropertyName() {
-		return getCorrectEntryName(getName()) + "RectHeight";
+		return getRectHeightPropertyName(getName());
+	}
+
+	public static String getRectHeightPropertyName(String entryName) {
+		return getCorrectEntryName(entryName) + "RectHeight";
 	}
 
 	public String getStringLengthPropertyName() {
@@ -274,7 +282,11 @@ public class Entry implements Comparable<Entry> {
 	}
 
 	public String getIndirectPropertyName() {
-		return "is" + getCorrectEntryName(getName()) + "Indirect";
+		return getIndirectPropertyName(getName());
+	}
+
+	public static String getIndirectPropertyName(String entryName) {
+		return "is" + getCorrectEntryName(entryName) + "Indirect";
 	}
 
 	public String getHasCyclePropertyName() {
@@ -282,7 +294,11 @@ public class Entry implements Comparable<Entry> {
 	}
 
 	public String getArraySortAscendingPropertyName(int number) {
-		return "is" + getCorrectEntryName(getName()) + "ArraySortAscending" + number;
+		return getArraySortAscendingPropertyName(getName(), String.valueOf(number));
+	}
+
+	public static String getArraySortAscendingPropertyName(String entryName, String number) {
+		return "is" + getCorrectEntryName(entryName) + "ArraySortAscending" + number;
 	}
 
 	public static String getTypeValuePropertyName(String entryName, Type type) {
@@ -432,6 +448,24 @@ public class Entry implements Comparable<Entry> {
 
 	public String getSinceString() {
 		return sinceString;
+	}
+
+	public static Boolean isInheritable(String objectName, String entryName) {
+		Boolean isInheritable = null;
+		for (PDFVersion version : PDFVersion.values()) {
+			Object object = version.getObjectIdMap().get(objectName);
+			if (object == null) {
+				continue;
+			}
+			Entry entry = object.getEntry(entryName);
+			if (entry == null) {
+				continue;
+			}
+			if (entry.getInheritable() != null) {
+				isInheritable = entry.getInheritable();
+			}
+		}
+		return isInheritable != null ? isInheritable : false;
 	}
 
 	@Override
