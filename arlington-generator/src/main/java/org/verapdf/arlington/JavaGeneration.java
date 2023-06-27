@@ -339,24 +339,6 @@ public class JavaGeneration {
 		return true;
 	}
 
-	public static Boolean isInheritable(String objectName, String entryName) {
-		Boolean isInheritable = null;
-		for (PDFVersion version : PDFVersion.values()) {
-			Object object = version.getObjectIdMap().get(objectName);
-			if (object == null) {
-				continue;
-			}
-			Entry entry = object.getEntry(entryName);
-			if (entry == null) {
-				continue;
-			}
-			if (entry.getInheritable() != null) {
-				isInheritable = entry.getInheritable();
-			}
-		}
-		return isInheritable != null ? isInheritable : false;
-	}
-
 	public void addPackageAndImportsToClass(String objectName) {
 		Main.addPackage(javaWriter, "org.verapdf.gf.model.impl.arlington");
 		javaWriter.println();
@@ -665,7 +647,7 @@ public class JavaGeneration {
 		for (String entry : entries.keySet()) {
 			String linkName = Links.getLinkName(entry);
 			javaWriter.println("\t\t\tcase \"" + linkName + "\":");
-			javaWriter.println("\t\t\t\treturn get" + linkName + "();");
+			javaWriter.println("\t\t\t\treturn " + getMethodName(linkName) + "();");
 		}
 		javaWriter.println("\t\t\tdefault:");
 		javaWriter.println("\t\t\t\treturn super.getLinkedObjects(link);");
@@ -929,6 +911,27 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	public void addEntriesStringMethod(Object object, String entryName) {//works only for name entries
+		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
+				getMethodName(Entry.getEntriesStringPropertyName(entryName)));
+		String objectName = entryName.contains("::") ? getComplexObject(object, entryName) : getObjectByEntryName(entryName);
+		javaWriter.println("\t\treturn " + getMethodName(Entry.getEntriesStringPropertyName("")) + "(" + objectName + ");");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addKeysStringMethod() {
+		printMethodSignature(false, "public", true, Type.STRING.getJavaType(),
+				getMethodName(Entry.getKeysStringPropertyName("")), "COSObject object");
+		String objectName = "object";
+		javaWriter.println("\t\tSet<ASAtom> set = " + objectName + ".getKeySet();");
+		javaWriter.println("\t\treturn set == null ? \"\" : set.stream()");
+		javaWriter.println("\t\t\t\t.map(ASAtom::getValue)");
+		javaWriter.println("\t\t\t\t.collect(Collectors.joining(\"&\"));");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	public void addKeysStringMethod(Object object, String entryName) {
 		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
 				getMethodName(Entry.getKeysStringPropertyName(entryName)));
@@ -950,7 +953,8 @@ public class JavaGeneration {
 		if (Constants.FILE_TRAILER.equals(multiObject.getId()) && Constants.XREF_STREAM.equals(entryName)) {
 			javaWriter.println("\t\tLong offset = " + getMethodName(Entry.getTypeValuePropertyName(Constants.XREF_STM,
 					Type.INTEGER)) + "();");
-			javaWriter.println("\t\tCOSObject object = offset != null ? StaticResources.getDocument().getDocument().getObject(offset) : null;");
+			javaWriter.println("\t\tCOSObject object = offset != null ? " +
+					"StaticResources.getDocument().getDocument().getObject(offset) : null;");
 		} else if (Constants.CURRENT_ENTRY.equals(entryName)) {
 			javaWriter.println("\t\tCOSObject object = new COSObject(this.baseObject);");
 		} else if (Entry.isNumber(entryName)) {
@@ -977,17 +981,21 @@ public class JavaGeneration {
 		String linkName = Links.getLinkName(entryName);
 		String returnObjectType = Constants.OBJECT.equals(returnType) ? "org.verapdf.model.baselayer.Object" : returnType;
 		javaWriter.println("\tprivate List<" + returnObjectType + "> get" + linkName + "() {");
-		javaWriter.println("\t\tswitch (StaticContainers.getFlavour()) {");
-		for (List<PDFVersion> versionsList : versions) {
-			for (PDFVersion version : versionsList) {
-				javaWriter.println("\t\t\tcase ARLINGTON" + version.getStringWithUnderScore() + ":");
+		if (versions.size() == 1 && versions.get(0).size() == PDFVersion.values().length) {
+			javaWriter.println("\t\treturn get" + linkName + versions.get(0).get(0).getStringWithUnderScore() + "();");
+		} else {
+			javaWriter.println("\t\tswitch (StaticContainers.getFlavour()) {");
+			for (List<PDFVersion> versionsList : versions) {
+				for (PDFVersion version : versionsList) {
+					javaWriter.println("\t\t\tcase ARLINGTON" + version.getStringWithUnderScore() + ":");
+				}
+				String versionString = versionsList.get(0).getStringWithUnderScore();
+				javaWriter.println("\t\t\t\treturn get" + linkName + versionString + "();");
 			}
-			String versionString = versionsList.get(0).getStringWithUnderScore();
-			javaWriter.println("\t\t\t\treturn get" + linkName + versionString + "();");
+			javaWriter.println("\t\t\tdefault:");
+			javaWriter.println("\t\t\t\treturn Collections.emptyList();");
+			javaWriter.println("\t\t}");
 		}
-		javaWriter.println("\t\t\tdefault:");
-		javaWriter.println("\t\t\t\treturn Collections.emptyList();");
-		javaWriter.println("\t\t}");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}

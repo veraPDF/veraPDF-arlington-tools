@@ -1,9 +1,8 @@
 package org.verapdf.arlington;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import javafx.util.Pair;
+
+import java.util.*;
 
 public class MultiEntry extends Entry {
 
@@ -138,4 +137,51 @@ public class MultiEntry extends Entry {
 	public void setHasCycleProperty(Boolean hasCycleProperty) {
 		this.hasCycleProperty = hasCycleProperty;
 	}
+
+	public static Map<Pair<Type, String>, List<PDFVersion>> getDefaultValueMap(Object multiObject, String entryName) {
+		Map<Pair<Type, String>, List<PDFVersion>> map = new HashMap<>();
+		for (PDFVersion version : PDFVersion.values()) {
+			Object object = version.getObjectIdMap().get(multiObject.getId());
+			if (object == null) {
+				continue;
+			}
+			Entry entry = object.getEntry(entryName);
+			if (entry == null) {
+				continue;
+			}
+			Pair<Type, String> defaultPair = entry.getDefaultValue();
+			if (defaultPair == null) {
+				continue;
+			}
+			Type type = defaultPair.getKey();
+			String defaultValue = defaultPair.getValue();
+			if (defaultValue == null || defaultValue.startsWith("@") || type == Type.ARRAY) {
+				continue;
+			}
+			if (defaultValue.startsWith("@")) {
+				defaultValue = JavaGeneration.getMethodName(Entry.getValuePropertyName(entryName)) + "()";
+			} else if (!defaultValue.contains(PredicatesParser.PREDICATE_PREFIX)) {
+				defaultValue = PredicatesParser.removeQuotes(defaultValue);
+				defaultValue = type.getCreationCOSObject(type.getSeparator() + defaultValue + type.getJavaPostfix() +
+						type.getSeparator());
+			} else {
+				defaultValue = new PredicatesParser(object, entry, version, type, Constants.DEFAULT_VALUE_COLUMN,
+						false).parse(defaultValue);
+				if (defaultValue == null) {
+					continue;
+				}
+			}
+			defaultPair = new Pair<>(type, defaultValue);
+			List<PDFVersion> list = map.get(defaultPair);
+			if (list != null) {
+				list.add(version);
+			} else {
+				list = new LinkedList<>();
+				list.add(version);
+				map.put(defaultPair, list);
+			}
+		}
+		return map;
+	}
 }
+
