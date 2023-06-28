@@ -437,11 +437,17 @@ public class Rules {
 			entry.setArraySizeProperty(true);
 			test.append("(").append(entry.getArrayLengthPropertyName()).append(" == ").append(values.length);
 			for (int i = 0; i < values.length; i++) {
-				String v = values[i];
+				String elementValue = values[i];
+				if (!elementValue.matches(Constants.NUMBER_REGEX)) {
+					LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
+							" possible array value contains non-integer element(s)");
+					return;
+				}
 				Type currentType = Type.INTEGER;
 				String currentEntryName = entry.getName() + "::" + i;
-				object.getEntriesValuesProperties().put(currentEntryName, currentType);//fix
-				test.append(" && ").append(Entry.getTypeValuePropertyName(currentEntryName, currentType)).append(" == ").append(v);
+				object.getEntriesValuesProperties().put(currentEntryName, currentType);
+				test.append(" && ").append(Entry.getTypeValuePropertyName(currentEntryName, currentType)).append(" == ")
+						.append(elementValue);
 			}
 			test.append(") || ");
 		}
@@ -451,12 +457,11 @@ public class Rules {
 		test.delete(test.length() - 4, test.length());
 		String valuesString = String.join(", ", possibleValues);
 		ProfileGeneration.writeRule(version, 20, object.getModelType(), entry.getName(), test.toString(),
-				possibleValues.size() == 1 ? ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
-						" shall have value " + valuesString :
-						ProfileGeneration.getErrorMessageStart(true, object, entry, type) +
-								" shall have one of values: " + valuesString,
-				ProfileGeneration.getErrorMessageStart(false, object, entry, type) +
-						" has incorrect value instead of " + valuesString, Constants.KEY_NAME);
+				String.format(possibleValues.size() == 1 ? POSSIBLE_VALUE_DESCRIPTION : POSSIBLE_VALUES_DESCRIPTION,
+						ProfileGeneration.getErrorMessageStart(true, object, entry, type), valuesString),
+				String.format(ARRAY_POSSIBLE_VALUE_ERROR_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type), valuesString),
+				Constants.KEY_NAME);
 	}
 
 	private static void requiredValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {

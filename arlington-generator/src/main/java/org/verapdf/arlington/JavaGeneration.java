@@ -372,8 +372,8 @@ public class JavaGeneration {
 
 	public void addLinkGetterByDifferentKeys(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
 		String linkName = Links.getLinkName(entry.getName());
-		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object get" + linkName + type.getType() +
-				version.getStringWithUnderScore() + "(COSBase base, String keyName) {");
+		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object " + getMethodName(linkName + type.getType() +
+				version.getStringWithUnderScore()) + "(COSBase base, String keyName) {");
 		SortedMap<String, Set<String>> newMap = Links.getDifferentKeysLinksMap(entry.getLinks(type), map);
 		int index = 0;
 		for (Map.Entry<String, Set<String>> mapEntry : newMap.entrySet()) {
@@ -382,8 +382,8 @@ public class JavaGeneration {
 			}
 			javaWriter.println("\t\tif (base.knownKey(" + getASAtomFromString(mapEntry.getKey()) + ")) {");
 			if (mapEntry.getValue().size() != 1) {
-				javaWriter.println("\t\t\treturn get" + linkName + type.getType() +
-						mapEntry.getKey() + version.getStringWithUnderScore() + "(base, keyName);");
+				javaWriter.println("\t\t\treturn " + getMethodName(linkName + type.getType() + mapEntry.getKey() +
+						version.getStringWithUnderScore()) + "(base, keyName);");
 			} else {
 				javaWriter.println("\t\t\treturn " + constructorGFAObject(entry.getName(), mapEntry.getValue().iterator().next(),
 						"base", "this.baseObject", "keyName") + ";");
@@ -410,8 +410,8 @@ public class JavaGeneration {
 
 	public void addLinkGetterByKeyName(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
 		String linkName = Links.getLinkName(entry.getName());
-		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object get" + linkName + type.getType() +
-				version.getStringWithUnderScore() + "(COSBase base, String keyName) {");
+		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object " + getMethodName(linkName + type.getType() +
+				version.getStringWithUnderScore()) + "(COSBase base, String keyName) {");
 		javaWriter.println("\t\tswitch (keyName) {");
 		String defaultLink = null;
 		for (String link : entry.getLinks(type)) {
@@ -441,10 +441,39 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	public void addGetValueMethod(Type type) {
+		if (type == Type.ENTRY || type == Type.SUB_ARRAY || type == Type.DICTIONARY || type == Type.ARRAY ||
+				type == Type.NULL || type == Type.RECTANGLE || type == Type.MATRIX || type == Type.NAME_TREE ||
+				type == Type.NUMBER_TREE || type == Type.STREAM) {
+			return;
+		}
+		printMethodSignature(false, "public", true, type.getJavaType(),
+				getMethodName(Entry.getTypeValuePropertyName("", type)), "COSObject object");
+		String objectName = "object";
+		if (type == Type.NUMBER) {
+			javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType().isNumber()) {");
+		} else if (type == Type.DATE) {
+			javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " +
+					type.getCosObjectType() + " && " + objectName + ".getString().matches(GFAObject.PDF_DATE_FORMAT_REGEX)) {");
+		} else {
+			javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " +
+					type.getCosObjectType() + ") {");
+		}
+		if (type == Type.STRING_ASCII) {
+			javaWriter.println("\t\t\treturn ((COSString)" + objectName + ".getDirectBase()).getASCIIString();");
+		} else {
+			javaWriter.println("\t\t\treturn " + objectName + type.getParserMethod() + ";");
+		}
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn null;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	public void addLinkGetterBySize(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
 		String linkName = Links.getLinkName(entry.getName());
-		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object get" + linkName + type.getType() +
-				version.getStringWithUnderScore() + "(COSBase base, String keyName) {");
+		javaWriter.println("\tprivate org.verapdf.model.baselayer.Object " + getMethodName(linkName + type.getType() +
+				version.getStringWithUnderScore()) + "(COSBase base, String keyName) {");
 		javaWriter.println("\t\tswitch (base.size()) {");
 		SortedMap<Integer, String> linksMap = Links.getSizeLinksMap(version, object, entry, type, entry.getLinks(type), map);
 		for (Map.Entry<Integer, String> mapEntry : linksMap.entrySet()) {
@@ -525,7 +554,7 @@ public class JavaGeneration {
 	public void addSubArrayLink(Object object, Entry entry, String returnType, PDFVersion version) {
 		String linkName = entry.getCorrectEntryName();
 		printMethodSignature(false, "private", false, "List<" + returnType + ">",
-				"get" + linkName + version.getStringWithUnderScore());
+				getMethodName(linkName + version.getStringWithUnderScore()));
 		javaWriter.println("\t\tList<" + returnType + "> list = new LinkedList<>();");
 		List<Integer> numbers = new LinkedList<>();
 		int requiredNumbers = 0;
@@ -969,7 +998,8 @@ public class JavaGeneration {
 		addGetInheritable(multiObject.getId(), entryName);
 		if (addDefault) {
 			javaWriter.println("\t\tif (" + objectName + " == null || " + objectName + ".empty()) {");
-			javaWriter.println("\t\t\t" + objectName + " = " + getMethodName(Entry.getDefaultValuePropertyName(entryName)) + "();");
+			javaWriter.println("\t\t\t" + objectName + " = " +
+					getMethodName(Entry.getDefaultValuePropertyName(entryName)) + "();");
 			javaWriter.println("\t\t}");
 		}
 		javaWriter.println("\t\treturn " + objectName + ";");
@@ -980,9 +1010,10 @@ public class JavaGeneration {
 	public void addCommonGetLink(String entryName, String returnType, List<List<PDFVersion>> versions) {
 		String linkName = Links.getLinkName(entryName);
 		String returnObjectType = Constants.OBJECT.equals(returnType) ? "org.verapdf.model.baselayer.Object" : returnType;
-		javaWriter.println("\tprivate List<" + returnObjectType + "> get" + linkName + "() {");
+		javaWriter.println("\tprivate List<" + returnObjectType + "> " + getMethodName(linkName) + "() {");
 		if (versions.size() == 1 && versions.get(0).size() == PDFVersion.values().length) {
-			javaWriter.println("\t\treturn get" + linkName + versions.get(0).get(0).getStringWithUnderScore() + "();");
+			javaWriter.println("\t\treturn " + getMethodName(linkName +
+					versions.get(0).get(0).getStringWithUnderScore()) + "();");
 		} else {
 			javaWriter.println("\t\tswitch (StaticContainers.getFlavour()) {");
 			for (List<PDFVersion> versionsList : versions) {
@@ -990,7 +1021,7 @@ public class JavaGeneration {
 					javaWriter.println("\t\t\tcase ARLINGTON" + version.getStringWithUnderScore() + ":");
 				}
 				String versionString = versionsList.get(0).getStringWithUnderScore();
-				javaWriter.println("\t\t\t\treturn get" + linkName + versionString + "();");
+				javaWriter.println("\t\t\t\treturn " + getMethodName(linkName + versionString) + "();");
 			}
 			javaWriter.println("\t\t\tdefault:");
 			javaWriter.println("\t\t\t\treturn Collections.emptyList();");
