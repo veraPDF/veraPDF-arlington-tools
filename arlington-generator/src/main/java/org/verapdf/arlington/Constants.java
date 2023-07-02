@@ -17,7 +17,12 @@ public class Constants {
 	public static final String XREF_STM = "XRefStm";
 	public static final String ARRAY_OF_DECODE_PARAMS_ENTRY = "ArrayOfDecodeParamsEntry";
 	public static final String PAGE_OBJECT = "PageObject";
-	public static final String PARENT = "Parent";
+	public static final String PARENT_KEY = "Parent";
+	public static final String PARENT = "parent";
+	public static final String TRAILER = "trailer";
+	public static final String CATALOG = "Catalog";
+	public static final String ROOT = "Root";
+	public static final String PAGE = "page";
 
 	//column names
 	public static final String SINCE_COLUMN = "Since";
@@ -42,6 +47,8 @@ public class Constants {
 	public static final String NOT_STANDARD_14_FONT = "notStandard14Font";
 	public static final String SUB_ARRAYS = "subArrays";
 	public static final String HAS_CYCLE = "hasCycle";
+	public static final String INHERITABLE_VALUE = "InheritableValue";
+
 
 	//regex
 	public static final String NUMBER_REGEX = "\\d+";
