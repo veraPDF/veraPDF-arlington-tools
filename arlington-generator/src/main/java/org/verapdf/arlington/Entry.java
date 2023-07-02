@@ -105,7 +105,12 @@ public class Entry implements Comparable<Entry> {
 	}
 
 	public Boolean isIndirectReference(Type type) {
-		return Constants.TRUE.equals(getIndirectReference(type));
+		return Constants.TRUE.equals(getIndirectReference(type)) ||
+				(PredicatesParser.MUST_BE_INDIRECT_PREDICATE + "()").equals(getIndirectReference(type));
+	}
+
+	public Boolean isDirectReference(Type type) {
+		return (PredicatesParser.MUST_BE_DIRECT_PREDICATE + "()").equals(getIndirectReference(type));
 	}
 
 	public PDFVersion getDeprecatedVersion() {

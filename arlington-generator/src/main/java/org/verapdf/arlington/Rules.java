@@ -377,12 +377,12 @@ public class Rules {
 	}
 
 	private static void indirectAndDirect(PDFVersion version, Object object, Entry entry, Type type) {
-		if (entry.isIndirectReference(type) == true) {
+		if (entry.isIndirectReference(type) || entry.isDirectReference(type)) {
 			StringBuilder test = new StringBuilder();
 			String propertyHasType = entry.getHasTypePropertyName(type);
 			test.append(propertyHasType).append(" != " + Constants.TRUE + " || ");
 			entry.addHasTypeProperty(type);
-			test.append(entry.getIndirectPropertyName()).append(" == ").append(entry.getIndirectReference(type));
+			test.append(entry.getIndirectPropertyName()).append(" == ").append(entry.isIndirectReference(type));
 			entry.setIndirectProperty(true);
 			ProfileGeneration.writeRule(version, 10, object.getModelType(), getClause(object, entry, type),
 					test.toString(),
