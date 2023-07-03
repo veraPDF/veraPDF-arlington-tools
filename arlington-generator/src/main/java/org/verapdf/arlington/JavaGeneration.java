@@ -445,6 +445,28 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	public void addHasTypeMethod(Object multiObject, String entryName, Type type) {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getMethodName(Entry.getHasTypePropertyName(entryName, type)));
+		String objectName = entryName.contains("::") ? getComplexObject(multiObject, entryName) :
+				getObjectByEntryName(entryName);
+		javaWriter.println("\t\treturn " + getMethodCall(getMethodName(Entry.getHasTypePropertyName("", type)),
+				objectName) + ";");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addGetValueMethod(MultiObject multiObject, String entryName, Type type) {
+		printMethodSignature(true, "public", false, type.getJavaType(),
+				getMethodName(Entry.getTypeValuePropertyName(entryName, type)));
+		String objectName = entryName.contains("::") ? getComplexObject(multiObject, entryName) :
+				getObjectByEntryName(entryName);
+		javaWriter.println("\t\treturn " + getMethodCall(getMethodName(Entry.getTypeValuePropertyName("", type)),
+				objectName) + ";");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	public void addGetValueMethod(Type type) {
 		if (type == Type.ENTRY || type == Type.SUB_ARRAY || type == Type.DICTIONARY || type == Type.ARRAY ||
 				type == Type.NULL || type == Type.RECTANGLE || type == Type.MATRIX || type == Type.NAME_TREE ||
@@ -491,6 +513,162 @@ public class JavaGeneration {
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t}");
 		javaWriter.println();
+	}
+
+	public void addOneLink(Object object, Entry entry, String returnType, PDFVersion version) {
+		String linkName = Links.getLinkName(entry.getName());
+		String returnObjectType = Constants.OBJECT.equals(returnType) ? "org.verapdf.model.baselayer.Object" : returnType;
+		printMethodSignature(false, "private", false, "List<" + returnObjectType + ">",
+				getMethodName(linkName + version.getStringWithUnderScore()));
+		String parentObject = getObjectForOneLinkMethod(entry);
+		for (Type type : entry.getUniqLinkTypes()) {
+			if (Type.ENTRY == type) {
+				continue;
+			}
+			Set<String> links = new HashSet<>(entry.getLinks(type));
+			if (links.isEmpty()) {
+				continue;
+			}
+			addObjectToListOneLink(version, object, entry, type, links, linkName, parentObject);
+		}
+		javaWriter.println("\t\treturn Collections.emptyList();");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	private String getObjectForOneLinkMethod(Entry entry) {
+		if (Constants.CURRENT_ENTRY.equals(entry.getName())) {
+			javaWriter.println("\t\tCOSObject object = " + constructor("COSObject", "this.baseObject") + ";");
+			return "this.parentObject";
+		}
+		javaWriter.println("\t\tCOSObject object = " +
+				getMethodCall(getMethodName(Entry.getValuePropertyName(entry.getName()))) + ";");
+		javaWriter.println("\t\tif (object == null) {");
+		javaWriter.println("\t\t\treturn Collections.emptyList();");
+		javaWriter.println("\t\t}");
+		return "this.baseObject";
+	}
+
+	private void addObjectToListOneLink(PDFVersion version, Object object, Entry entry, Type type, Set<String> links,
+										String linkName, String parentObject) {
+		javaWriter.println("\t\tif (object.getType() == " + type.getCosObjectType() + ") {");
+		String entryName = Constants.CURRENT_ENTRY.equals(entry.getName()) ? "keyName" : "\"" + entry.getName() + "\"";
+		if (links.size() == 1) {
+			String link = links.iterator().next();
+			if (link.contains(PredicatesParser.PREDICATE_PREFIX)) {
+				linkPredicate(object, entry, type, version, link, Type.ARRAY);
+				link = PredicatesParser.getPredicateLastArgument(link);
+			}
+			javaWriter.println("\t\t\tList<" + Object.getModelType(link) + "> list = new ArrayList<>(1);");
+			javaWriter.println("\t\t\tlist.add(" + constructorGFAObject(entry.getName(), link, "(" +
+					type.getParserClassName() + ")object.getDirectBase()", parentObject, entryName) + ");");
+		} else {
+			Set<String> correctLinks = entry.getLinksWithoutPredicatesSet(type);
+			if (LinkHelper.getMap(correctLinks) != null) {
+				javaWriter.println("\t\t\torg.verapdf.model.baselayer.Object result = " +
+						getMethodCall(getMethodName(linkName + type.getType() + version.getStringWithUnderScore()),
+								"object.getDirectBase()", entryName) + ";");
+				javaWriter.println("\t\t\tList<org.verapdf.model.baselayer.Object> list = new ArrayList<>(1);");
+				javaWriter.println("\t\t\tif (result != null) {");
+				javaWriter.println("\t\t\t\tlist.add(result);");
+				javaWriter.println("\t\t\t}");
+			} else {
+				javaWriter.println("\t\t\tList<org.verapdf.model.baselayer.Object> list = Collections.emptyList();");
+				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
+						" Several dictionaries/streams " + String.join(",", entry.getLinks(type)));
+			}
+		}
+		javaWriter.println("\t\t\treturn Collections.unmodifiableList(list);");
+		javaWriter.println("\t\t}");
+	}
+
+	public void addMultiLink(Object object, Entry entry, String returnType, PDFVersion version) {
+		String linkName = Links.getLinkName(entry.getName());
+		String returnObjectType = Constants.OBJECT.equals(returnType) ? "org.verapdf.model.baselayer.Object" : returnType;
+		printMethodSignature(false, "private", false, "List<" + returnObjectType + ">",
+				getMethodName(linkName + version.getStringWithUnderScore()));
+		javaWriter.println("\t\tList<" + returnObjectType + "> list = new LinkedList<>();");
+		String keyName = getObjectForMultiLinkMethod(object);
+		for (Type type : entry.getUniqLinkTypes()) {
+			if (Type.ENTRY == type) {
+				continue;
+			}
+			Set<String> links = entry.getLinks(type).stream().filter(s -> !s.contains(PredicatesParser.PREDICATE_PREFIX))
+					.collect(Collectors.toSet());
+			if (!entry.getLinks(type).stream().filter(s -> s.contains(PredicatesParser.PREDICATE_PREFIX))
+					.collect(Collectors.toSet()).isEmpty()) {
+				System.out.println(Main.getString(version, object, entry) + " links with predicates");
+			}
+			if (links.isEmpty()) {
+				continue;
+			}
+			addObjectToListMultiLink(version, object, entry, type, links, linkName, keyName);
+		}
+		if (entry.getUniqLinkTypes().contains(Type.ENTRY)) {
+			javaWriter.println("\t\t\tlist.add(" + constructorGFAObject(entry.getName(), entry.getLinks(Type.ENTRY).get(0),
+					"object != null ? object.get() : null", "this.baseObject", keyName) + ");");
+		}
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn Collections.unmodifiableList(list);");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	private String getObjectForMultiLinkMethod(Object object) {
+		if (object.isArray()) {
+			javaWriter.println("\t\tfor (int i = " + (object.getEntries().size() - 1) + "; i < baseObject.size(); i++) {");
+			javaWriter.println("\t\t\tCOSObject object = baseObject.at(i);");
+			return "String.valueOf(i)";
+		}
+		if (object.isNameTree()) {
+			javaWriter.println("\t\tfor (COSObject object : PDNameTreeNode.create(new COSObject(baseObject))) {");
+			return "null";
+		}
+		if (object.isNumberTree()) {
+			javaWriter.println("\t\tfor (COSObject object : new PDNumberTreeNode(new COSObject(baseObject))) {");
+			return "null";
+		}
+		javaWriter.println("\t\tfor (ASAtom key : baseObject.getKeySet()) {");
+		if (object.getEntries().size() > 1) {
+			StringBuilder condition = new StringBuilder();
+			for (Entry currentEntry : object.getEntries()) {
+				if (!currentEntry.isStar()) {
+					condition.append("\"").append(currentEntry.getName()).append("\".equals(key.getValue()) || ");
+				}
+			}
+			condition.delete(condition.length() - 4, condition.length());
+			javaWriter.println("\t\t\tif (" + condition + ") {");
+			javaWriter.println("\t\t\t\tcontinue;");
+			javaWriter.println("\t\t\t}");
+		}
+		javaWriter.println("\t\t\tCOSObject object = this.baseObject.getKey(key);");
+		return "key.getValue()";
+	}
+
+	private void addObjectToListMultiLink(PDFVersion version, Object object, Entry entry, Type type, Set<String> links,
+										  String linkName, String keyName) {
+		javaWriter.println("\t\t\tif (object.getType() == " + type.getCosObjectType() + ") {");
+		if (links.size() == 1) {
+			String link = links.iterator().next();
+			javaWriter.println("\t\t\t\tlist.add(" + constructorGFAObject(entry.getName(), link,
+					"(" + type.getParserClassName() + ")object.getDirectBase()",
+					"this.parentObject", keyName) + ");");
+		} else {
+			if (LinkHelper.getMap(links) != null) {
+				javaWriter.println("\t\t\t\torg.verapdf.model.baselayer.Object result = " +
+						getMethodCall(getMethodName(linkName + type.getType() +
+								version.getStringWithUnderScore()), "object.getDirectBase()", keyName) + ";");
+				javaWriter.println("\t\t\t\tif (result != null) {");
+				javaWriter.println("\t\t\t\t\tlist.add(result);");
+				javaWriter.println("\t\t\t\t}");
+			} else {
+				javaWriter.println("\t\t\t\t//todo");
+				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
+						" Several dictionaries/streams/arrays " + String.join(",", entry.getLinks(type)));
+			}
+		}
+		javaWriter.println("\t\t\t\tcontinue;");
+		javaWriter.println("\t\t\t}");
 	}
 
 	public void addGetInheritable(String objectId, String entryName) {
@@ -1006,7 +1184,7 @@ public class JavaGeneration {
 	}
 
 	public String getObjectByEntryName(String entryName) {
-		javaWriter.println("\t\tCOSObject object = " + getMethodName(Entry.getValuePropertyName(entryName)) + "();");
+		javaWriter.println("\t\tCOSObject object = " + getMethodCall(getMethodName(Entry.getValuePropertyName(entryName))) + ";");
 		return "object";
 	}
 
@@ -1069,6 +1247,19 @@ public class JavaGeneration {
 
 	public static String getMethodName(String propertyName) {
 		return "get" + propertyName;
+	}
+
+	public String getMethodCall(String methodName, String ... arguments) {
+		StringBuilder str = new StringBuilder(methodName);
+		str.append("(");
+		if (arguments.length != 0) {
+			for (int i = 0; i < arguments.length - 1; i++) {
+				str.append(arguments[i]).append(", ");
+			}
+			str.append(arguments[arguments.length - 1]);
+		}
+		str.append(")");
+		return str.toString();
 	}
 
 	public void printMethodSignature(boolean isOverride, String accessModifier, boolean isStatic,
