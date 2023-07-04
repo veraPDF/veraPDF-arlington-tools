@@ -377,18 +377,38 @@ public class Rules {
 	}
 
 	private static void indirectAndDirect(PDFVersion version, Object object, Entry entry, Type type) {
-		if (entry.isIndirectReference(type) || entry.isDirectReference(type)) {
+		boolean isIndirect = entry.isIndirectReference(type);
+		boolean isDirect = entry.isDirectReference(type);
+		String indirectReference = entry.getIndirectReference(type);
+		if (!isIndirect && !isDirect && indirectReference != null &&
+				indirectReference.contains(PredicatesParser.PREDICATE_PREFIX)) {
+			String predicate = indirectReference.substring(0, indirectReference.indexOf("("));
+			if (PredicatesParser.MUST_BE_INDIRECT_PREDICATE.equals(predicate) ||
+					PredicatesParser.MUST_BE_DIRECT_PREDICATE.equals(predicate)) {
+				indirectReference = indirectReference.substring(predicate.length() + 1, indirectReference.length() - 1);
+				String result = new PredicatesParser(object, entry, version, type,
+						Constants.INDIRECT_REFERENCE_COLUMN).parse(indirectReference);
+				if (Constants.TRUE.equals(result)) {
+					if (PredicatesParser.MUST_BE_INDIRECT_PREDICATE.equals(predicate)) {
+						isIndirect = true;
+					} else {
+						isDirect = true;
+					}
+				}
+			}
+		}
+		if (isIndirect || isDirect) {
 			StringBuilder test = new StringBuilder();
 			String propertyHasType = entry.getHasTypePropertyName(type);
 			test.append(propertyHasType).append(" != " + Constants.TRUE + " || ");
 			entry.addHasTypeProperty(type);
-			test.append(entry.getIndirectPropertyName()).append(" == ").append(entry.isIndirectReference(type));
+			test.append(entry.getIndirectPropertyName()).append(" == ").append(isIndirect);
 			entry.setIndirectProperty(true);
 			ProfileGeneration.writeRule(version, 10, object.getModelType(), getClause(object, entry, type),
 					test.toString(),
-					String.format(entry.isIndirectReference(type) ? INDIRECT_DESCRIPTION : DIRECT_DESCRIPTION,
+					String.format(isIndirect ? INDIRECT_DESCRIPTION : DIRECT_DESCRIPTION,
 							ProfileGeneration.getErrorMessageStart(true, object, entry, type)),
-					String.format(entry.isIndirectReference(type) ? INDIRECT_ERROR_MESSAGE : DIRECT_ERROR_MESSAGE,
+					String.format(isIndirect ? INDIRECT_ERROR_MESSAGE : DIRECT_ERROR_MESSAGE,
 							ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
 					Constants.KEY_NAME);
 		} else if (entry.getIndirectReference(type) != null &&
@@ -408,7 +428,7 @@ public class Rules {
 						test.toString(),
 						String.format(INDIRECT_CONDITION_DESCRIPTION,
 								ProfileGeneration.getErrorMessagePart(true, object, entry, type),
-								entry.getIndirectReference(type)),
+								indirectReference),
 						String.format(INDIRECT_ERROR_MESSAGE,
 								ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
 						Constants.KEY_NAME);
@@ -417,7 +437,7 @@ public class Rules {
 						test.toString(),
 						String.format(DIRECT_CONDITION_DESCRIPTION,
 								ProfileGeneration.getErrorMessagePart(true, object, entry, type),
-								entry.getIndirectReference(type)),
+								indirectReference),
 						String.format(DIRECT_ERROR_MESSAGE,
 								ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
 						Constants.KEY_NAME);
@@ -428,6 +448,8 @@ public class Rules {
 	private static void possibleValuesOfArray(PDFVersion version, Object object, Entry entry, Type type) {
 		StringBuilder test = new StringBuilder();
 		Set<String> possibleValues = new HashSet<>();
+		test.append(entry.getHasTypePropertyName(type)).append(" != " + Constants.TRUE + " || ");
+		entry.addHasTypeProperty(type);
 		for (String value : entry.getPossibleValues(type)) {
 			if (value.contains(PredicatesParser.PREDICATE_PREFIX)) {
 				continue;
@@ -451,7 +473,7 @@ public class Rules {
 			}
 			test.append(") || ");
 		}
-		if (test.length() == 0) {
+		if (possibleValues.isEmpty()) {
 			return;
 		}
 		test.delete(test.length() - 4, test.length());
@@ -643,7 +665,9 @@ public class Rules {
 					String.format(DEPRECATED_ENTRY_ERROR_MESSAGE,
 							ProfileGeneration.getErrorMessageStart(false, object, entry)),
 					Constants.KEY_NAME);
-			entry.setContainsProperty(true);
+			if (!Constants.CURRENT_ENTRY.equals(entry.getName())) {
+				entry.setContainsProperty(true);
+			}
 		}
 	}
 
