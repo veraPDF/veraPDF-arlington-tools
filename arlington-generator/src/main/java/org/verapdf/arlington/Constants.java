@@ -63,6 +63,9 @@ public class Constants {
 	public static final String NULL = "null";
 	public static final String CURRENT_ENTRY = "";
 
+	//verapdf
+	public static final String BASE_MODEL_OBJECT_PATH = "org.verapdf.model.baselayer.Object";
+
 	public static final Set<String> reservedVeraPDFNames = new HashSet<>();
 
 	static {

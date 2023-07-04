@@ -778,7 +778,7 @@ public class PredicatesParser {
 				output.push(getNewPart(arguments.subList(1, arguments.size())));
 			}
 		} else {
-			if (arguments.size() == 1 || Constants.REQUIRED_COLUMN.equals(columnName)) {
+			if (arguments.size() == 1) {
 				output.push("false");
 			} else {
 				output.push(Constants.UNDEFINED);
@@ -1066,7 +1066,7 @@ public class PredicatesParser {
 				output.push(getNewPart(arguments.subList(1, arguments.size())));
 			}
 		} else {
-			if (arguments.size() == 1 || Constants.REQUIRED_COLUMN.equals(columnName)) {
+			if (arguments.size() == 1) {
 				output.push("false");
 			} else {
 				output.push(Constants.UNDEFINED);
@@ -1183,7 +1183,7 @@ public class PredicatesParser {
 				output.push(getNewPart(arguments.subList(1, arguments.size())));
 			}
 		} else {
-			if (arguments.size() == 1 || Constants.REQUIRED_COLUMN.equals(columnName)) {
+			if (arguments.size() == 1) {
 				output.push("false");
 			} else {
 				output.push(Constants.UNDEFINED);
