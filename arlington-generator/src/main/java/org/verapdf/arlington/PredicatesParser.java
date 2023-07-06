@@ -1344,6 +1344,103 @@ public class PredicatesParser {
 		return predicate.substring(index + 1, lastIndex).trim();
 	}
 
+	private Part processComplexArgument(String argument) {
+		if (argument.startsWith("@") || argument.startsWith(PREDICATE_PREFIX) ||
+				argument.matches(Constants.NUMBER_REGEX) || Constants.STAR.equals(argument) ||
+				argument.matches(Constants.DOUBLE_REGEX) || "true".equals(argument) || "false".equals(argument)) {
+			return new Part(argument);
+		}
+		List<String> array = new ArrayList<>(Arrays.asList(argument.split("::")));
+		if (array.size() < 2) {
+			return new Part(argument);
+		}
+		List<Object> currentObjects = new LinkedList<>();
+		int index = calculateInitialObjects(array, currentObjects);
+		Part part = calculateIntermediateObjects(index, array, currentObjects, argument);
+		if (part != null) {
+			return part;
+		}
+		return calculateFinalValue(currentObjects, array, argument);
+	}
+
+	private int calculateInitialObjects(List<String> array, List<Object> initialObjects) {
+		int index = 0;
+		if (Constants.TRAILER.equals(array.get(0))) {
+			index += 1;
+			if (Constants.CATALOG.equals(array.get(1))) {
+				initialObjects.add(version.getObjectIdMap().get(Constants.CATALOG));
+				index += 1;
+			} else {
+				initialObjects.add(version.getObjectIdMap().get(Constants.FILE_TRAILER));
+			}
+		} else if (Constants.PAGE.equals(array.get(0))) {
+			index += 2;
+			initialObjects.add(version.getObjectIdMap().get(Constants.PAGE_OBJECT));
+		} else if (Constants.CURRENT_ENTRY.equals(entry.getName()) && Constants.STAR.equals(array.get(0))) {
+			initialObjects.add(object);
+			index += 1;
+		} else {
+			initialObjects.add(object);
+			while (Constants.PARENT.equals(array.get(index))) {
+				List<Object> futureObjects = new LinkedList<>();
+				for (Object currentObject : initialObjects) {
+					for (String parentName : currentObject.getPossibleParents()) {
+						Object parent = version.getObjectIdMap().get(parentName);
+						if (parent != null) {
+							futureObjects.add(parent);
+						}
+					}
+				}
+				initialObjects.clear();
+				initialObjects.addAll(futureObjects);
+				index += 1;
+			}
+		}
+		return index;
+	}
+
+	private Part calculateIntermediateObjects(int index, List<String> array, List<Object> currentObjects, String argument) {
+		for (; index < array.size() - 1; index++) {
+			List<Object> futureObjects = new LinkedList<>();
+			String entryName = array.get(index);
+			for (Object currentObject : currentObjects) {
+				if (entryName.matches(Constants.NUMBER_REGEX) && !currentObject.getEntriesNames().contains(entryName) &&
+						currentObject.getEntriesNames().contains(Constants.STAR)) {
+					entryName = Constants.STAR;
+				}
+				if (Constants.STAR.equals(entryName)) {
+					array.add(index + 1, Constants.CURRENT_ENTRY);
+				}
+				Entry entry = currentObject.getEntry(entryName);
+				if (entry == null) {
+					continue;
+				}
+				if (entry.getUniqActiveTypes().size() == 1 && index == array.size() - 2) {
+					Type type = entry.getUniqActiveTypes().iterator().next();
+					if (type == Type.RECTANGLE || type == Type.MATRIX) {
+						Part newPart = calculateFinalValueForMatrixOrRectangle(array, argument);
+						if (newPart != null) {
+							return newPart;
+						}
+					}
+				}
+				for (Type type : entry.getUniqLinkTypes()) {
+					for (String linkName : entry.getLinks(type)) {
+						Object futureObject = version.getObjectIdMap().get(linkName);
+						if (futureObject != null) {
+							futureObjects.add(futureObject);
+						}
+					}
+				}
+			}
+			if (!futureObjects.isEmpty() || !Constants.CURRENT_ENTRY.equals(entryName)) {
+				currentObjects.clear();
+				currentObjects.addAll(futureObjects);
+			}
+		}
+		return null;
+	}
+
 	private String getPropertyOrMethodName(String propertyName) {
 		return isProfile ? propertyName : JavaGeneration.getMethodName(propertyName) + "()";
 	}
