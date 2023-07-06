@@ -258,10 +258,16 @@ public class Rules {
 			}
 			if (!keysString.toString().isEmpty()) {
 				test.append(Constants.KEYS_STRING + " == '' || ");
-				test.append(ProfileGeneration.split(Constants.KEYS_STRING, false, entries)).append(" == 0");
-				keysString.deleteCharAt(keysString.length() - 1);
-				keysString.deleteCharAt(keysString.length() - 1);
+				test.append(ProfileGeneration.split(Constants.KEYS_STRING, false, entries));
+				test.delete(test.length() - 8, test.length());
 				errorArgument.delete(errorArgument.length() - 4, errorArgument.length());
+				String checkSecondAndThirdClassNames = " && /" + Constants.SECOND_OR_THIRD_CLASS_NAME_REGEX + "/.test(elem) == false";
+				test.append(checkSecondAndThirdClassNames);
+				errorArgument.append(checkSecondAndThirdClassNames);
+				test.append(").length");
+				test.append(" == 0");
+				keysString.deleteCharAt(keysString.length() - 1);
+				keysString.deleteCharAt(keysString.length() - 1);
 				errorArgument.append(").toString()");
 				ProfileGeneration.writeRule(version, 1, object.getModelType(), getClause(object), test.toString(),
 						String.format(EXTRA_ENTRIES_DESCRIPTION, object.getId(), keysString),

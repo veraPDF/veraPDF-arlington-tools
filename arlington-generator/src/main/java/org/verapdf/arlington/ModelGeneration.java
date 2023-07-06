@@ -19,7 +19,7 @@ public class ModelGeneration {
 	public static void addPackageAndImportsToModel() {
 		Main.addPackage(modelWriter, "org.verapdf.model.alayer");
 		modelWriter.println();
-		Main.addImport(modelWriter, "org.verapdf.model.baselayer.Object");
+		Main.addImport(modelWriter, Constants.BASE_MODEL_OBJECT_PATH);
 		modelWriter.println();
 	}
 

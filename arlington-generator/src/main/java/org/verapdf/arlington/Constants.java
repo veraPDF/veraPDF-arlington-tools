@@ -54,6 +54,7 @@ public class Constants {
 	public static final String NUMBER_REGEX = "\\d+";
 	public static final String DOUBLE_REGEX = "\\d+\\.\\d+";
 	public static final String NUMBER_WITH_STAR_REGEX = "\\d+\\*";
+	public static final String SECOND_OR_THIRD_CLASS_NAME_REGEX = "^(XX|(.{4}[_:]))";
 
 	public static final String STAR = "*";
 	public static final String TRUE = "true";
