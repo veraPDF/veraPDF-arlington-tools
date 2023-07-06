@@ -1344,6 +1344,42 @@ public class PredicatesParser {
 		return predicate.substring(index + 1, lastIndex).trim();
 	}
 
+	private Part processArgument(String argument) {
+		if (argument.contains(" ")) {
+			return new Part(argument);
+		}
+		if (!argument.startsWith("@")) {
+			return processComplexArgument(argument);
+		}
+		String entryName = argument.substring(1);
+		if (Constants.STAR.equals(entryName)) {
+			entryName = Constants.CURRENT_ENTRY;
+		}
+		if (entryName.equals(entry.getName())) {
+			if (!type.isPropertyType()) {
+				return new Part(argument);
+			}
+			entry.addTypeValueProperty(type);
+			return new Part(getPropertyOrMethodName(entry.getTypeValuePropertyName(type)));
+		}
+		Entry entry = object.getEntry(entryName);
+		if (entry != null && entry.getUniqPropertyTypes().size() != 1) {
+			System.out.println(getString() + " " + entry.getName() + " several property types");
+		}
+		if (entry == null || entry.getUniqPropertyTypes().size() != 1) {
+			return new Part(argument);
+		}
+		Type type = entry.getUniqPropertyTypes().iterator().next();
+		entry.addTypeValueProperty(type);
+		String property = getPropertyOrMethodName(entry.getTypeValuePropertyName(type));
+		Part part = new Part(property);
+		if (type == Type.INTEGER || type == Type.NUMBER) {
+			part.getUndefinedEntries().put(entry.getName(), type);
+			entry.addHasTypeProperty(type);
+		}
+		return part;
+	}
+
 	private Part processComplexArgument(String argument) {
 		if (argument.startsWith("@") || argument.startsWith(PREDICATE_PREFIX) ||
 				argument.matches(Constants.NUMBER_REGEX) || Constants.STAR.equals(argument) ||
@@ -1441,8 +1477,72 @@ public class PredicatesParser {
 		return null;
 	}
 
+	private Part calculateFinalValueForMatrixOrRectangle(List<String> array, String argument) {
+		String numberEntryName = array.get(array.size() - 1);
+		String collectionName = argument.substring(0, argument.length() - numberEntryName.length() - 2);
+		if (numberEntryName.startsWith("@")) {
+			numberEntryName = numberEntryName.substring(1);
+		}
+		if (numberEntryName.matches(Constants.NUMBER_REGEX)) {
+			object.getEntriesValuesProperties().put(argument, Type.NUMBER);
+			Part part = new Part(getPropertyOrMethodName(Entry.getTypeValuePropertyName(argument,
+					Type.NUMBER)));
+			if (array.size() > 2) {
+				object.getEntriesHasTypeProperties().put(collectionName, type);
+				part.getUndefinedEntries().put(collectionName, type);
+			}
+			return part;
+		}
+		return null;
+	}
+
+	private Part calculateFinalValue(List<Object> currentObjects, List<String> array, String argument) {
+		String entryName = array.get(array.size() - 1);
+		if (!entryName.startsWith("@")) {
+			return new Part(argument);
+		}
+		entryName = entryName.substring(1);
+		Set<Type> types = new HashSet<>();
+		for (Object currentObject : currentObjects) {
+			if (entryName.matches(Constants.NUMBER_REGEX) && !currentObject.getEntriesNames().contains(entryName) &&
+					currentObject.getEntriesNames().contains(Constants.STAR)) {
+				entryName = Constants.STAR;
+			}
+			Entry entry = currentObject.getEntry(entryName);
+			if (entry != null) {
+				types.addAll(entry.getUniqPropertyTypes());
+			}
+		}
+		if (types.size() < 1) {
+			System.out.println(getString() + " " + entryName + " Types not found");
+		} else if (types.size() > 1) {
+			System.out.println(getString() + " " + entryName + " Several types found");
+		} else {
+			Type type = types.iterator().next();
+			object.getEntriesValuesProperties().put(argument, type);
+			if (currentObjects.size() == 1) {
+				Object currentObject = currentObjects.get(0);
+				Entry entry = currentObject.getEntry(entryName);
+				if (entry != null) {
+					entry.getTypeValueProperties().add(type);
+					if (type == Type.NUMBER || type == Type.INTEGER) {
+						entry.addHasTypeProperty(type);
+					}
+					object.getEntryNameToArlingtonObjectMap().put(argument, currentObject.getId());
+				}
+			}
+			Part part = new Part(getPropertyOrMethodName(Entry.getTypeValuePropertyName(argument, type)));
+			if (type == Type.NUMBER || type == Type.INTEGER) {
+				object.getEntriesHasTypeProperties().put(argument, type);
+				part.getUndefinedEntries().put(argument, type);
+			}
+			return part;
+		}
+		return new Part(argument);
+	}
+
 	private String getPropertyOrMethodName(String propertyName) {
-		return isProfile ? propertyName : JavaGeneration.getMethodName(propertyName) + "()";
+		return isProfile ? propertyName : JavaGeneration.getMethodCall(JavaGeneration.getMethodName(propertyName));
 	}
 
 	public static String removeQuotes(String argument) {

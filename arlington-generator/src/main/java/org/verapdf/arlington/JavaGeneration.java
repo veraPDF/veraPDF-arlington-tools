@@ -1314,7 +1314,7 @@ public class JavaGeneration {
 		return "get" + propertyName;
 	}
 
-	public String getMethodCall(String methodName, String ... arguments) {
+	public static String getMethodCall(String methodName, String ... arguments) {
 		StringBuilder str = new StringBuilder(methodName);
 		str.append("(");
 		if (arguments.length != 0) {
