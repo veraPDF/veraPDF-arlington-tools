@@ -411,6 +411,117 @@ public class JavaGeneration {
 		}
 	}
 
+	public void addLinkGetterByKeyValues(Map<String, LinkHelper> map, Object object, Entry entry, Type type,
+										 PDFVersion version, int index, String methodNamePostfix) {
+		String linkName = Links.getLinkName(entry.getName());
+		printMethodSignature(false, "private", false, Constants.BASE_MODEL_OBJECT_PATH,
+				getMethodName(linkName + type.getType() + methodNamePostfix + version.getStringWithUnderScore()),
+				"COSBase base", "String keyName");
+		List<String> links = entry.getLinks(type).stream().filter(link -> map.containsKey(link.contains(PredicatesParser.PREDICATE_PREFIX) ?
+				PredicatesParser.getPredicateLastArgument(link) : link)).collect(Collectors.toList());
+		List<String> correctLinks = entry.getLinksWithoutPredicatesList(links);
+		DifferentKeysValuesLinkHelper helper = (DifferentKeysValuesLinkHelper)map.get(correctLinks.iterator().next());
+		Key key = helper.getKey();
+		calculateSubtype(object, entry, key);
+		javaWriter.println("\t\t" + key.getType().getJavaType() + " subtypeValue = subtype" +
+				key.getType().getParserMethod() + ";");
+		Set<String> defaultSet = addDefaultCaseLinkGetterByKeyValues(map, version, entry, type, linkName, correctLinks);
+		SortedMap<String, Set<String>> newMap = addSwitchLinkGetterByKeyValues(map, version, object, entry, type, key, links,
+				correctLinks, linkName);
+		javaWriter.println("\t}");
+		javaWriter.println();
+		for (Map.Entry<String, Set<String>> mapEntry : newMap.entrySet()) {
+			if (mapEntry.getValue().size() != 1) {
+				addLinkGetterByKeyValues(LinkHelper.getMap(mapEntry.getValue()), object, entry, type, version,
+						index + 1, mapEntry.getKey());
+			}
+		}
+		if (defaultSet.size() > 1) {
+			addLinkGetterByKeyValues(LinkHelper.getMap(defaultSet), object, entry, type, version, index + 1,
+					"Default");
+		}
+	}
+
+	private void calculateSubtype(Object object, Entry entry, Key key) {
+		String objectName = key.isParent() ? "this.baseObject" : "base";
+		String keyName = key.isParent() && "FDecodeParms".equals(entry.getName()) ? "FFilter" : key.getKeyName();
+		if (Constants.ARRAY_OF_DECODE_PARAMS_ENTRY.equals(object.getId())) {
+			javaWriter.println("\t\tString name = \"FDecodeParms\".equals(collectionName) ? \"FFilter\" : \"Filter\";");
+			javaWriter.println("\t\tCOSObject object = this.parentParentObject.getKey(ASAtom.getASAtom(name));");
+			javaWriter.println("\t\tint keyNumber = Integer.parseInt(keyName);");
+			javaWriter.println("\t\tif (object == null) { ");
+			javaWriter.println("\t\t\treturn null;");
+			javaWriter.println("\t\t}");
+			javaWriter.println("\t\tCOSObject subtype = object.at(keyNumber);");
+		} else if (key.getKeyName().matches("\\d+")) {
+			javaWriter.println("\t\tif (" + objectName + ".size() <= " + keyName + ") {");
+			javaWriter.println("\t\t\treturn null;");
+			javaWriter.println("\t\t}");
+			javaWriter.println("\t\tCOSObject subtype = " + objectName + ".at(" + keyName + ");");
+		} else {
+			javaWriter.println("\t\tCOSObject subtype = " + objectName + ".getKey(" + getASAtomFromString(keyName) + ");");
+		}
+		javaWriter.println("\t\tif (subtype == null) {");
+		javaWriter.println("\t\t\treturn null;");
+		javaWriter.println("\t\t}");
+	}
+
+	private Set<String> addDefaultCaseLinkGetterByKeyValues(Map<String, LinkHelper> map, PDFVersion version, Entry entry,
+															Type type, String linkName, List<String> correctLinks) {
+		javaWriter.println("\t\tif (subtypeValue == null) {");
+		Set<String> defaultSet = new HashSet<>();
+		for (String link : correctLinks) {//refactoring
+			DifferentKeysValuesLinkHelper helper = (DifferentKeysValuesLinkHelper)map.get(link);
+			if (helper != null && helper.getKey().isDefault()) {
+				defaultSet.add(link);
+			}
+		}
+		if (defaultSet.isEmpty()) {
+			javaWriter.println("\t\t\treturn null;");
+		} else if (defaultSet.size() == 1) {
+			javaWriter.println("\t\t\treturn " + constructorGFAObject(entry.getName(), defaultSet.iterator().next(),
+					"base", "this.baseObject", "keyName") + ";");
+		} else {
+			javaWriter.println("\t\t\t\treturn " + getMethodCall(getMethodName(linkName + type.getType() + "Default" +
+					version.getStringWithUnderScore()), "base", "keyName") + ";");
+		}
+		javaWriter.println("\t\t}");
+		return defaultSet;
+	}
+
+	private SortedMap<String, Set<String>> addSwitchLinkGetterByKeyValues(Map<String, LinkHelper> map, PDFVersion version,
+																		  Object object, Entry entry, Type type,
+																		  Key key, List<String> links,
+																		  List<String> correctLinks, String linkName) {
+		if (key.getBit() != null) {
+			javaWriter.println("\t\tswitch (subtypeValue.intValue() >> " + key.getBit() + ") {");
+		} else if (Type.INTEGER == key.getType()) {
+			javaWriter.println("\t\tswitch (subtypeValue.intValue()) {");
+		} else {
+			javaWriter.println("\t\tswitch (subtypeValue) {");
+		}
+		SortedMap<String, Set<String>> newMap = Links.getDifferentKeysValuesLinksMap(correctLinks, map);
+		for (Map.Entry<String, Set<String>> mapEntry : newMap.entrySet()) {
+			javaWriter.println("\t\t\tcase " + key.getType().getSeparator() + mapEntry.getKey() + key.getType().getSeparator() + ":");
+			if (mapEntry.getValue().size() != 1) {
+				javaWriter.println("\t\t\t\treturn " + getMethodCall(getMethodName(linkName + type.getType() +
+						mapEntry.getKey() + version.getStringWithUnderScore()), "base", "keyName") + ";");
+			} else {
+				String link = mapEntry.getValue().iterator().next();
+				int index1 = correctLinks.indexOf(link);
+				if (links.get(index1).contains(PredicatesParser.PREDICATE_PREFIX)) {
+					linkPredicate(object, entry, type, version, links.get(index1), Type.ENTRY);
+				}
+				javaWriter.println("\t\t\t\treturn " + constructorGFAObject(entry.getName(), link, "base",
+						"this.baseObject", "keyName") + ";");
+			}
+		}
+		javaWriter.println("\t\t\tdefault:");
+		javaWriter.println("\t\t\t\treturn null;");
+		javaWriter.println("\t\t}");
+		return newMap;
+	}
+
 	public void addLinkGetterByKeyName(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
 		String linkName = Links.getLinkName(entry.getName());
 		printMethodSignature(false, "private", false, Constants.BASE_MODEL_OBJECT_PATH,
