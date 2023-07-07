@@ -451,6 +451,100 @@ public class Rules {
 		}
 	}
 
+	private static void possibleValuesOfEntry(PDFVersion version, Object object, Entry entry, Type type) {
+		if ((type == Type.RECTANGLE || type == Type.MATRIX || type == Type.ARRAY) &&
+				entry.getPossibleValues(type) != null && !entry.getPossibleValues(type).isEmpty()) {
+			possibleValuesOfArray(version, object, entry, type);
+		}
+		for (String value : entry.getPossibleValues(type)) {
+			if (value.contains(PredicatesParser.EVAL_PREDICATE)) {
+				possibleValuePredicate(object, entry, version, type, value);
+			}
+		}
+		if (!type.isPropertyType()) {
+			return;
+		}
+		StringBuilder test = new StringBuilder();
+		String propertyName = entry.getTypeValuePropertyName(type);
+		String propertyHasType = entry.getHasTypePropertyName(type);
+		test.append(propertyHasType).append(" != " + Constants.TRUE + " || ");
+		entry.addHasTypeProperty(type);
+		Set<String> possibleValues = new HashSet<>();
+		Set<String> deprecatedValues = new HashSet<>();
+		calculatePossibleAndDeprecatedValues(test, version, object, entry, type, propertyName, possibleValues, deprecatedValues);
+		if (!deprecatedValues.isEmpty()) {
+			deprecatedValues(deprecatedValues, version, object, entry, type);
+		}
+		if (possibleValues.contains(Constants.STAR) || possibleValues.contains("\"" + Constants.STAR + "\"")) {
+			return;
+		}
+		String valuesString = String.join(", ", possibleValues);
+		if (!possibleValues.isEmpty()) {
+			test.delete(test.length() - 4, test.length());
+			ProfileGeneration.writeRule(version, 6, object.getModelType(), getClause(object, entry, type), test.toString(),
+					String.format(possibleValues.size() == 1 ? POSSIBLE_VALUE_DESCRIPTION : POSSIBLE_VALUES_DESCRIPTION,
+							ProfileGeneration.getErrorMessageStart(true, object, entry, type), valuesString),
+					String.format(POSSIBLE_VALUE_ERROR_MESSAGE,
+							ProfileGeneration.getErrorMessageStart(false, object, entry, type), "%2", valuesString),
+					Constants.KEY_NAME, propertyName);
+		}
+	}
+
+	private static void calculatePossibleAndDeprecatedValues(StringBuilder test, PDFVersion version, Object object,
+													  Entry entry, Type type, String propertyName,
+													  Set<String> possibleValues, Set<String> deprecatedValues) {
+		String separator = type.getSeparator();
+		for (String propertyValue : entry.getPossibleValues(type)) {
+			if (!propertyValue.contains(PredicatesParser.PREDICATE_PREFIX)) {
+				propertyValue = PredicatesParser.removeQuotes(propertyValue);
+				test.append(propertyName).append(" == ").append(separator).append(propertyValue).append(separator).append(" || ");
+				possibleValues.add(propertyValue);
+				entry.addTypeValueProperty(type);
+			} else if (!propertyValue.contains(PredicatesParser.EVAL_PREDICATE)) {
+				String possibleValue = null;
+				if (propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
+					if (propertyValue.startsWith(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
+						requiredValue(object, entry, version, type, propertyValue);
+						possibleValue = PredicatesParser.getPredicateLastArgument(propertyValue);
+					}
+				} else if (propertyValue.contains(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE)) {
+					if (propertyValue.startsWith(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE)) {
+						valueOnlyWhen(object, entry, version, type, propertyValue);
+						possibleValue = PredicatesParser.getPredicateFirstArgument(propertyValue);
+					}
+				} else if (propertyValue.contains(PredicatesParser.EXTENSION_PREDICATE)) {
+					if (propertyValue.startsWith(PredicatesParser.EXTENSION_PREDICATE)) {
+						possibleValue = type.getSeparator() + PredicatesParser.getPredicateLastArgument(propertyValue) +
+								type.getSeparator();
+					}
+				} else if (propertyValue.contains(PredicatesParser.DEPRECATED_PREDICATE)) {
+					if (propertyValue.startsWith(PredicatesParser.DEPRECATED_PREDICATE)) {
+						possibleValue = type.getSeparator() + PredicatesParser.getPredicateLastArgument(propertyValue) +
+								type.getSeparator();
+						if (possibleValue.contains(PredicatesParser.PREDICATE_PREFIX)) {
+							possibleValue = null;
+						} else if (isDeprecatedValue(object, entry, version, type, propertyValue)) {
+							deprecatedValues.add(PredicatesParser.removeQuotes(possibleValue));
+						}
+					}
+				} else {
+					possibleValue = new PredicatesParser(object, entry, version, type,
+							Constants.POSSIBLE_VALUES_COLUMN).parse(propertyValue);
+				}
+				if (possibleValue == null) {
+					continue;
+				}
+				if (Constants.TRUE.equals(possibleValue)) {
+					continue;
+				}
+				test.append(propertyName).append(" == ").append(possibleValue).append(" || ");
+				possibleValue = PredicatesParser.removeQuotes(possibleValue);
+				possibleValues.add(possibleValue);
+				entry.addTypeValueProperty(type);
+			}
+		}
+	}
+
 	private static void possibleValuesOfArray(PDFVersion version, Object object, Entry entry, Type type) {
 		StringBuilder test = new StringBuilder();
 		Set<String> possibleValues = new HashSet<>();
