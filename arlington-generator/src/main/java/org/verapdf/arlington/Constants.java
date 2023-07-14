@@ -33,6 +33,7 @@ public class Constants {
 	public static final String SPECIAL_CASE_COLUMN = "SpecialCase";
 	public static final String INDIRECT_REFERENCE_COLUMN = "IndirectReference";
 	public static final String LINKS_COLUMN = "Links";
+	public static final String VALUE = "Value";
 
 	//propertiesNames
 	public static final String FILE_SIZE = "fileSize";

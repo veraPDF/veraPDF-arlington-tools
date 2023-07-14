@@ -67,6 +67,9 @@ public class PredicatesParser {
 	public String parse(String str) {
 		try {
 			String result = parseString(str);
+			if (result == null) {
+				return null;
+			}
 			if (result.contains("@") || result.contains("::")) {
 				LOGGER.log(Level.WARNING, getString() + " result: " + result + " original: " + str);
 				return null;
@@ -832,11 +835,14 @@ public class PredicatesParser {
 		if (arguments.size() < 2) {
 			throw new RuntimeException("Invalid number of arguments of " + DEPRECATED_PREDICATE);
 		}
+		if (isValue()) {
+			output.push(removeQuotes(arguments.get(1).getString()));
+			return;
+		}
 		PDFVersion version = PDFVersion.getPDFVersion(getEntryName(arguments.get(0).getString()));
 		if (PDFVersion.compare(this.version, version) >= 0) {
 			Part part = getNewPart(arguments.subList(1, arguments.size()));
-			output.push(new Part(DEPRECATED_PREDICATE.replace(":", "/") + part.getString(),
-					part.getUndefinedEntries()));
+			output.push(new Part(DEPRECATED_PREDICATE.replace(":", "/") + part.getString()));//not need undefined
 		} else {
 			output.push(getNewPart(arguments.subList(1, arguments.size())));
 		}
@@ -849,6 +855,10 @@ public class PredicatesParser {
 	private void extension() {
 		if (arguments.size() < 1) {
 			throw new RuntimeException("Invalid number of arguments of " + EXTENSION_PREDICATE);
+		}
+		if (isValue()) {
+			output.push(removeQuotes(arguments.get(arguments.size() - 1).getString()));
+			return;
 		}
 		String extensionName = removeQuotes(arguments.get(0).getString());
 		if (isDefault()) {
@@ -1164,11 +1174,14 @@ public class PredicatesParser {
 		if (arguments.size() < 2) {
 			throw new RuntimeException("Invalid number of arguments of " + REQUIRED_VALUE_PREDICATE);
 		}
-		String separator = type.getSeparator();
+		String value = removeQuotes(arguments.get(arguments.size() - 1).getString());
+		if (isValue()) {
+			output.push(value);
+			return;
+		}
 		entry.addTypeValueProperty(type);
 		processTokens("(", "(", getNewPart(arguments.subList(0, arguments.size() - 1)), ")", "==", "false", "||",
-				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "==",
-				separator + arguments.get(arguments.size() - 1).getString() + separator, ")");
+				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "==", type.getValueWithSeparator(value), ")");
 	}
 
 	private void sinceVersion() {
@@ -1227,11 +1240,14 @@ public class PredicatesParser {
 		if (arguments.size() < 2) {
 			throw new RuntimeException("Invalid number of arguments of " + VALUE_ONLY_WHEN_PREDICATE);
 		}
-		String separator = type.getSeparator();
+		String value = removeQuotes(arguments.get(0).getString());
+		if (isValue()) {
+			output.push(value);
+			return;
+		}
 		entry.addTypeValueProperty(type);
 		processTokens("(", "(", getNewPart(arguments.subList(1, arguments.size())), ")", "==", "true", "||",
-				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "!=",
-				separator + arguments.get(0).getString() + separator, ")");
+				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "!=", type.getValueWithSeparator(value), ")");
 	}
 
 	private void checkBit(int bitValue) {
@@ -1330,9 +1346,17 @@ public class PredicatesParser {
 	}
 
 	public static String getPredicateLastArgument(String predicate) {
+		return getPredicateLastArgument(predicate, true);
+	}
+
+	public static String getPredicateLastArgument(String predicate, boolean removeBrackets) {
 		int index = predicate.lastIndexOf(",");
 		int lastIndex = predicate.lastIndexOf(")");
-		while (predicate.charAt(lastIndex) == ')') {
+		if (removeBrackets) {
+			while (predicate.charAt(lastIndex) == ')') {
+				lastIndex--;
+			}
+		} else {
 			lastIndex--;
 		}
 		return predicate.substring(index + 1, lastIndex + 1).trim();
@@ -1364,7 +1388,7 @@ public class PredicatesParser {
 		}
 		Entry entry = object.getEntry(entryName);
 		if (entry != null && entry.getUniqPropertyTypes().size() != 1) {
-			System.out.println(getString() + " " + entry.getName() + " several property types");
+			LOGGER.log(Level.WARNING, getString() + " " + entry.getName() + " several property types");
 		}
 		if (entry == null || entry.getUniqPropertyTypes().size() != 1) {
 			return new Part(argument);
@@ -1514,9 +1538,9 @@ public class PredicatesParser {
 			}
 		}
 		if (types.size() < 1) {
-			System.out.println(getString() + " " + entryName + " Types not found");
+			LOGGER.log(Level.WARNING, getString() + " " + entryName + " Types not found");
 		} else if (types.size() > 1) {
-			System.out.println(getString() + " " + entryName + " Several types found");
+			LOGGER.log(Level.WARNING, getString() + " " + entryName + " Several types found");
 		} else {
 			Type type = types.iterator().next();
 			object.getEntriesValuesProperties().put(argument, type);
@@ -1554,6 +1578,10 @@ public class PredicatesParser {
 
 	public boolean isDefault() {
 		return Constants.DEFAULT_VALUE_COLUMN.equals(columnName);
+	}
+
+	private boolean isValue() {
+		return Constants.VALUE.equals(columnName);
 	}
 
 	public static class Part {

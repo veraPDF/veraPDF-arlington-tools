@@ -162,8 +162,7 @@ public class MultiEntry extends Entry {
 				defaultValue = JavaGeneration.getMethodName(Entry.getValuePropertyName(entryName)) + "()";
 			} else if (!defaultValue.contains(PredicatesParser.PREDICATE_PREFIX)) {
 				defaultValue = PredicatesParser.removeQuotes(defaultValue);
-				defaultValue = type.getCreationCOSObject(type.getSeparator() + defaultValue + type.getJavaPostfix() +
-						type.getSeparator());
+				defaultValue = type.getCreationCOSObject(type.getValueWithSeparator(defaultValue + type.getJavaPostfix()));
 			} else {
 				defaultValue = new PredicatesParser(object, entry, version, type, Constants.DEFAULT_VALUE_COLUMN,
 						false).parse(defaultValue);

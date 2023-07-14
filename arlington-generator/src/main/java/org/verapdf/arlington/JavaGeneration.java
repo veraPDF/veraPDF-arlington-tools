@@ -502,7 +502,7 @@ public class JavaGeneration {
 		}
 		SortedMap<String, Set<String>> newMap = Links.getDifferentKeysValuesLinksMap(correctLinks, map);
 		for (Map.Entry<String, Set<String>> mapEntry : newMap.entrySet()) {
-			javaWriter.println("\t\t\tcase " + key.getType().getSeparator() + mapEntry.getKey() + key.getType().getSeparator() + ":");
+			javaWriter.println("\t\t\tcase " + key.getType().getValueWithSeparator(mapEntry.getKey()) + ":");
 			if (mapEntry.getValue().size() != 1) {
 				javaWriter.println("\t\t\t\treturn " + getMethodCall(getMethodName(linkName + type.getType() +
 						mapEntry.getKey() + version.getStringWithUnderScore()), "base", "keyName") + ";");

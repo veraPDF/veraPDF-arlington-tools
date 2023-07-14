@@ -493,11 +493,10 @@ public class Rules {
 	private static void calculatePossibleAndDeprecatedValues(StringBuilder test, PDFVersion version, Object object,
 													  Entry entry, Type type, String propertyName,
 													  Set<String> possibleValues, Set<String> deprecatedValues) {
-		String separator = type.getSeparator();
 		for (String propertyValue : entry.getPossibleValues(type)) {
 			if (!propertyValue.contains(PredicatesParser.PREDICATE_PREFIX)) {
 				propertyValue = PredicatesParser.removeQuotes(propertyValue);
-				test.append(propertyName).append(" == ").append(separator).append(propertyValue).append(separator).append(" || ");
+				test.append(propertyName).append(" == ").append(type.getValueWithSeparator(propertyValue)).append(" || ");
 				possibleValues.add(propertyValue);
 				entry.addTypeValueProperty(type);
 			} else if (!propertyValue.contains(PredicatesParser.EVAL_PREDICATE)) {
@@ -586,27 +585,26 @@ public class Rules {
 				Constants.KEY_NAME);
 	}
 
-	private static void requiredValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
+	private static void requiredValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue,
+									  String value) {
 		String test = new PredicatesParser(object, entry, version, type, Constants.REQUIRED_VALUE_COLUMN).parse(propertyValue);
 		if (test == null || Constants.TRUE.equals(test)) {
 			return;
 		}
 		test = PredicatesParser.removeBrackets(test);
-		String neededValue = PredicatesParser.getPredicateLastArgument(propertyValue);
-		ProfileGeneration.writeRule(version, 15, object.getModelType(), getClause(object, entry, type, neededValue), test,
+		ProfileGeneration.writeRule(version, 15, object.getModelType(), getClause(object, entry, type, value), test,
 				String.format(REQUIRED_VALUE_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType(),
-						neededValue, PredicatesParser.getPredicateFirstArgument(propertyValue)),
+						value, PredicatesParser.getPredicateFirstArgument(propertyValue)),
 				String.format(REQUIRED_VALUE_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry), neededValue),
+						ProfileGeneration.getErrorMessageStart(false, object, entry), value),
 				Constants.KEY_NAME);
 	}
 
 	private static void deprecatedValues(Set<String> deprecatedValues, PDFVersion version, Object object, Entry entry, Type type) {
 		StringBuilder deprecatedTest = new StringBuilder();
 		for (String deprecatedValue : deprecatedValues) {
-			deprecatedTest.append(entry.getTypeValuePropertyName(type)).append(" != ").append(type.getSeparator())
-					.append(deprecatedValue).append(type.getSeparator()).append(" && ");
+			deprecatedTest.append(entry.getTypeValuePropertyName(type)).append(" != ").append(type.getValueWithSeparator(deprecatedValue)).append(" && ");
 		}
 		deprecatedTest.delete(deprecatedTest.length() - 4, deprecatedTest.length());
 		String valuesString = String.join(", ", deprecatedValues);
@@ -631,20 +629,20 @@ public class Rules {
 		}
 	}
 
-	private static void valueOnlyWhen(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
+	private static void valueOnlyWhen(Object object, Entry entry, PDFVersion version, Type type, String propertyValue,
+									  String value) {
 		String test = new PredicatesParser(object, entry, version, type, Constants.POSSIBLE_VALUES_COLUMN).parse(propertyValue);
 		if (test == null) {
 			return;
 		}
 		test = PredicatesParser.removeBrackets(test);
-		String neededValue = PredicatesParser.getPredicateFirstArgument(propertyValue);
-		ProfileGeneration.writeRule(version, 13, object.getModelType(), getClause(object, entry, type, neededValue), test,
+		String condition = PredicatesParser.getPredicateLastArgument(propertyValue, false);//todo fix
+		ProfileGeneration.writeRule(version, 13, object.getModelType(), getClause(object, entry, type, value), test,
 				String.format(VALUE_ONLY_WHEN_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType(),
-						neededValue, PredicatesParser.getPredicateLastArgument(propertyValue)),
+						value, condition),
 				String.format(VALUE_ONLY_WHEN_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry), neededValue,
-						PredicatesParser.getPredicateLastArgument(propertyValue)),
+						ProfileGeneration.getErrorMessageStart(false, object, entry), value, condition),
 				Constants.KEY_NAME);
 	}
 
