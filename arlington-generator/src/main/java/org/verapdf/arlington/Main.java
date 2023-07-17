@@ -64,6 +64,9 @@ public class Main {
 		for (String objectName : objectNames) {
 			objectIdMap.put(objectName, new MultiObject(objectName));
 		}
+		for (PDFVersion version : PDFVersion.values()) {
+			findActiveObjects(version);
+		}
 		for (String objectName : objectNames) {
 			MultiObject multiObject = objectIdMap.get(objectName);
 			Rules.addRules(multiObject);
@@ -302,4 +305,15 @@ public class Main {
 	public static String getString(PDFVersion version, Object object, Entry entry) {
 		return getString(version, object, entry, null);
 	}
+
+	public static Map<PDFVersion, Set<String>> getActiveObjectNames() {
+		return activeObjectNames;
+	}
 }
+
+//add extra context not to all items, only for * entries?
+
+//improve message of 11,16 rule
+
+//extension possible values rule, links other cases rules
+

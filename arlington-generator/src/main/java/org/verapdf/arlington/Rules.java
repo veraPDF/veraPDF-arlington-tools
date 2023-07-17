@@ -15,7 +15,8 @@ public class Rules {
 	private static final String SPECIAL_CASE_DESCRIPTION = "%s shall satisfy special case: %s";
 	private static final String SPECIAL_CASE_ERROR_MESSAGE = "%s does not satisfy special case: %s";
 
-	private static final String REQUIRED_DESCRIPTION = "%s is required, when %s";
+	private static final String REQUIRED_CONDITION_DESCRIPTION = "%s is required, when %s";
+	private static final String REQUIRED_DESCRIPTION = "%s is required";
 	private static final String REQUIRED_ERROR_MESSAGE = "%s is missing";
 
 	private static final String DEPRECATED_ENTRY_DESCRIPTION = "%s is deprecated since PDF %s";
@@ -82,7 +83,7 @@ public class Rules {
 	static void addRules(MultiObject multiObject) {
 		for (PDFVersion version : PDFVersion.values()) {
 			Object object = version.getObjectIdMap().get(multiObject.getId());
-			if (object == null) {
+			if (object == null || !Main.getActiveObjectNames().get(version).contains(multiObject.getId())) {
 				continue;
 			}
 			if (object.isArray()) {
@@ -710,8 +711,8 @@ public class Rules {
 		if (entry.isRequired() && !Constants.CURRENT_ENTRY.equals(entry.getName()) && !object.isArray()) {
 			ProfileGeneration.writeRule(version, 7, object.getModelType(), getClause(object, entry),
 					propertyName + " == true",
-					ProfileGeneration.getErrorMessageStart(true, object, entry) + " is required",
-					ProfileGeneration.getErrorMessageStart(false, object, entry) + " is missing",
+					String.format(REQUIRED_DESCRIPTION, ProfileGeneration.getErrorMessageStart(true, object, entry)),
+					String.format(REQUIRED_ERROR_MESSAGE, ProfileGeneration.getErrorMessageStart(false, object, entry)),
 					Constants.KEY_NAME);
 			entry.setContainsProperty(true);
 		} else if (!Constants.CURRENT_ENTRY.equals(entry.getName()) && entry.getRequired().contains(PredicatesParser.PREDICATE_PREFIX)) {
@@ -721,7 +722,7 @@ public class Rules {
 			}
 			test = PredicatesParser.removeBrackets(test);
 			ProfileGeneration.writeRule(version, 11, object.getModelType(), getClause(object, entry), test,
-					String.format(REQUIRED_DESCRIPTION,
+					String.format(Constants.TRUE.equals(result) ? REQUIRED_DESCRIPTION : REQUIRED_CONDITION_DESCRIPTION,
 							ProfileGeneration.getErrorMessageStart(true, object, entry), entry.getRequired()),
 					String.format(REQUIRED_ERROR_MESSAGE,
 							ProfileGeneration.getErrorMessageStart(false, object, entry)),

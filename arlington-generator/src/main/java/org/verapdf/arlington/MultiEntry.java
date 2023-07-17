@@ -159,7 +159,7 @@ public class MultiEntry extends Entry {
 				continue;
 			}
 			if (defaultValue.startsWith("@")) {
-				defaultValue = JavaGeneration.getMethodName(Entry.getValuePropertyName(entryName)) + "()";
+				defaultValue = JavaGeneration.getGetterName(Entry.getValuePropertyName(entryName)) + "()";
 			} else if (!defaultValue.contains(PredicatesParser.PREDICATE_PREFIX)) {
 				defaultValue = PredicatesParser.removeQuotes(defaultValue);
 				defaultValue = type.getCreationCOSObject(type.getValueWithSeparator(defaultValue + type.getJavaPostfix()));

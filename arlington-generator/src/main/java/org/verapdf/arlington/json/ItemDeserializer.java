@@ -15,6 +15,13 @@ import java.util.List;
 
 public class ItemDeserializer extends StdDeserializer<JSONValue> {
 
+	private static final String TYPE = "type";
+	private static final String VALUE = "value";
+	private static final String FUNCTION_NAME = "FUNC_NAME";
+	private static final String KEY_VALUE = "KEY_VALUE";
+	private static final String KEY_PATH = "KEY_PATH";
+	private static final String PDF_PATH = "PDF_PATH";
+
 	public ItemDeserializer() {
 		this(null);
 	}
@@ -65,7 +72,7 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 					return true;
 				}
 				if (child.isContainerNode()) {
-					JsonNode type = child.get("type");
+					JsonNode type = child.get(TYPE);
 					if (type != null) {
 						return true;
 					}
@@ -74,7 +81,6 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 		}
 		return false;
 	}
-
 
 	public String getString(JsonNode node, boolean isArguments) {
 		if (!node.isArray()) {
@@ -87,7 +93,7 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 			JsonNode firstChild = iterator.next();
 			if (iterator.hasNext()) {
 				hasOneElement = false;
-				if (firstChild.get("type") != null && "FUNC_NAME".equals(firstChild.get("type").asText())) {
+				if (firstChild.get(TYPE) != null && FUNCTION_NAME.equals(firstChild.get(TYPE).asText())) {
 					JsonNode secondChild = iterator.next();
 					if (secondChild.isArray() && !iterator.hasNext()) {
 						hasOneElement = true;
@@ -116,16 +122,16 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 			if (child.isArray()) {
 				stringValue = getString(child, previousChildIsFunction);
 			} else if (child.isContainerNode()) {
-				JsonNode value = child.get("value");
+				JsonNode value = child.get(VALUE);
 				stringValue = value != null ? value.asText() : child.asText();
-				JsonNode type = child.get("type");
+				JsonNode type = child.get(TYPE);
 				if (type != null) {
-					if ("FUNC_NAME".equals(type.asText())) {
+					if (FUNCTION_NAME.equals(type.asText())) {
 						isFunction = true;
-					} else if (!"KEY_VALUE".equals(type.asText())) {
+					} else if (!KEY_VALUE.equals(type.asText())) {
 						isToken = true;
 					}
-					if ("KEY_VALUE".equals(type.asText()) && value.asText().matches("@" + Constants.NUMBER_REGEX)) {
+					if (KEY_VALUE.equals(type.asText()) && value.asText().matches("@" + Constants.NUMBER_REGEX)) {
 						isNumberKeyValue = true;
 					}
 					if ("KEY_PATH".equals(type.asText()) || "PDF_PATH".equals(type.asText())) {
@@ -134,13 +140,13 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 				}
 			} else {
 				stringValue = child.asText();
-				if (stringBuilder.length() > 0 && stringBuilder.toString().charAt(stringBuilder.length() - 1) == ' ' &&
-						Constants.STAR.equals(child.asText()) && previousChildIsNumberKeyValue) {
-					stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+				if (Constants.STAR.equals(child.asText()) && previousChildIsNumberKeyValue) {
+					removeTrailingSpace(stringBuilder);
 				}
 			}
 			if (isArguments && !isToken && !previousChildIsToken && !isFirstElement &&
 					(!Constants.STAR.equals(child.asText()) || !previousChildIsNumberKeyValue)) {
+				removeTrailingSpace(stringBuilder);
 				stringBuilder.append(", ");
 			}
 			if (!stringBuilder.toString().endsWith(" ") && PredicatesParser.isOperator(stringValue)) {
@@ -162,5 +168,11 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 			stringBuilder.append(")");
 		}
 		return stringBuilder.toString();
+	}
+
+	private static void removeTrailingSpace(StringBuilder stringBuilder) {
+		if (stringBuilder.length() > 0 && stringBuilder.toString().charAt(stringBuilder.length() - 1) == ' ') {
+			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+		}
 	}
 }

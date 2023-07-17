@@ -49,6 +49,7 @@ public class Constants {
 	public static final String SUB_ARRAYS = "subArrays";
 	public static final String HAS_CYCLE = "hasCycle";
 	public static final String INHERITABLE_VALUE = "InheritableValue";
+	public static final String IS_CONTAINS_INHERITABLE_VALUE = "isContainsInheritableValue";
 
 
 	//regex

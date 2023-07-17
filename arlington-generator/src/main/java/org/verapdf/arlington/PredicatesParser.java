@@ -19,6 +19,7 @@ public class PredicatesParser {
 	public static final String MUST_BE_INDIRECT_PREDICATE = "fn:MustBeIndirect";
 	public static final String REQUIRED_VALUE_PREDICATE = "fn:RequiredValue";
 	public static final String VALUE_ONLY_WHEN_PREDICATE = "fn:ValueOnlyWhen";
+	public static final String IS_REQUIRED_PREDICATE = "fn:IsRequired";
 
 	private boolean isProfile = true;//false if java code
 	private final PartStack output = new PartStack();
@@ -613,7 +614,7 @@ public class PredicatesParser {
 			case "fn:IsPresent":
 				isPresent();
 				break;
-			case "fn:IsRequired":
+			case IS_REQUIRED_PREDICATE:
 				isRequired();
 				break;
 //			case "fn:KeyNameIsColorant":
@@ -1566,7 +1567,7 @@ public class PredicatesParser {
 	}
 
 	private String getPropertyOrMethodName(String propertyName) {
-		return isProfile ? propertyName : JavaGeneration.getMethodCall(JavaGeneration.getMethodName(propertyName));
+		return isProfile ? propertyName : JavaGeneration.getMethodCall(JavaGeneration.getGetterName(propertyName));
 	}
 
 	public static String removeQuotes(String argument) {
