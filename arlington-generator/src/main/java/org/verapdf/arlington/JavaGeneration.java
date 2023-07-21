@@ -484,7 +484,7 @@ public class JavaGeneration {
 			javaWriter.println("\t\t\treturn " + constructorGFAObject(entry.getName(), defaultSet.iterator().next(),
 					"base", "this.baseObject", "keyName") + ";");
 		} else {
-			javaWriter.println("\t\t\t\treturn " + getMethodCall(getMethodName(linkName + type.getType() + "Default" +
+			javaWriter.println("\t\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() + "Default" +
 					version.getStringWithUnderScore()), "base", "keyName") + ";");
 		}
 		javaWriter.println("\t\t}");
@@ -993,7 +993,7 @@ public class JavaGeneration {
 		for (String entry : entries.keySet()) {
 			String linkName = Links.getLinkName(entry);
 			javaWriter.println("\t\t\tcase \"" + linkName + "\":");
-			javaWriter.println("\t\t\t\treturn " + getMethodName(linkName) + "();");
+			javaWriter.println("\t\t\t\treturn " + getGetterName(linkName) + "();");
 		}
 		javaWriter.println("\t\t\tdefault:");
 		javaWriter.println("\t\t\t\treturn super.getLinkedObjects(link);");

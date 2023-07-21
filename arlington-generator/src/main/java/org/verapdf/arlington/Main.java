@@ -16,6 +16,7 @@ public class Main {
 
 	private static final SortedSet<String> objectNames = new TreeSet<>();
 	private static final Map<String, MultiObject> objectIdMap = new HashMap<>();
+	private static final Map<PDFVersion, Set<String>> activeObjectNames = new HashMap<>();
 
 	public static void main(String[] args) throws IOException {
 		ModelGeneration.addPackageAndImportsToModel();

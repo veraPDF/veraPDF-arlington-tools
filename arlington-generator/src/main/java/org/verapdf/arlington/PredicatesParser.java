@@ -1049,7 +1049,7 @@ public class PredicatesParser {
 
 	private void isRequired() {
 		if (arguments.size() < 1) {
-			throw new RuntimeException("Invalid number of arguments of isRequired");
+			throw new RuntimeException("Invalid number of arguments of " + IS_REQUIRED_PREDICATE);
 		}
 		Part part = getNewPart(arguments);
 		if (Constants.UNDEFINED.equals(part.getString())) {
@@ -1367,6 +1367,10 @@ public class PredicatesParser {
 		int index = predicate.indexOf("(");
 		int lastIndex = predicate.lastIndexOf(",");
 		return predicate.substring(index + 1, lastIndex).trim();
+	}
+
+	public static String getPredicateArgument(String string, String predicate) {
+		return string.substring(predicate.length() + 1, string.length() - 1);
 	}
 
 	private Part processArgument(String argument) {

@@ -392,7 +392,7 @@ public class Rules {
 			String predicate = indirectReference.substring(0, indirectReference.indexOf("("));
 			if (PredicatesParser.MUST_BE_INDIRECT_PREDICATE.equals(predicate) ||
 					PredicatesParser.MUST_BE_DIRECT_PREDICATE.equals(predicate)) {
-				indirectReference = indirectReference.substring(predicate.length() + 1, indirectReference.length() - 1);
+				indirectReference = PredicatesParser.getPredicateArgument(indirectReference, predicate);
 				String result = new PredicatesParser(object, entry, version, type,
 						Constants.INDIRECT_REFERENCE_COLUMN).parse(indirectReference);
 				if (Constants.TRUE.equals(result)) {
@@ -723,7 +723,7 @@ public class Rules {
 			test = PredicatesParser.removeBrackets(test);
 			ProfileGeneration.writeRule(version, 11, object.getModelType(), getClause(object, entry), test,
 					String.format(Constants.TRUE.equals(result) ? REQUIRED_DESCRIPTION : REQUIRED_CONDITION_DESCRIPTION,
-							ProfileGeneration.getErrorMessageStart(true, object, entry), entry.getRequired()),
+							ProfileGeneration.getErrorMessageStart(true, object, entry), requiredArgument),
 					String.format(REQUIRED_ERROR_MESSAGE,
 							ProfileGeneration.getErrorMessageStart(false, object, entry)),
 					Constants.KEY_NAME);

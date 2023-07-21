@@ -116,6 +116,10 @@ public enum Type {
 		return "";
 	}
 
+	public String getValueWithSeparator(String value) {
+		return getSeparator() + value + getSeparator();
+	}
+
 	public String getJavaPostfix() {
 		if (this == Type.NUMBER) {
 			return "D";

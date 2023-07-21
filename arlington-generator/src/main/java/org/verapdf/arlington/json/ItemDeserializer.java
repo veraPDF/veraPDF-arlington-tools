@@ -134,7 +134,7 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 					if (KEY_VALUE.equals(type.asText()) && value.asText().matches("@" + Constants.NUMBER_REGEX)) {
 						isNumberKeyValue = true;
 					}
-					if ("KEY_PATH".equals(type.asText()) || "PDF_PATH".equals(type.asText())) {
+					if (KEY_PATH.equals(type.asText()) || PDF_PATH.equals(type.asText())) {
 						isKeyPath = true;
 					}
 				}
