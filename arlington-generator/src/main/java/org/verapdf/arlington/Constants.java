@@ -13,8 +13,10 @@ public class Constants {
 	public static final String FONT_FILE_2 = "FontFile2";
 	public static final String FILE_TRAILER = "FileTrailer";
 	public static final String OBJECT_REFERENCE = "ObjectReference";
+	public static final String OBJECT_STREAM = "ObjectStream";
 	public static final String XREF_STREAM = "XRefStream";
 	public static final String XREF_STM = "XRefStm";
+	public static final String LINEARIZATION_PARAMETER_DICTIONARY = "LinearizationParameterDict";
 	public static final String ARRAY_OF_DECODE_PARAMS_ENTRY = "ArrayOfDecodeParamsEntry";
 	public static final String PAGE_OBJECT = "PageObject";
 	public static final String PARENT_KEY = "Parent";

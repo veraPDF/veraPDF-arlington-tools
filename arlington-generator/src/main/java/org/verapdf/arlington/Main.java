@@ -30,6 +30,7 @@ public class Main {
 		}
 		findParents();
 		addXRef();
+		addLinearizationDictionary();
 		addStarObjects();
 		generate();
 		ModelGeneration.close();
@@ -111,6 +112,23 @@ public class Main {
 		entry.setRequired("");
 		for (PDFVersion version : PDFVersion.values()) {
 			if (PDFVersion.compare(version, PDFVersion.VERSION1_5) >= 0) {
+				Object object = version.getObjectIdMap().get(Constants.FILE_TRAILER);
+				object.addEntry(entry);
+			}
+		}
+	}
+
+	private static void addLinearizationDictionary() {
+		Entry entry = new Entry();
+		entry.setName(Constants.LINEARIZATION_PARAMETER_DICTIONARY);
+		entry.getTypes().add(Type.DICTIONARY);
+		List<String> links = new LinkedList<>();
+		links.add(Constants.LINEARIZATION_PARAMETER_DICTIONARY);
+		entry.getLinks().put(Type.DICTIONARY, links);
+		entry.getTypesPredicates().add("");
+		entry.setRequired("");
+		for (PDFVersion version : PDFVersion.values()) {
+			if (PDFVersion.compare(version, PDFVersion.VERSION1_2) >= 0) {
 				Object object = version.getObjectIdMap().get(Constants.FILE_TRAILER);
 				object.addEntry(entry);
 			}

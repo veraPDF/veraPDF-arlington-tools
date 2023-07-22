@@ -246,9 +246,11 @@ public class Rules {
 			Set<String> entryNamesSet = object.getEntriesNames();
 			if (Constants.FILE_TRAILER.equals(object.getId())) {
 				entryNamesSet.remove(Constants.XREF_STREAM);
+				entryNamesSet.remove(Constants.LINEARIZATION_PARAMETER_DICTIONARY);
 			}
 			for (String entryName : object.getMultiObject().getEntriesNames()) {
-				if (Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) {
+				if (Constants.FILE_TRAILER.equals(object.getId()) && (Constants.XREF_STREAM.equals(entryName) ||
+						Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName))) {
 					continue;
 				}
 				if (entryNamesSet.contains(entryName)) {
@@ -290,7 +292,8 @@ public class Rules {
 			List<String> entries = new LinkedList<>();
 			Set<String> entryNamesSet = object.getEntriesNames();
 			for (String entryName : object.getMultiObject().getEntriesNames()) {
-				if (Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) {
+				if (Constants.FILE_TRAILER.equals(object.getId()) && (Constants.XREF_STREAM.equals(entryName) ||
+						Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName))) {
 					continue;
 				}
 				if (!entryNamesSet.contains(entryName)) {

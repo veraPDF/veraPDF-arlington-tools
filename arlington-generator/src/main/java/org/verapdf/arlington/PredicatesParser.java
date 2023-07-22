@@ -126,6 +126,7 @@ public class PredicatesParser {
 					break;
 			}
 		}
+		processToken(currentString.toString());
 		while (!operators.isEmpty()) {
 			if ("(".equals(operators.peek())) {
 				throw new RuntimeException("This expression is invalid");
