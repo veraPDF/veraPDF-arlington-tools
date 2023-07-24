@@ -29,8 +29,9 @@ public class Main {
 			objectNames.addAll(version.getObjectIdMap().keySet());
 		}
 		findParents();
-		addXRef();
+		addXRefStream();
 		addLinearizationDictionary();
+		addStreamObjects();
 		addStarObjects();
 		generate();
 		ModelGeneration.close();
@@ -78,6 +79,31 @@ public class Main {
 		}
 	}
 
+	private static void findActiveObjects(PDFVersion version) {
+		Stack<String> currentObjectNames = new Stack<>();
+		currentObjectNames.add(Constants.FILE_TRAILER);
+		Set<String> activeObjectNames = new HashSet<>();
+		activeObjectNames.add(Constants.FILE_TRAILER);
+		while (!currentObjectNames.isEmpty()) {
+			String objectName = currentObjectNames.pop();
+			Object object = version.getObjectIdMap().get(objectName);
+			if (object == null) {
+				continue;
+			}
+			for (Entry entry : object.getEntries()) {
+				for (Type type : entry.getTypes()) {
+					for (String link : entry.getLinksWithoutPredicatesList(type)) {
+						if (!activeObjectNames.contains(link) && !currentObjectNames.contains(link)) {
+							activeObjectNames.add(link);
+							currentObjectNames.add(link);
+						}
+					}
+				}
+			}
+		}
+		Main.activeObjectNames.put(version, activeObjectNames);
+	}
+
 	private static void generate(String objectName) throws IOException {
 		MultiObject multiObject = objectIdMap.get(objectName);
 		PrintWriter javaWriter = new PrintWriter(new FileWriter(folder + Object.getJavaClassName(objectName) + ".java"));
@@ -101,7 +127,7 @@ public class Main {
 		writer.println(Constants.IMPORT + " " + importName + ";");
 	}
 
-	private static void addXRef() {
+	private static void addXRefStream() {
 		Entry entry = new Entry();
 		entry.setName(Constants.XREF_STREAM);
 		entry.getTypes().add(Type.STREAM);
@@ -135,9 +161,45 @@ public class Main {
 		}
 	}
 
+	private static void addStreamObjects() {
+		Entry entry = new Entry();
+		entry.setName(Constants.OBJECT_STREAMS);
+		entry.getTypes().add(Type.ARRAY);
+		List<String> links = new LinkedList<>();
+		links.add(Constants.ARRAY_OF_OBJECT_STREAMS);
+		entry.getLinks().put(Type.ARRAY, links);
+		entry.getTypesPredicates().add("");
+		entry.setRequired("");
+		for (PDFVersion version : PDFVersion.values()) {
+			if (PDFVersion.compare(version, PDFVersion.VERSION1_5) >= 0) {
+				Object object = version.getObjectIdMap().get(Constants.FILE_TRAILER);
+				object.addEntry(entry);
+			}
+		}
+		objectNames.add(Constants.ARRAY_OF_OBJECT_STREAMS);
+		for (PDFVersion version : PDFVersion.values()) {
+			Set<String> possibleParents = new HashSet<>();
+			possibleParents.add(Constants.FILE_TRAILER);
+			Entry starEntry = new Entry();
+			starEntry.setName(Constants.STAR);
+			starEntry.getTypes().add(Type.STREAM);
+			List<String> starLinks = new LinkedList<>();
+			starLinks.add(Constants.OBJECT_STREAM);
+			starEntry.getLinks().put(Type.STREAM, starLinks);
+			starEntry.getTypesPredicates().add("");
+			starEntry.setRequired("");
+			SortedSet<Entry> entries = new TreeSet<>();
+			entries.add(starEntry);
+			Object object = new Object(Constants.ARRAY_OF_OBJECT_STREAMS, entries, possibleParents);
+			if (PDFVersion.compare(version, PDFVersion.VERSION1_5) >= 0) {
+				version.getObjectIdMap().put(Constants.ARRAY_OF_OBJECT_STREAMS, object);
+			}
+		}
+	}
+
 	private static void addStarObjects() {
 		for (PDFVersion version : PDFVersion.values()) {
-			List<String> newObjectsNames = new LinkedList<>();
+			Set<String> newObjectsNames = new HashSet<>();
 			for (String objectName : objectNames) {
 				Object object = version.getObjectIdMap().get(objectName);
 				if (object == null) {
@@ -160,7 +222,7 @@ public class Main {
 			objectNames.addAll(newObjectsNames);
 		}
 		for (PDFVersion version : PDFVersion.values()) {
-			List<String> newObjectsNames = new LinkedList<>();
+			Set<String> newObjectsNames = new HashSet<>();
 			for (String objectName : objectNames) {
 				Object object = version.getObjectIdMap().get(objectName);
 				if (object == null) {
@@ -252,7 +314,7 @@ public class Main {
 		version.getObjectIdMap().put(newObjectName, new Object(newObjectName, entries, object.getPossibleParents()));
 	}
 
-	private static void addSubArrayObject(Object object, PDFVersion version, List<String> newObjectsNames) {
+	private static void addSubArrayObject(Object object, PDFVersion version, Set<String> newObjectsNames) {
 		List<? extends Entry> numberStarEntries = object.getNumberStarEntries();
 		if (!numberStarEntries.isEmpty()) {
 			String newObjectName = object.getId() + Type.SUB_ARRAY.getType();

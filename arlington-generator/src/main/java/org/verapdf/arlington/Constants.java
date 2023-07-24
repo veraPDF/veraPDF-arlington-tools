@@ -14,6 +14,8 @@ public class Constants {
 	public static final String FILE_TRAILER = "FileTrailer";
 	public static final String OBJECT_REFERENCE = "ObjectReference";
 	public static final String OBJECT_STREAM = "ObjectStream";
+	public static final String OBJECT_STREAMS = "ObjectStreams";
+	public static final String ARRAY_OF_OBJECT_STREAMS = "ArrayOfObjectStreams";
 	public static final String XREF_STREAM = "XRefStream";
 	public static final String XREF_STM = "XRefStm";
 	public static final String LINEARIZATION_PARAMETER_DICTIONARY = "LinearizationParameterDict";

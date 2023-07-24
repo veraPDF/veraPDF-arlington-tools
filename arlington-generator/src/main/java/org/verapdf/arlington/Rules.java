@@ -247,10 +247,12 @@ public class Rules {
 			if (Constants.FILE_TRAILER.equals(object.getId())) {
 				entryNamesSet.remove(Constants.XREF_STREAM);
 				entryNamesSet.remove(Constants.LINEARIZATION_PARAMETER_DICTIONARY);
+				entryNamesSet.remove(Constants.OBJECT_STREAMS);
 			}
 			for (String entryName : object.getMultiObject().getEntriesNames()) {
 				if (Constants.FILE_TRAILER.equals(object.getId()) && (Constants.XREF_STREAM.equals(entryName) ||
-						Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName))) {
+						Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName) ||
+						Constants.OBJECT_STREAMS.equals(entryName))) {
 					continue;
 				}
 				if (entryNamesSet.contains(entryName)) {
@@ -293,7 +295,8 @@ public class Rules {
 			Set<String> entryNamesSet = object.getEntriesNames();
 			for (String entryName : object.getMultiObject().getEntriesNames()) {
 				if (Constants.FILE_TRAILER.equals(object.getId()) && (Constants.XREF_STREAM.equals(entryName) ||
-						Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName))) {
+						Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName) ||
+						Constants.OBJECT_STREAMS.equals(entryName))) {
 					continue;
 				}
 				if (!entryNamesSet.contains(entryName)) {
