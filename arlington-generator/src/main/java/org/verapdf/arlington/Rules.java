@@ -506,48 +506,70 @@ public class Rules {
 				test.append(propertyName).append(" == ").append(type.getValueWithSeparator(propertyValue)).append(" || ");
 				possibleValues.add(propertyValue);
 				entry.addTypeValueProperty(type);
-			} else if (!propertyValue.contains(PredicatesParser.EVAL_PREDICATE)) {
-				String possibleValue = null;
-				if (propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
-					if (propertyValue.startsWith(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
-						requiredValue(object, entry, version, type, propertyValue);
-						possibleValue = PredicatesParser.getPredicateLastArgument(propertyValue);
-					}
-				} else if (propertyValue.contains(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE)) {
-					if (propertyValue.startsWith(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE)) {
-						valueOnlyWhen(object, entry, version, type, propertyValue);
-						possibleValue = PredicatesParser.getPredicateFirstArgument(propertyValue);
-					}
-				} else if (propertyValue.contains(PredicatesParser.EXTENSION_PREDICATE)) {
-					if (propertyValue.startsWith(PredicatesParser.EXTENSION_PREDICATE)) {
-						possibleValue = type.getSeparator() + PredicatesParser.getPredicateLastArgument(propertyValue) +
-								type.getSeparator();
-					}
-				} else if (propertyValue.contains(PredicatesParser.DEPRECATED_PREDICATE)) {
-					if (propertyValue.startsWith(PredicatesParser.DEPRECATED_PREDICATE)) {
-						possibleValue = type.getSeparator() + PredicatesParser.getPredicateLastArgument(propertyValue) +
-								type.getSeparator();
-						if (possibleValue.contains(PredicatesParser.PREDICATE_PREFIX)) {
-							possibleValue = null;
-						} else if (isDeprecatedValue(object, entry, version, type, propertyValue)) {
-							deprecatedValues.add(PredicatesParser.removeQuotes(possibleValue));
-						}
+				continue;
+			} else if (propertyValue.contains(PredicatesParser.EVAL_PREDICATE)) {
+				continue;
+			}
+			String possibleValue = new PredicatesParser(object, entry, version, type, Constants.VALUE).parse(propertyValue);
+			if (possibleValue != null) {
+				possibleValue = PredicatesParser.removeQuotes(possibleValue);
+			}
+			if (possibleValue == null || Constants.UNDEFINED.equals(possibleValue)) {
+				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " " + propertyValue +
+						" undefined value");
+				continue;
+			}
+			if (propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
+				if (propertyValue.startsWith(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
+					requiredValue(object, entry, version, type, propertyValue, possibleValue);
+				} else {
+					LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " required predicate");
+				}
+			}
+			if (propertyValue.contains(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE)) {
+				if (propertyValue.startsWith(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE)) {
+					valueOnlyWhen(object, entry, version, type, propertyValue, possibleValue);
+				} else {
+					LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " valueOnlyWhen predicate");
+				}
+			}
+			if (propertyValue.contains(PredicatesParser.EXTENSION_PREDICATE)) {
+				if (propertyValue.startsWith(PredicatesParser.EXTENSION_PREDICATE)) {
+					//add rule
+				} else {
+					LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " extension predicate");
+				}
+			}
+			if (propertyValue.contains(PredicatesParser.DEPRECATED_PREDICATE)) {
+				if (propertyValue.startsWith(PredicatesParser.DEPRECATED_PREDICATE)) {
+					if (isDeprecatedValue(object, entry, version, type, propertyValue)) {
+						deprecatedValues.add(possibleValue);
 					}
 				} else {
-					possibleValue = new PredicatesParser(object, entry, version, type,
-							Constants.POSSIBLE_VALUES_COLUMN).parse(propertyValue);
+					LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " deprecated predicate");
 				}
-				if (possibleValue == null) {
-					continue;
-				}
-				if (Constants.TRUE.equals(possibleValue)) {
-					continue;
-				}
-				test.append(propertyName).append(" == ").append(possibleValue).append(" || ");
-				possibleValue = PredicatesParser.removeQuotes(possibleValue);
-				possibleValues.add(possibleValue);
-				entry.addTypeValueProperty(type);
 			}
+			if (!propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE) &&
+					!propertyValue.contains(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE) &&
+					!propertyValue.contains(PredicatesParser.EXTENSION_PREDICATE) &&
+					!propertyValue.startsWith(PredicatesParser.DEPRECATED_PREDICATE)) {
+				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
+						" PossibleValues contains specialPredicate " + propertyValue);
+				possibleValue = new PredicatesParser(object, entry, version, type,
+						Constants.POSSIBLE_VALUES_COLUMN).parse(propertyValue);
+				if (possibleValue != null) {
+					possibleValue = PredicatesParser.removeQuotes(possibleValue);
+				}
+			}
+			if (possibleValue == null) {
+				continue;
+			}
+			if (Constants.TRUE.equals(possibleValue)) {
+				continue;
+			}
+			test.append(propertyName).append(" == ").append(type.getValueWithSeparator(possibleValue)).append(" || ");
+			possibleValues.add(possibleValue);
+			entry.addTypeValueProperty(type);
 		}
 	}
 
@@ -726,6 +748,10 @@ public class Rules {
 			if (test == null || Constants.TRUE.equals(test)) {
 				return;
 			}
+			String requiredArgument = PredicatesParser.getPredicateArgument(entry.getRequired(),
+					PredicatesParser.IS_REQUIRED_PREDICATE);
+			String result = new PredicatesParser(object, entry, version, null,
+					Constants.REQUIRED_COLUMN).parse(requiredArgument);
 			test = PredicatesParser.removeBrackets(test);
 			ProfileGeneration.writeRule(version, 11, object.getModelType(), getClause(object, entry), test,
 					String.format(Constants.TRUE.equals(result) ? REQUIRED_DESCRIPTION : REQUIRED_CONDITION_DESCRIPTION,

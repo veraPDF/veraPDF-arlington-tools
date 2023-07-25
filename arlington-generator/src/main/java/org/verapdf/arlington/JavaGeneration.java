@@ -187,7 +187,7 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tSet<COSKey> visitedKeys = new HashSet<>();");
-		javaWriter.println("\t\twhile (object.knownKey(entryName)) {");
+		javaWriter.println("\t\twhile (!object.empty() && object.knownKey(entryName)) {");
 		javaWriter.println("\t\t\tif (object.getKey() != null) {");
 		javaWriter.println("\t\t\t\tif (visitedKeys.contains(object.getKey())) {");
 		javaWriter.println("\t\t\t\t\treturn true;");
@@ -563,7 +563,23 @@ public class JavaGeneration {
 				getGetterName(Entry.getHasTypePropertyName(entryName, type)));
 		String objectName = entryName.contains("::") ? getComplexObject(multiObject, entryName) :
 				getObjectByEntryName(entryName);
-		javaWriter.println("\t\treturn " + getMethodCall(getMethodName(Entry.getHasTypePropertyName("", type)),
+		String[] objects = entryName.split("::");
+		String arlingtonObject = multiObject.getEntryNameToArlingtonObjectMap().get(entryName);
+		if (arlingtonObject != null) {
+			String object = objects[objects.length - 2];
+			if (Constants.PARENT.equals(object)) {
+				object = "this.parentObject";
+			} else if (Constants.CATALOG.equals(object)) {
+				object = Constants.ROOT;
+			}
+			javaWriter.println("\t\treturn " + constructorGFAObject(entryName, arlingtonObject,  object +
+					".getDirectBase()", null, null) + "." +
+					getGetterName(Entry.getHasTypePropertyName(objects[objects.length - 1], type)) + "();");
+			javaWriter.println("\t}");
+			javaWriter.println();
+			return;
+		}
+		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getHasTypePropertyName("", type)),
 				objectName) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
@@ -571,10 +587,25 @@ public class JavaGeneration {
 
 	public void addGetValueMethod(MultiObject multiObject, String entryName, Type type) {
 		printMethodSignature(true, "public", false, type.getJavaType(),
-				getMethodName(Entry.getTypeValuePropertyName(entryName, type)));
-		String objectName = entryName.contains("::") ? getComplexObject(multiObject, entryName) :
-				getObjectByEntryName(entryName);
-		javaWriter.println("\t\treturn " + getMethodCall(getMethodName(Entry.getTypeValuePropertyName("", type)),
+				getGetterName(Entry.getTypeValuePropertyName(entryName, type)));
+		String objectName = entryName.contains("::") ? getComplexObject(multiObject, entryName) : getObjectByEntryName(entryName);
+		String[] objects = entryName.split("::");
+		String arlingtonObject = multiObject.getEntryNameToArlingtonObjectMap().get(entryName);
+		if (arlingtonObject != null) {
+			String object = objects[objects.length - 2];
+			if (Constants.PARENT.equals(object)) {
+				object = "this.parentObject";
+			} else if (Constants.CATALOG.equals(object)) {
+				object = Constants.ROOT;
+			}
+			javaWriter.println("\t\treturn " + constructorGFAObject(entryName, arlingtonObject,  object +
+					".getDirectBase()", null, null) + "." +
+					getMethodCall(getGetterName(Entry.getTypeValuePropertyName(objects[objects.length - 1], type))) + ";");
+			javaWriter.println("\t}");
+			javaWriter.println();
+			return;
+		}
+		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getTypeValuePropertyName("", type)),
 				objectName) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
@@ -655,7 +686,7 @@ public class JavaGeneration {
 			return "this.parentObject";
 		}
 		javaWriter.println("\t\tCOSObject object = " +
-				getMethodCall(getMethodName(Entry.getValuePropertyName(entry.getName()))) + ";");
+				getMethodCall(getGetterName(Entry.getValuePropertyName(entry.getName()))) + ";");
 		javaWriter.println("\t\tif (object == null) {");
 		javaWriter.println("\t\t\treturn Collections.emptyList();");
 		javaWriter.println("\t\t}");
@@ -846,12 +877,14 @@ public class JavaGeneration {
 		if (newLink == null || !newLink.contains(PredicatesParser.PREDICATE_PREFIX)) {
 			return;
 		}
-		newLink = new PredicatesParser(object, entry, version, type, Constants.LINKS_COLUMN, false).parse(newLink);
+		newLink = new PredicatesParser(object, entry, version, type, Constants.LINKS_COLUMN,
+				false).parse("(" + newLink + ") == false");
 		if (newLink == null) {
 			return;
 		}
+		newLink = PredicatesParser.removeBrackets(newLink);
 		if (Type.ARRAY.equals(returnType)) {
-			javaWriter.println("\t\t\tif ((" + newLink + ") == false) {");
+			javaWriter.println("\t\t\tif (" + newLink + ") {");
 			javaWriter.println("\t\t\t\treturn Collections.emptyList();");
 			javaWriter.println("\t\t\t}");
 		} else {
@@ -1371,7 +1404,7 @@ public class JavaGeneration {
 	}
 
 	public String getObjectByEntryName(String entryName) {
-		javaWriter.println("\t\tCOSObject object = " + getMethodCall(getMethodName(Entry.getValuePropertyName(entryName))) + ";");
+		javaWriter.println("\t\tCOSObject object = " + getMethodCall(getGetterName(Entry.getValuePropertyName(entryName))) + ";");
 		return "object";
 	}
 

@@ -1017,7 +1017,8 @@ public class PredicatesParser {
 		if ((entry != null || entryName.matches(ENTRY_REGEX)) &&
 				!arguments.get(0).getString().contains("@")) {
 			if (entry == null && !entryName.contains("::")) {
-				throw new RuntimeException("Invalid entryName in isPresent");
+				output.push("@" + entryName);
+				return;
 			}
 			if (arguments.size() == 1) {
 				processTokens("(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "true", ")");
