@@ -122,6 +122,10 @@ public class Object {
 		return getEntries().size() == 1 && Constants.CURRENT_ENTRY.equals(getEntries().iterator().next().getName());
 	}
 
+	public static String getObjectEntryName(String objectId) {
+		return objectId + Type.ENTRY.getType();
+	}
+
 	public Set<String> getPossibleParents() {
 		return possibleParents;
 	}

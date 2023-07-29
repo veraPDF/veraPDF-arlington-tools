@@ -888,7 +888,7 @@ public class JavaGeneration {
 			javaWriter.println("\t\t\t\treturn Collections.emptyList();");
 			javaWriter.println("\t\t\t}");
 		} else {
-			javaWriter.println("\t\t\t\tif ((" + newLink + ") == false) {");
+			javaWriter.println("\t\t\t\tif (" + newLink + ") {");
 			javaWriter.println("\t\t\t\t\treturn null;");
 			javaWriter.println("\t\t\t\t}");
 		}

@@ -159,7 +159,7 @@ public class Rules {
 		} else {
 			for (Type type : linkTypes) {
 				List<String> links = entry.getLinks(type);
-				if (links.isEmpty()) {
+				if (links.isEmpty() || (links.size() == 1 && !links.get(0).contains(PredicatesParser.PREDICATE_PREFIX))) {
 					continue;
 				}
 				if (type == Type.SUB_ARRAY) {
@@ -170,9 +170,9 @@ public class Rules {
 				String linkName = Links.getLinkName(entry.getName());
 				ProfileGeneration.writeRule(version, 17, object.getModelType(), getClause(object, entry, type),
 						entry.getHasTypePropertyName(type) + " != true || " + linkName + "_size == 1",
-						String.format(links.size() == 1 ? LINK_DESCRIPTION : LINKS_DESCRIPTION,
+						String.format(LINKS_DESCRIPTION,
 								ProfileGeneration.getErrorMessageStart(true, object, entry, type), objectsString),
-						String.format(links.size() == 1 ? LINK_ERROR_MESSAGE : LINKS_ERROR_MESSAGE,
+						String.format(LINKS_ERROR_MESSAGE,
 								ProfileGeneration.getErrorMessageStart(false, object, entry, type), objectsString),
 						Constants.KEY_NAME);
 			}
@@ -208,6 +208,10 @@ public class Rules {
 	}
 
 	private static void hasWrongType(PDFVersion version, Object object, Entry entry) {
+		if (Constants.FILE_TRAILER.equals(object.getId()) && (Constants.OBJECT_STREAMS.equals(entry.getName()) ||
+				Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entry.getName()))) {
+			return;
+		}
 		SortedSet<Type> currentTypes = new TreeSet<>(entry.getUniqActiveTypes());
 		if (currentTypes.isEmpty() || currentTypes.size() < entry.getTypes().size()) {
 			return;

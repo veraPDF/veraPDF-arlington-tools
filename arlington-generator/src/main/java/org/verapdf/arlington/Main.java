@@ -296,7 +296,7 @@ public class Main {
 	}
 
 	private static void addStarEntryObject(Object object, Entry entry, PDFVersion version) {
-		String newObjectName = object.getId() + Type.ENTRY.getType();
+		String newObjectName = Object.getObjectEntryName(object.getId());
 		Entry newEntry = new Entry(entry);
 		newEntry.setName(Constants.CURRENT_ENTRY);
 		entry.setRequired(Constants.FALSE);

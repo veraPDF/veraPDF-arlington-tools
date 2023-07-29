@@ -66,27 +66,31 @@ public class ProfileGeneration {
 
 	public static String getErrorMessagePart(boolean isDescription, Object object, Entry entry, Type type, boolean isStart) {
 		StringBuilder stringBuilder = new StringBuilder();
-		if (isStart) {
-			stringBuilder.append("Entry");
+		if (Object.getObjectEntryName(Constants.ARRAY_OF_OBJECT_STREAMS).equals(object.getId())) {
+			stringBuilder.append(Constants.OBJECT_STREAM);
 		} else {
-			stringBuilder.append("entry");
-		}
-		if (!Constants.CURRENT_ENTRY.equals(entry.getName())) {
-			if (!Constants.STAR.equals(entry.getName()) || (!object.isNameTree() && !object.isNumberTree())) {
-				stringBuilder.append(" ").append(entry.getName());
+			if (isStart) {
+				stringBuilder.append("Entry");
+			} else {
+				stringBuilder.append("entry");
 			}
-		} else if (!isDescription) {
-			stringBuilder.append(" ").append("%1");
-		}
-		if (type != null) {
-			stringBuilder.append(" with type ");
-			stringBuilder.append(type.getType());
-		}
-		stringBuilder.append(" in ");
-		if (Constants.CURRENT_ENTRY.equals(entry.getName())) {
-			stringBuilder.append(object.getId().substring(0, object.getId().length() - 5));//remove ...Entry
-		} else {
-			stringBuilder.append(object.getId());
+			if (!Constants.CURRENT_ENTRY.equals(entry.getName())) {
+				if (!Constants.STAR.equals(entry.getName()) || (!object.isNameTree() && !object.isNumberTree())) {
+					stringBuilder.append(" ").append(entry.getName());
+				}
+			} else if (!isDescription) {
+				stringBuilder.append(" ").append("%1");
+			}
+			if (type != null) {
+				stringBuilder.append(" with type ");
+				stringBuilder.append(type.getType());
+			}
+			stringBuilder.append(" in ");
+			if (Constants.CURRENT_ENTRY.equals(entry.getName())) {
+				stringBuilder.append(object.getId().substring(0, object.getId().length() - 5));//remove ...Entry
+			} else {
+				stringBuilder.append(object.getId());
+			}
 		}
 		return stringBuilder.toString();
 	}
