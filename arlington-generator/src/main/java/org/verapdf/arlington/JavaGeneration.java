@@ -94,6 +94,7 @@ public class JavaGeneration {
 		addRectHeightMethod();
 		addRectWidthMethod();
 		addIndirectMethod();
+		addImageIsStructContentItemBaseMethod();
 		addArrayLengthMethod();
 		addArraySortAscendingMethod();
 		addKeysStringMethod();
@@ -317,21 +318,21 @@ public class JavaGeneration {
 	}
 
 	public boolean getDefaultObject(Object multiObject, String entryName) {
-		Map<Pair<Type, String>, List<PDFVersion>> map = MultiEntry.getDefaultValueMap(multiObject, entryName);
+		Map<String, List<PDFVersion>> map = MultiEntry.getDefaultValueMap(multiObject, entryName);
 		if (map.isEmpty()) {
 			return false;
 		}
 		printMethodSignature(false, "public", false, "COSObject",
 				getGetterName(Entry.getDefaultValuePropertyName(entryName)));
 		if (map.size() == 1 && map.values().iterator().next().size() == PDFVersion.values().length) {
-			javaWriter.println("\t\treturn " + map.keySet().iterator().next().getValue() + ";");
+			javaWriter.println("\t\treturn " + map.keySet().iterator().next() + ";");
 		} else {
 			javaWriter.println("\t\tswitch (StaticContainers.getFlavour()) {");
-			for (Map.Entry<Pair<Type, String>, List<PDFVersion>> value : map.entrySet()) {
+			for (Map.Entry<String, List<PDFVersion>> value : map.entrySet()) {
 				for (PDFVersion version : value.getValue()) {
 					javaWriter.println("\t\t\tcase ARLINGTON" + version.getStringWithUnderScore() + ":");
 				}
-				String obj = value.getKey().getValue();
+				String obj = value.getKey();
 				javaWriter.println("\t\t\t\treturn " + obj + ";");
 			}
 			javaWriter.println("\t\t}");
@@ -1079,10 +1080,19 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	public void addImageIsStructContentItemBaseMethod() {
+		printMethodSignature(false, "public", true, Type.BOOLEAN.getJavaType(),
+				getGetterName(Constants.IMAGE_IS_STRUCT_CONTENT_ITEM), "COSObject object");
+		javaWriter.println("\t\treturn object.isIndirect() && GFAObject.getKeysSet().contains(object.getKey());");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	public void addImageIsStructContentItemMethod() {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Constants.IMAGE_IS_STRUCT_CONTENT_ITEM));
-		javaWriter.println("\t\treturn GFAObject.getKeysSet().contains(this.baseObject.getKey());");
+		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Constants.IMAGE_IS_STRUCT_CONTENT_ITEM),
+				"new COSObject(this.baseObject)") + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}

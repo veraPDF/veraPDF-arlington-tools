@@ -68,6 +68,8 @@ public class ProfileGeneration {
 		StringBuilder stringBuilder = new StringBuilder();
 		if (Object.getObjectEntryName(Constants.ARRAY_OF_OBJECT_STREAMS).equals(object.getId())) {
 			stringBuilder.append(Constants.OBJECT_STREAM);
+		} else if (Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entry.getName())) {
+			stringBuilder.append(Constants.XREF_STREAM);
 		} else {
 			if (isStart) {
 				stringBuilder.append("Entry");

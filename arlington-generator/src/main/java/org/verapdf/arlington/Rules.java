@@ -123,39 +123,39 @@ public class Rules {
 			return;
 		}
 		if (entry.isStar()) {
-			if (!object.isNumberTree() && !object.isNameTree()) {
-				return;
-			}
-			List<String> links = new LinkedList<>();
-			for (List<String> currentLinks : entry.getLinks().values()) {
-				links.addAll(currentLinks);
-			}
-			String objectsString = String.join(", ", links);
-			StringBuilder test = new StringBuilder();
-			test.append("Entries_size == ");
-			if (object.isArray() || object.isNumberTree() || object.isNameTree() || (object.getEntries().size() == 1 &&
-					object.getEntries().iterator().next().isStar())) {
-				test.append("size");
-				if (object.getEntries().size() > 1) {
-					test.append(" - ").append(object.getEntries().size() - 1);
-				}
-			} else {
-				List<String> values = new LinkedList<>();
-				for (Entry currentEntry : object.getEntries()) {
-					if (!currentEntry.isStar()) {
-						values.add("'" + currentEntry.getName() + "'");
-					}
-				}
-				test.append("(keysString == '' ? 0 : ").append(ProfileGeneration.split("keysString",
-						false, values)).append(")");
-			}
-			ProfileGeneration.writeRule(version, 18, object.getModelType(), getClause(object, entry, null),
-					test.toString(),
-					String.format(links.size() == 1 ? LINK_DESCRIPTION : LINKS_DESCRIPTION,
-							ProfileGeneration.getErrorMessageStart(true, object, entry), objectsString),
-					String.format(links.size() == 1 ? LINK_ERROR_MESSAGE : LINKS_ERROR_MESSAGE,
-							ProfileGeneration.getErrorMessageStart(false, object, entry), objectsString),
-					Constants.KEY_NAME);
+//			if (!object.isNumberTree() && !object.isNameTree()) {
+//				return;
+//			}
+//			List<String> links = new LinkedList<>();
+//			for (List<String> currentLinks : entry.getLinks().values()) {
+//				links.addAll(currentLinks);
+//			}
+//			String objectsString = String.join(", ", links);
+//			StringBuilder test = new StringBuilder();
+//			test.append("Entries_size == ");
+//			if (object.isArray() || object.isNumberTree() || object.isNameTree() || (object.getEntries().size() == 1 &&
+//					object.getEntries().iterator().next().isStar())) {
+//				test.append("size");
+//				if (object.getEntries().size() > 1) {
+//					test.append(" - ").append(object.getEntries().size() - 1);
+//				}
+//			} else {
+//				List<String> values = new LinkedList<>();
+//				for (Entry currentEntry : object.getEntries()) {
+//					if (!currentEntry.isStar()) {
+//						values.add("'" + currentEntry.getName() + "'");
+//					}
+//				}
+//				test.append("(keysString == '' ? 0 : ").append(ProfileGeneration.split("keysString",
+//						false, values)).append(")");
+//			}
+//			ProfileGeneration.writeRule(version, 18, object.getModelType(), getClause(object, entry, null),
+//					test.toString(),
+//					String.format(links.size() == 1 ? LINK_DESCRIPTION : LINKS_DESCRIPTION,
+//							ProfileGeneration.getErrorMessageStart(true, object, entry), objectsString),
+//					String.format(links.size() == 1 ? LINK_ERROR_MESSAGE : LINKS_ERROR_MESSAGE,
+//							ProfileGeneration.getErrorMessageStart(false, object, entry), objectsString),
+//					Constants.KEY_NAME);
 		} else {
 			for (Type type : linkTypes) {
 				List<String> links = entry.getLinks(type);
@@ -791,7 +791,7 @@ public class Rules {
 
 	private static void deprecatedEntry(PDFVersion version, Object object, Entry entry) {
 		String propertyName = Entry.getContainsPropertyName(entry.getName());
-		if (entry.getDeprecatedVersion() != null && PDFVersion.compare(entry.getDeprecatedVersion(), version) < 0) {
+		if (entry.getDeprecatedVersion() != null && PDFVersion.compare(entry.getDeprecatedVersion(), version) <= 0) {
 			String test = Constants.CURRENT_ENTRY.equals(entry.getName()) ? "false" : propertyName + " == false";
 			ProfileGeneration.writeRule(version, 5, object.getModelType(), getClause(object, entry), test,
 					String.format(DEPRECATED_ENTRY_DESCRIPTION,

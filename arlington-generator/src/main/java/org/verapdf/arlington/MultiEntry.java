@@ -138,8 +138,8 @@ public class MultiEntry extends Entry {
 		this.hasCycleProperty = hasCycleProperty;
 	}
 
-	public static Map<Pair<Type, String>, List<PDFVersion>> getDefaultValueMap(Object multiObject, String entryName) {
-		Map<Pair<Type, String>, List<PDFVersion>> map = new HashMap<>();
+	public static Map<String, List<PDFVersion>> getDefaultValueMap(Object multiObject, String entryName) {
+		Map<String, List<PDFVersion>> map = new TreeMap<>();
 		for (PDFVersion version : PDFVersion.values()) {
 			Object object = version.getObjectIdMap().get(multiObject.getId());
 			if (object == null) {
@@ -170,14 +170,13 @@ public class MultiEntry extends Entry {
 					continue;
 				}
 			}
-			defaultPair = new Pair<>(type, defaultValue);
-			List<PDFVersion> list = map.get(defaultPair);
+			List<PDFVersion> list = map.get(defaultValue);
 			if (list != null) {
 				list.add(version);
 			} else {
 				list = new LinkedList<>();
 				list.add(version);
-				map.put(defaultPair, list);
+				map.put(defaultValue, list);
 			}
 		}
 		return map;
