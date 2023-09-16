@@ -1199,6 +1199,25 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	public void addGetObjectType() {
+		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
+				getGetterName(Constants.OBJECT_TYPE));
+		for (Type type : Type.values()) {
+			if (type == Type.BITMASK || type == Type.DATE || type == Type.MATRIX || type == Type.ENTRY || 
+					type == Type.RECTANGLE || type == Type.NAME_TREE || type == Type.NUMBER_TREE || 
+					type == Type.STRING_BYTE || type == Type.STRING_ASCII || type == Type.STRING_TEXT ||
+					type == Type.SUB_ARRAY) {
+				continue;
+			}
+			javaWriter.println("\t\tif (baseObject.getType() == " + type.getCosObjectType() + ") {");
+			javaWriter.println("\t\t\treturn \"" + type.getType() + "\";");
+			javaWriter.println("\t\t}");
+		}
+		javaWriter.println("\t\treturn null;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	public void addNotStandard14FontMethod() {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Constants.NOT_STANDARD_14_FONT));

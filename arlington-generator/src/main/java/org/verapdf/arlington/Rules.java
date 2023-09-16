@@ -71,9 +71,9 @@ public class Rules {
 	private static final String MULTIPLY_ARRAY_SIZE_DESCRIPTION = "%s shall contain %d * n elements";
 
 	private static final String POSSIBLE_TYPE_DESCRIPTION = "%s shall have type %s";
-	private static final String POSSIBLE_TYPE_ERROR_MESSAGE = "%s is not of type %s";
+	private static final String POSSIBLE_TYPE_ERROR_MESSAGE = "%s has type %s instead of type %s";
 	private static final String POSSIBLE_TYPES_DESCRIPTION = "%s shall have one of types: %s";
-	private static final String POSSIBLE_TYPES_ERROR_MESSAGE = "%s is not one of types: %s";
+	private static final String POSSIBLE_TYPES_ERROR_MESSAGE = "%s has type %s instead of one of types: %s";
 
 	private static final String LINK_DESCRIPTION = "%s shall be object %s";
 	private static final String LINK_ERROR_MESSAGE = "%s is not object %s";
@@ -233,8 +233,8 @@ public class Rules {
 				String.format(currentTypes.size() != 1 ? POSSIBLE_TYPES_DESCRIPTION : POSSIBLE_TYPE_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), typesString),
 				String.format(currentTypes.size() != 1 ? POSSIBLE_TYPES_ERROR_MESSAGE : POSSIBLE_TYPE_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry), typesString),
-				Constants.KEY_NAME);
+						ProfileGeneration.getErrorMessageStart(false, object, entry), "%2", typesString),
+				Constants.KEY_NAME, Constants.OBJECT_TYPE);
 	}
 
 	private static void containsExtraEntries(PDFVersion version, Object object) {
@@ -628,7 +628,7 @@ public class Rules {
 		ProfileGeneration.writeRule(version, 15, object.getModelType(), getClause(object, entry, type, value), test,
 				String.format(REQUIRED_VALUE_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType(),
-						value, PredicatesParser.getPredicateFirstArgument(propertyValue)),
+						value, new PredicatesParserDescription(version).parse(PredicatesParser.getPredicateFirstArgument(propertyValue))),
 				String.format(REQUIRED_VALUE_ERROR_MESSAGE,
 						ProfileGeneration.getErrorMessageStart(false, object, entry), value),
 				Constants.KEY_NAME);
@@ -697,6 +697,7 @@ public class Rules {
 		if (predicate == null) {
 			return;
 		}
+		value = new PredicatesParserDescription(version).parse(value);
 		test.append(predicate);
 		ProfileGeneration.writeRule(version, 14, object.getModelType(), getClause(object, entry, type), test.toString(),
 				String.format(POSSIBLE_VALUE_CONDITION_DESCRIPTION,
@@ -752,8 +753,8 @@ public class Rules {
 			if (test == null || Constants.TRUE.equals(test)) {
 				return;
 			}
-			String requiredArgument = PredicatesParser.getPredicateArgument(entry.getRequired(),
-					PredicatesParser.IS_REQUIRED_PREDICATE);
+			String requiredArgument = new PredicatesParserDescription(version).parse(PredicatesParser.getPredicateArgument(entry.getRequired(),
+					PredicatesParser.IS_REQUIRED_PREDICATE));
 			String result = new PredicatesParser(object, entry, version, null,
 					Constants.REQUIRED_COLUMN).parse(requiredArgument);
 			test = PredicatesParser.removeBrackets(test);

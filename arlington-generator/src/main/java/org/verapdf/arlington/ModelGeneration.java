@@ -55,6 +55,7 @@ public class ModelGeneration {
 		ModelGeneration.addProperty(Constants.KEYS_STRING, Type.STRING.getModelType());
 		ModelGeneration.addProperty(Constants.NUMBER_OF_PAGES, Type.INTEGER.getModelType());
 		ModelGeneration.addProperty(Constants.FILE_SIZE, Type.INTEGER.getModelType());
+		ModelGeneration.addProperty(Constants.OBJECT_TYPE, Type.STRING.getModelType());
 		ModelGeneration.addProperty(Constants.IS_PDF_TAGGED, Type.BOOLEAN.getModelType());
 		ModelGeneration.addProperty(Constants.NOT_STANDARD_14_FONT, Type.BOOLEAN.getModelType());
 		ModelGeneration.addProperty(Constants.IS_ENCRYPTED_WRAPPER, Type.BOOLEAN.getModelType());

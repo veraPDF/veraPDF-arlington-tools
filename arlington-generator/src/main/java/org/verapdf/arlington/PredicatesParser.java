@@ -22,14 +22,15 @@ public class PredicatesParser {
 	public static final String IS_REQUIRED_PREDICATE = "fn:IsRequired";
 
 	private boolean isProfile = true;//false if java code
-	private final PartStack output = new PartStack();
-	private final Stack<String> operators = new Stack<>();
-	private List<Part> arguments = new LinkedList<>();
+	protected boolean isDescription = false;
+	protected final PartStack output = new PartStack();
+	protected final Stack<String> operators = new Stack<>();
+	List<Part> arguments = new LinkedList<>();
 	private Object object = new Object();
 	private String columnName;
 	private Entry entry = new MultiEntry("name");
 	private Type type = Type.INTEGER;
-	private PDFVersion version = PDFVersion.VERSION2_0;
+	protected PDFVersion version = PDFVersion.VERSION2_0;
 	private static final List<String> colorants = new LinkedList<>();
 
 	static {
@@ -56,11 +57,11 @@ public class PredicatesParser {
 	}
 
 	public static class PartStack extends Stack<Part> {
-		private void push(String s) {
+		protected void push(String s) {
 			push(new Part(s));
 		}
 
-		private void add(String s) {
+		protected void add(String s) {
 			add(new Part(s));
 		}
 	}
@@ -203,7 +204,7 @@ public class PredicatesParser {
 				"&&".equals(string) || "!=".equals(string) || "mod".equals(string);
 	}
 
-	private void processToken(String token) {
+	protected void processToken(String token) {
 		processToken(new Part(token), true);
 	}
 
@@ -261,7 +262,7 @@ public class PredicatesParser {
 		}
 	}
 
-	private void executeOperator(String operatorName, boolean isOriginal) {
+	protected void executeOperator(String operatorName, boolean isOriginal) {
 		Part secondArgument = output.pop();
 		Part firstArgument = output.pop();
 		switch (operatorName) {
@@ -347,7 +348,7 @@ public class PredicatesParser {
 		return string;
 	}
 
-	private void or(Part firstArgument, Part secondArgument, boolean isOriginal) {
+	protected void or(Part firstArgument, Part secondArgument, boolean isOriginal) {
 		String firstString = firstArgument.getString();
 		String secondString = secondArgument.getString();
 		if (Constants.SINCE_COLUMN.equals(columnName)) {
@@ -381,7 +382,7 @@ public class PredicatesParser {
 		}
 	}
 
-	private void and(Part firstArgument, Part secondArgument, boolean isOriginal) {
+	protected void and(Part firstArgument, Part secondArgument, boolean isOriginal) {
 		if ("false".equals(firstArgument.getString()) || "false".equals(secondArgument.getString())) {
 			output.add("false");
 		} else if ("true".equals(firstArgument.getString()) || Constants.UNDEFINED.equals(firstArgument.getString())) {
@@ -710,7 +711,7 @@ public class PredicatesParser {
 	}
 
 	public static String addBrackets(String str) {
-		if (containsBrackets(str) || !str.contains(" ")) {
+		if (containsBrackets(str) || !str.contains(" ") || isSinglePredicate(str)) {
 			return str;
 		}
 		return "(" + str + ")";
@@ -761,7 +762,7 @@ public class PredicatesParser {
 		output.push(getPropertyOrMethodName(arrayEntry.getArraySortAscendingPropertyName(number) + " == true"));
 	}
 
-	private void beforeVersion() {
+	protected void beforeVersion() {
 		if (arguments.size() < 1) {
 			throw new RuntimeException("Invalid number of arguments of beforeVersion");
 		}
@@ -1067,7 +1068,7 @@ public class PredicatesParser {
 		output.push(getPropertyOrMethodName(Constants.IS_PDF_TAGGED));
 	}
 
-	private void isPDFVersion() {
+	protected void isPDFVersion() {
 		if (arguments.size() < 1) {
 			throw new RuntimeException("Invalid number of arguments of isPDFVersion");
 		}
@@ -1187,7 +1188,7 @@ public class PredicatesParser {
 				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "==", type.getValueWithSeparator(value), ")");
 	}
 
-	private void sinceVersion() {
+	protected void sinceVersion() {
 		if (arguments.size() < 1) {
 			throw new RuntimeException("Invalid number of arguments of sinceVersion");
 		}
@@ -1291,8 +1292,8 @@ public class PredicatesParser {
 		entry.addTypeValueProperty(Type.BITMASK);
 	}
 
-	private String addQuotes(String argument) {
-		if (argument.matches(ENTRY_REGEX) && !argument.startsWith("@") && !argument.startsWith(PREDICATE_PREFIX) &&
+	protected String addQuotes(String argument) {
+		if (!isDescription && argument.matches(ENTRY_REGEX) && !argument.startsWith("@") && !argument.startsWith(PREDICATE_PREFIX) &&
 				!argument.contains("::") && !argument.matches("-?" + Constants.NUMBER_REGEX) &&
 				!Constants.STAR.equals(argument) && !argument.matches("-?" + Constants.DOUBLE_REGEX) &&
 				!Constants.TRUE.equals(argument) && !Constants.FALSE.equals(argument)) {
@@ -1622,7 +1623,7 @@ public class PredicatesParser {
 		}
 	}
 
-	private String getString() {
+	protected String getString() {
 		return Main.getString(version, object, entry, type) + " column name " + columnName;
 	}
 }
