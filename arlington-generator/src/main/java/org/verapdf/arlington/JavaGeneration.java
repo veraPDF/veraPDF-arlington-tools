@@ -90,6 +90,7 @@ public class JavaGeneration {
 		javaWriter.println();
 
 		addIsPDFTagged();
+		addGetObjectType();
 		addNotStandard14FontMethod();
 		addRectHeightMethod();
 		addRectWidthMethod();

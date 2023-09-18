@@ -717,6 +717,10 @@ public class PredicatesParser {
 		return "(" + str + ")";
 	}
 
+	private static boolean isSinglePredicate(String str) {
+		return str.startsWith(PREDICATE_PREFIX) && containsBrackets(str.substring(str.indexOf("(")));
+	}
+
 	private void alwaysUnencrypted() {
 		output.push("true");//todo
 	}
@@ -1377,7 +1381,7 @@ public class PredicatesParser {
 	}
 
 	private Part processArgument(String argument) {
-		if (argument.contains(" ")) {
+		if (isDescription || argument.contains(" ")) {
 			return new Part(argument);
 		}
 		if (!argument.startsWith("@")) {

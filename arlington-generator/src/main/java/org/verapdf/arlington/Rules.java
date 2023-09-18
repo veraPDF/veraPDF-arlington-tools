@@ -188,9 +188,7 @@ public class Rules {
 		if (newSpecialCase == null || Constants.TRUE.equals(newSpecialCase)) {
 			return;
 		}
-		if (entry.getDefaultValue() != null) {
-			System.out.println(Main.getString(version, object, entry, type) + " default + specialCase");
-		}
+		specialCase = new PredicatesParserDescription(object, entry, version, type, Constants.SPECIAL_CASE_COLUMN).parse(specialCase);
 		StringBuilder test = new StringBuilder();
 		if (Constants.STRUCTURE_ATTRIBUTE_DICTIONARY.equals(object.getId())) {
 			test.append(entry.getContainsPropertyName()).append(" != true || ");
@@ -440,6 +438,8 @@ public class Rules {
 				return;
 			}
 			test.append(predicate);
+			indirectReference = new PredicatesParserDescription(object, entry, version, type,
+					Constants.INDIRECT_REFERENCE_COLUMN).parse(indirectReference);
 			if (entry.mustBeIndirect(type)) {
 				ProfileGeneration.writeRule(version, 12, object.getModelType(), getClause(object, entry, type),
 						test.toString(),
@@ -628,7 +628,8 @@ public class Rules {
 		ProfileGeneration.writeRule(version, 15, object.getModelType(), getClause(object, entry, type, value), test,
 				String.format(REQUIRED_VALUE_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType(),
-						value, new PredicatesParserDescription(version).parse(PredicatesParser.getPredicateFirstArgument(propertyValue))),
+						value, new PredicatesParserDescription(object, entry, version, type, 
+								Constants.REQUIRED_VALUE_COLUMN).parse(PredicatesParser.getPredicateFirstArgument(propertyValue))),
 				String.format(REQUIRED_VALUE_ERROR_MESSAGE,
 						ProfileGeneration.getErrorMessageStart(false, object, entry), value),
 				Constants.KEY_NAME);
@@ -669,7 +670,8 @@ public class Rules {
 			return;
 		}
 		test = PredicatesParser.removeBrackets(test);
-		String condition = PredicatesParser.getPredicateLastArgument(propertyValue, false);//todo fix
+		String condition = new PredicatesParserDescription(object, entry, version, type, 
+				Constants.POSSIBLE_VALUES_COLUMN).parse(PredicatesParser.getPredicateLastArgument(propertyValue, false));
 		ProfileGeneration.writeRule(version, 13, object.getModelType(), getClause(object, entry, type, value), test,
 				String.format(VALUE_ONLY_WHEN_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType(),
@@ -697,7 +699,7 @@ public class Rules {
 		if (predicate == null) {
 			return;
 		}
-		value = new PredicatesParserDescription(version).parse(value);
+		value = new PredicatesParserDescription(object, entry, version, type, Constants.POSSIBLE_VALUES_COLUMN).parse(value);
 		test.append(predicate);
 		ProfileGeneration.writeRule(version, 14, object.getModelType(), getClause(object, entry, type), test.toString(),
 				String.format(POSSIBLE_VALUE_CONDITION_DESCRIPTION,
@@ -753,7 +755,7 @@ public class Rules {
 			if (test == null || Constants.TRUE.equals(test)) {
 				return;
 			}
-			String requiredArgument = new PredicatesParserDescription(version).parse(PredicatesParser.getPredicateArgument(entry.getRequired(),
+			String requiredArgument = new PredicatesParserDescription(object, entry, version, null, Constants.REQUIRED_COLUMN).parse(PredicatesParser.getPredicateArgument(entry.getRequired(),
 					PredicatesParser.IS_REQUIRED_PREDICATE));
 			String result = new PredicatesParser(object, entry, version, null,
 					Constants.REQUIRED_COLUMN).parse(requiredArgument);
