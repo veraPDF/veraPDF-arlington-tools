@@ -922,6 +922,9 @@ public class PredicatesParser {
 		output.push("(" + getPropertyOrMethodName(Entry.getEntriesStringPropertyName(entryName)) + " != null && " +
 				split(getPropertyOrMethodName(Entry.getEntriesStringPropertyName(entryName)), false, colorants) + " > 0)");
 		object.getEntriesStringProperties().add(entryName);
+		if (entryName.contains("::")) {
+			object.getComplexObjectProperties().add(entryName);
+		}
 	}
 
 	private void ignore() {
@@ -946,6 +949,9 @@ public class PredicatesParser {
 		output.push("(" + split(getPropertyOrMethodName(Entry.getKeysStringPropertyName(entryName)), true,
 				Collections.singletonList(getPropertyOrMethodName(entry.getTypeValuePropertyName(Type.NAME)))) + " > 0)");
 		object.getKeysStringProperties().add(entryName);
+		if (entryName.contains("::")) {
+			object.getComplexObjectProperties().add(entryName);
+		}
 		entry.getTypeValueProperties().add(Type.NAME);
 	}
 
@@ -968,6 +974,9 @@ public class PredicatesParser {
 		}
 		output.push("(" + getPropertyOrMethodName(entry.getNameTreeContainsStringPropertyName(entryName)) + " == true)");
 		entry.getInNameTreeProperties().add(entryName);
+		if (entryName.contains("::")) {
+			object.getComplexObjectProperties().add(entryName);
+		}
 	}
 
 	private void isFieldName() {
@@ -996,6 +1005,7 @@ public class PredicatesParser {
 		} else if (entryName.contains("::")) {
 			output.push(getPropertyOrMethodName(Entry.getHasTypePropertyName(entryName, Type.DICTIONARY)) + " == true");
 			object.getEntriesHasTypeProperties().put(entryName, Type.DICTIONARY);
+			object.getComplexObjectProperties().add(entryName);
 		} else {
 			throw new RuntimeException("Invalid argument of isDictionary");
 		}
@@ -1039,6 +1049,10 @@ public class PredicatesParser {
 					multiEntry.setContainsProperty(true);
 				} else {
 					object.getContainsEntriesProperties().add(entryName);
+					int index = entryName.lastIndexOf("::");
+					if (index != -1) {
+						object.getComplexObjectProperties().add(entryName.substring(0, index));
+					}
 				}
 			}
 		} else {
@@ -1527,6 +1541,7 @@ public class PredicatesParser {
 				object.getEntriesHasTypeProperties().put(collectionName, type);
 				part.getUndefinedEntries().put(collectionName, type);
 			}
+			object.getComplexObjectProperties().add(argument);
 			return part;
 		}
 		return null;
@@ -1556,6 +1571,7 @@ public class PredicatesParser {
 		} else {
 			Type type = types.iterator().next();
 			object.getEntriesValuesProperties().put(argument, type);
+			boolean createArlingtonObject = false;
 			if (currentObjects.size() == 1) {
 				Object currentObject = currentObjects.get(0);
 				Entry entry = currentObject.getEntry(entryName);
@@ -1565,6 +1581,14 @@ public class PredicatesParser {
 						entry.addHasTypeProperty(type);
 					}
 					object.getEntryNameToArlingtonObjectMap().put(argument, currentObject.getId());
+					createArlingtonObject = true;
+				}
+			}
+			if (argument.contains("::")) {
+				if (createArlingtonObject) {
+					object.getComplexObjectProperties().add(argument.substring(0, argument.lastIndexOf("::")));
+				} else {
+					object.getComplexObjectProperties().add(argument);
 				}
 			}
 			Part part = new Part(getPropertyOrMethodName(Entry.getTypeValuePropertyName(argument, type)));

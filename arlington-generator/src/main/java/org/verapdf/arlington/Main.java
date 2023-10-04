@@ -178,20 +178,20 @@ public class Main {
 		}
 		objectNames.add(Constants.ARRAY_OF_OBJECT_STREAMS);
 		for (PDFVersion version : PDFVersion.values()) {
-			Set<String> possibleParents = new HashSet<>();
-			possibleParents.add(Constants.FILE_TRAILER);
-			Entry starEntry = new Entry();
-			starEntry.setName(Constants.STAR);
-			starEntry.getTypes().add(Type.STREAM);
-			List<String> starLinks = new LinkedList<>();
-			starLinks.add(Constants.OBJECT_STREAM);
-			starEntry.getLinks().put(Type.STREAM, starLinks);
-			starEntry.getTypesPredicates().add("");
-			starEntry.setRequired("");
-			SortedSet<Entry> entries = new TreeSet<>();
-			entries.add(starEntry);
-			Object object = new Object(Constants.ARRAY_OF_OBJECT_STREAMS, entries, possibleParents);
 			if (PDFVersion.compare(version, PDFVersion.VERSION1_5) >= 0) {
+				Set<String> possibleParents = new HashSet<>();
+				possibleParents.add(Constants.FILE_TRAILER);
+				Entry starEntry = new Entry();
+				starEntry.setName(Constants.STAR);
+				starEntry.getTypes().add(Type.STREAM);
+				List<String> starLinks = new LinkedList<>();
+				starLinks.add(Constants.OBJECT_STREAM);
+				starEntry.getLinks().put(Type.STREAM, starLinks);
+				starEntry.getTypesPredicates().add("");
+				starEntry.setRequired("");
+				SortedSet<Entry> entries = new TreeSet<>();
+				entries.add(starEntry);
+				Object object = new Object(Constants.ARRAY_OF_OBJECT_STREAMS, entries, possibleParents);
 				version.getObjectIdMap().put(Constants.ARRAY_OF_OBJECT_STREAMS, object);
 			}
 		}

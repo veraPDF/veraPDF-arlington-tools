@@ -55,6 +55,9 @@ public class Properties {
 				addNameTreeContainsString(multiObject, multiEntry, entryName);
 			}
 		}
+		for (String entry : multiObject.getComplexObjectProperties()) {
+			multiObject.getJavaGeneration().getComplexCOSObject(multiObject, entry);
+		}
 		if (multiObject.getPageContainsStructContentItemsProperty()) {
 			addPageContainsStructContentItems(multiObject);
 		}

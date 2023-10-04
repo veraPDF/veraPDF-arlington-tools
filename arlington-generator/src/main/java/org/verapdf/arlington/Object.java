@@ -146,6 +146,10 @@ public class Object {
 		return multiObject.getKeysStringProperties();
 	}
 
+	public Set<String> getComplexObjectProperties() {
+		return multiObject.getComplexObjectProperties();
+	}
+
 	public Set<String> getEntriesStringProperties() {
 		return multiObject.getEntriesStringProperties();
 	}

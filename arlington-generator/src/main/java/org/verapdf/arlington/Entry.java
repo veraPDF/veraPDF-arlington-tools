@@ -311,7 +311,7 @@ public class Entry implements Comparable<Entry> {
 	}
 
 	public static String getValuePropertyName(String entryName) {
-		return getCorrectEntryName(entryName) + "Value";
+		return getCorrectEntryName(entryName).replace("*", "Any") + "Value";
 	}
 
 	public static String getTypeDefaultValuePropertyName(String entryName, Type type) {

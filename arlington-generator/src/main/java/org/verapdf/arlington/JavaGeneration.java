@@ -866,10 +866,10 @@ public class JavaGeneration {
 	public void addArraySortAscendingMethod(Entry entry, int number) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(entry.getArraySortAscendingPropertyName(number)));
-		getObjectByEntryName(entry.getName());
+		String objectName = getObjectByEntryName(entry.getName());
 		javaWriter.println("\t\treturn " +
 				getMethodCall(getGetterName(Entry.getArraySortAscendingPropertyName("", "")),
-						"object", String.valueOf(number)) + ";");
+						objectName, String.valueOf(number)) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -1000,7 +1000,7 @@ public class JavaGeneration {
 	public void addIndirectMethod(Entry entry) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(entry.getIndirectPropertyName()));
-		getObjectByEntryName(entry.getName());
+		String objectName = getObjectByEntryName(entry.getName());
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getIndirectPropertyName("")),
 				"object") + ";");
 		javaWriter.println("\t}");
@@ -1123,9 +1123,10 @@ public class JavaGeneration {
 	public void addStringLengthMethod(Entry entry) {
 		printMethodSignature(true, "public", false, Type.INTEGER.getJavaType(),
 				getGetterName(entry.getStringLengthPropertyName()));
-		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\tif (object != null && object.getType() == " + Type.STRING.getCosObjectType() + ") {");
-		javaWriter.println("\t\t\treturn (long) object.getString().length();");
+		String objectName = getObjectByEntryName(entry.getName());
+		javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " + 
+				Type.STRING.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\treturn (long) " + objectName + ".getString().length();");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\treturn null;");
 		javaWriter.println("\t}");
@@ -1135,9 +1136,10 @@ public class JavaGeneration {
 	public void addStreamLengthMethod(Entry entry) {
 		printMethodSignature(true, "public", false, Type.INTEGER.getJavaType(),
 				getGetterName(entry.getStreamLengthPropertyName()));
-		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\tif (object != null && object.getType() == " + Type.STREAM.getCosObjectType() + ") {");
-		javaWriter.println("\t\t\tCOSObject length = object.getKey(ASAtom.LENGTH);");
+		String objectName = getObjectByEntryName(entry.getName());
+		javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " + 
+				Type.STREAM.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\tCOSObject length = " + objectName + ".getKey(ASAtom.LENGTH);");
 		javaWriter.println("\t\t\tif (length != null && length.getType() == " + Type.INTEGER.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\t\treturn length.getInteger();");
 		javaWriter.println("\t\t\t}");
@@ -1172,9 +1174,9 @@ public class JavaGeneration {
 	public void addRectWidthMethod(Entry entry) {
 		printMethodSignature(true, "public", false, Type.NUMBER.getJavaType(),
 				getGetterName(entry.getRectWidthPropertyName()));
-		getObjectByEntryName(entry.getName());
+		String objectName = getObjectByEntryName(entry.getName());
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getRectWidthPropertyName("")),
-				"object") + ";");
+				objectName) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -1266,9 +1268,9 @@ public class JavaGeneration {
 	public void addRectHeightMethod(Entry entry) {
 		printMethodSignature(true, "public", false, Type.NUMBER.getJavaType(),
 				getGetterName(entry.getRectHeightPropertyName()));
-		getObjectByEntryName(entry.getName());
+		String objectName = getObjectByEntryName(entry.getName());
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getRectHeightPropertyName("")),
-				"object") + ";");
+				objectName) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -1276,9 +1278,9 @@ public class JavaGeneration {
 	public void addHexStringMethod(Entry entry) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(entry.getIsHexStringPropertyName()));
-		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\treturn object != null && object.getType() == " + Type.STRING.getCosObjectType() +
-				" && ((COSString)object.getDirectBase()).isHexadecimal();");
+		String objectName = getObjectByEntryName(entry.getName());
+		javaWriter.println("\t\treturn " + objectName + " != null && " + objectName + ".getType() == " + 
+				Type.STRING.getCosObjectType() + " && ((COSString)" + objectName + ".getDirectBase()).isHexadecimal();");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -1286,9 +1288,9 @@ public class JavaGeneration {
 	public void addFieldNameMethod(Entry entry) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Entry.getIsFieldNamePropertyName(entry.getName())));
-		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\treturn object != null && object.getType() == " + Type.STRING.getCosObjectType() +
-				" && !object.getString().contains(\".\");");
+		String objectName = getObjectByEntryName(entry.getName());
+		javaWriter.println("\t\treturn " + objectName + " != null && " + objectName + ".getType() == " + 
+				Type.STRING.getCosObjectType() + " && !" + objectName + ".getString().contains(\".\");");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -1296,9 +1298,9 @@ public class JavaGeneration {
 	public void addHasCycleMethod(Entry entry) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(entry.getHasCyclePropertyName()));
-		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\treturn GFAObject." + Constants.HAS_CYCLE + "(object, " +
-				getASAtomFromString(entry.getName()) + ");");
+		String objectName = getObjectByEntryName(entry.getName());
+		javaWriter.println("\t\treturn GFAObject." + getMethodCall(Constants.HAS_CYCLE, objectName, 
+				getASAtomFromString(entry.getName())) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}

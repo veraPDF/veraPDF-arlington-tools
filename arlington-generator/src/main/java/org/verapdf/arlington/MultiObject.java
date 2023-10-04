@@ -16,6 +16,7 @@ public class MultiObject extends Object {
 	private final Map<String, Type> entriesValuesProperties = new HashMap<>();
 	private final Map<String, Type> entriesHasTypeProperties = new HashMap<>();
 	private final Map<String, String> entryNameToArlingtonObjectMap = new HashMap<>();
+	private final Set<String> complexObjectProperties = new TreeSet<>();
 
 	private final SortedSet<MultiEntry> entries;
 
@@ -102,5 +103,9 @@ public class MultiObject extends Object {
 
 	public void setJavaGeneration(JavaGeneration javaGeneration) {
 		this.javaGeneration = javaGeneration;
+	}
+
+	public Set<String> getComplexObjectProperties() {
+		return complexObjectProperties;
 	}
 }
