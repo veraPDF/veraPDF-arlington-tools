@@ -1002,25 +1002,43 @@ public class JavaGeneration {
 				getGetterName(entry.getIndirectPropertyName()));
 		String objectName = getObjectByEntryName(entry.getName());
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getIndirectPropertyName("")),
-				"object") + ";");
+				objectName) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
 
-	public void addNameTreeContainsStringMethod(Object object, Entry entry, String nameTreeEntryName) {
+	public void addEntryIsIndexInNameTreeMethod(Object object, Entry entry, String nameTreeEntryName) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
-				getGetterName(entry.getNameTreeContainsStringPropertyName(nameTreeEntryName)));
-		getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\tif (object == null || object.getType() != " + Type.STRING.getCosObjectType() + ") {");
+				getGetterName(entry.getEntryIsIndexInNameTreePropertyName(nameTreeEntryName)));
+		String entryName = getObjectByEntryName(entry.getName());
+		javaWriter.println("\t\tif (" + entryName + " == null || " + entryName + ".getType() != " + Type.STRING.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
-		String nameTreeFinalEntry = getComplexObject(object, nameTreeEntryName);
+		String nameTreeFinalEntry = getComplexObject(nameTreeEntryName);
 		javaWriter.println("\t\tif (" + nameTreeFinalEntry + " == null || " + nameTreeFinalEntry + ".getType() != " +
 				Type.DICTIONARY.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tPDNameTreeNode nameTreeNode = PDNameTreeNode.create(" + nameTreeFinalEntry + ");");
-		javaWriter.println("\t\treturn nameTreeNode.getObject(object.getString()) != null;");
+		javaWriter.println("\t\treturn nameTreeNode.containsKey(" + entryName + ".getString());");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addEntryIsValueInNameTreeMethod(Object object, Entry entry, String nameTreeEntryName) {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getGetterName(entry.getEntryIsValueInNameTreePropertyName(nameTreeEntryName)));
+		String entryName = getObjectByEntryName(entry.getName());
+		javaWriter.println("\t\tif (" + entryName + " == null) {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		String nameTreeFinalEntry = getComplexObject(nameTreeEntryName);
+		javaWriter.println("\t\tif (" + nameTreeFinalEntry + " == null || " + nameTreeFinalEntry + ".getType() != " +
+				Type.DICTIONARY.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tPDNameTreeNode nameTreeNode = PDNameTreeNode.create(" + nameTreeFinalEntry + ");");
+		javaWriter.println("\t\treturn nameTreeNode.containsValue(object);");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -1046,8 +1064,8 @@ public class JavaGeneration {
 				getGetterName(Constants.PAGE_CONTAINS_STRUCT_CONTENT_ITEMS));
 		javaWriter.println("\t\tCOSObject contents = this.baseObject.getKey(ASAtom.CONTENTS);");
 		javaWriter.println("\t\tif (contents.getType() == COSObjType.COS_STREAM || contents.getType() == COSObjType.COS_ARRAY) {");
-		javaWriter.println("\t\t\ttry (ASInputStream opStream = contents.getDirectBase().getData(COSStream.FilterFlags.DECODE);" +
-				" PDFStreamParser streamParser = new PDFStreamParser(opStream)) {");
+		javaWriter.println("\t\t\ttry (ASInputStream opStream = contents.getDirectBase().getData(COSStream.FilterFlags.DECODE);");
+		javaWriter.println("\t\t\t\t PDFStreamParser streamParser = new PDFStreamParser(opStream)) {");
 		javaWriter.println("\t\t\t\tstreamParser.parseTokens();");
 		javaWriter.println("\t\t\t\tList<COSBase> arguments = new ArrayList<>();");
 		javaWriter.println("\t\t\t\tfor (java.lang.Object rawToken : streamParser.getTokens()) {");
@@ -1061,7 +1079,12 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\t\t\t\t\t}");
 		javaWriter.println("\t\t\t\t\t\t\tCOSBase lastArgument = arguments.get(arguments.size() - 1);");
 		javaWriter.println("\t\t\t\t\t\t\tif (lastArgument.getType() == COSObjType.COS_NAME) {");
-		javaWriter.println("\t\t\t\t\t\t\t\t//todo check dict from properties");
+		javaWriter.println("\t\t\t\t\t\t\t\tCOSObject resources = getInheritableResources(new COSObject(this.baseObject));");
+		javaWriter.println("\t\t\t\t\t\t\t\tCOSObject properties = resources != null ? resources.getKey(ASAtom.PROPERTIES) : null;");
+		javaWriter.println("\t\t\t\t\t\t\t\tCOSObject dict = properties != null ? properties.getKey(lastArgument.getName()) : null;");
+		javaWriter.println("\t\t\t\t\t\t\t\tif (dict != null && dict.getType() == COSObjType.COS_DICT) {");
+		javaWriter.println("\t\t\t\t\t\t\t\t\tlastArgument = dict.getDirectBase();");
+		javaWriter.println("\t\t\t\t\t\t\t\t}");
 		javaWriter.println("\t\t\t\t\t\t\t}");
 		javaWriter.println("\t\t\t\t\t\t\tif (lastArgument.getType() == COSObjType.COS_DICT) {");
 		javaWriter.println("\t\t\t\t\t\t\t\tif (lastArgument.knownKey(ASAtom.MCID)) {");
@@ -1077,6 +1100,16 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\t}");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\treturn false;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+		
+		javaWriter.println("\tprivate COSObject getInheritableResources(COSObject object) {");
+		javaWriter.println("\t\tCOSObject value = object.getKey(ASAtom.RESOURCES);");
+		javaWriter.println("\t\tif (value != null && !value.empty()) {");
+		javaWriter.println("\t\t\treturn value;");
+		javaWriter.println("\t\t} else {");
+		javaWriter.println("\t\t\treturn this.baseObject.knownKey(ASAtom.PARENT) ? getInheritableResources(this.baseObject.getKey(ASAtom.PARENT)) : null;");
+		javaWriter.println("\t\t}");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -1369,6 +1402,16 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	private String getComplexObject(String entryName) {
+		if (Constants.PARENT.equals(entryName)) {
+			return "this.parentObject";
+		}
+		String correctEntryName = Entry.getCorrectEntryName(entryName).replace(Constants.STAR, "Any");
+		javaWriter.println("\t\tCOSObject " + correctEntryName + " = " + 
+				getMethodCall(getGetterName(Entry.getValuePropertyName(entryName))) + ";");
+		return correctEntryName;
+	}
+	
 	private String getComplexObject(Object object, String entryName) {
 		List<String> entriesNames = new ArrayList<>(Arrays.asList(entryName.split("::")));
 		Pair<Integer, String> pair = calculateInitialObjectName(object, entriesNames);
@@ -1471,6 +1514,20 @@ public class JavaGeneration {
 					getMethodCall(getGetterName(Entry.getDefaultValuePropertyName(entryName))) + ";");
 			javaWriter.println("\t\t}");
 		}
+		javaWriter.println("\t\treturn " + objectName + ";");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+	
+	public void getComplexCOSObject(MultiObject object, String entry) {
+		if (Constants.PARENT.equals(entry)) {
+			return;
+		}
+		if (object.getEntriesNames().contains(entry)) {
+			return;
+		}
+		printMethodSignature(false, "public", false, "COSObject", getGetterName(Entry.getValuePropertyName(entry)));
+		String objectName = getComplexObject(object, entry);
 		javaWriter.println("\t\treturn " + objectName + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();

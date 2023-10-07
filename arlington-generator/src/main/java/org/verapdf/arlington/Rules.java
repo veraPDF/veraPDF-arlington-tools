@@ -600,6 +600,7 @@ public class Rules {
 				Type currentType = Type.INTEGER;
 				String currentEntryName = entry.getName() + "::" + i;
 				object.getEntriesValuesProperties().put(currentEntryName, currentType);
+				object.getComplexObjectProperties().add(currentEntryName);
 				test.append(" && ").append(Entry.getTypeValuePropertyName(currentEntryName, currentType)).append(" == ")
 						.append(elementValue);
 			}

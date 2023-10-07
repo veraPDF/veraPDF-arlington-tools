@@ -338,9 +338,14 @@ public class Entry implements Comparable<Entry> {
 		return getCorrectEntryName(name) + "EntriesString";
 	}
 
-	public String getNameTreeContainsStringPropertyName(String entryName) {
-		return getCorrectEntryName("nameTree" + entryName + "Contains" + getName()) + "String";
+	public String getEntryIsIndexInNameTreePropertyName(String entryName) {
+		return getCorrectEntryName(getName() + "EntryIsIndexInNameTree" + entryName);
 	}
+
+	public String getEntryIsValueInNameTreePropertyName(String entryName) {
+		return getCorrectEntryName(getName() + "EntryIsValueInNameTree" + entryName);
+	}
+
 
 	public static String getIsHexStringPropertyName(String entryName) {
 		return getCorrectEntryName("is" + entryName) + "HexString";

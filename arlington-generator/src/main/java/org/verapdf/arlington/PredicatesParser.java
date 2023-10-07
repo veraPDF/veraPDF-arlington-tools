@@ -972,7 +972,7 @@ public class PredicatesParser {
 		if (nameTreeEntry == null && !entryName.contains("::")) {
 			throw new RuntimeException("Invalid entry name in inNameTree");
 		}
-		output.push("(" + getPropertyOrMethodName(entry.getNameTreeContainsStringPropertyName(entryName)) + " == true)");
+		output.push("(" + getPropertyOrMethodName(entry.getEntryIsIndexInNameTreePropertyName(entryName)) + " == true)");
 		entry.getInNameTreeProperties().add(entryName);
 		if (entryName.contains("::")) {
 			object.getComplexObjectProperties().add(entryName);

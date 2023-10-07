@@ -52,7 +52,7 @@ public class Properties {
 				addHasCycle(multiObject, multiEntry);
 			}
 			for (String entryName : multiEntry.getInNameTreeProperties()) {
-				addNameTreeContainsString(multiObject, multiEntry, entryName);
+				addEntryIsIndexInNameTree(multiObject, multiEntry, entryName);
 			}
 		}
 		for (String entry : multiObject.getComplexObjectProperties()) {
@@ -177,8 +177,13 @@ public class Properties {
 		multiObject.getJavaGeneration().addArraySortAscendingMethod(entry, number);
 	}
 
-	private static void addNameTreeContainsString(MultiObject multiObject, Entry entry, String entryName) {
-		ModelGeneration.addProperty(entry.getNameTreeContainsStringPropertyName(entryName), Type.BOOLEAN.getModelType());
-		multiObject.getJavaGeneration().addNameTreeContainsStringMethod(multiObject, entry, entryName);
+	private static void addEntryIsIndexInNameTree(MultiObject multiObject, Entry entry, String entryName) {
+		ModelGeneration.addProperty(entry.getEntryIsIndexInNameTreePropertyName(entryName), Type.BOOLEAN.getModelType());
+		multiObject.getJavaGeneration().addEntryIsIndexInNameTreeMethod(multiObject, entry, entryName);
+	}
+
+	private static void addEntryIsValueInNameTree(MultiObject multiObject, Entry entry, String entryName) {
+		ModelGeneration.addProperty(entry.getEntryIsValueInNameTreePropertyName(entryName), Type.BOOLEAN.getModelType());
+		multiObject.getJavaGeneration().addEntryIsValueInNameTreeMethod(multiObject, entry, entryName);
 	}
 }
