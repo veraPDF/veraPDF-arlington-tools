@@ -1147,7 +1147,7 @@ public class JavaGeneration {
 	public void addArrayLengthMethod(Object object, String entryName) {
 		printMethodSignature(true, "public", false, Type.INTEGER.getJavaType(),
 				getGetterName(Entry.getArrayLengthPropertyName(entryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(object, entryName) : getObjectByEntryName(entryName);
+		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getArrayLengthPropertyName("")), objectName) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
@@ -1373,7 +1373,7 @@ public class JavaGeneration {
 	public void addEntriesStringMethod(Object object, String entryName) {//works only for name entries
 		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
 				getGetterName(Entry.getEntriesStringPropertyName(entryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(object, entryName) : getObjectByEntryName(entryName);
+		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getEntriesStringPropertyName("")),
 				objectName) + ";");
 		javaWriter.println("\t}");
@@ -1395,7 +1395,7 @@ public class JavaGeneration {
 	public void addKeysStringMethod(Object object, String entryName) {
 		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
 				getGetterName(Entry.getKeysStringPropertyName(entryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(object, entryName) : getObjectByEntryName(entryName);
+		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getKeysStringPropertyName("")),
 				objectName) + ";");
 		javaWriter.println("\t}");

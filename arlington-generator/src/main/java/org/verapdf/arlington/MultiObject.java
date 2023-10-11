@@ -8,13 +8,13 @@ public class MultiObject extends Object {
 
 	private boolean pageContainsStructContentItemsProperty = false;
 	private boolean imageIsStructContentItemProperty = false;
-	private final Set<String> extensionProperties = new HashSet<>();
-	private final Set<String> arraySizeProperties = new HashSet<>();
-	private final Set<String> keysStringProperties = new HashSet<>();
-	private final Set<String> entriesStringProperties = new HashSet<>();
-	private final Set<String> containsEntriesProperties = new HashSet<>();
-	private final Map<String, Type> entriesValuesProperties = new HashMap<>();
-	private final Map<String, Type> entriesHasTypeProperties = new HashMap<>();
+	private final Set<String> extensionProperties = new TreeSet<>();
+	private final Set<String> arraySizeProperties = new TreeSet<>();
+	private final Set<String> keysStringProperties = new TreeSet<>();
+	private final Set<String> entriesStringProperties = new TreeSet<>();
+	private final Set<String> containsEntriesProperties = new TreeSet<>();
+	private final Map<String, Type> entriesValuesProperties = new TreeMap<>();
+	private final Map<String, Type> entriesHasTypeProperties = new TreeMap<>();
 	private final Map<String, String> entryNameToArlingtonObjectMap = new HashMap<>();
 	private final Set<String> complexObjectProperties = new TreeSet<>();
 
