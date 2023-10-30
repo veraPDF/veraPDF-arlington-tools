@@ -65,7 +65,7 @@ public enum PDFVersion {
 	}
 
 	public String getSpecification() {
-		return "ISO_32000_" + getStringWithUnderScore();
+		return (compare(this, PDFVersion.VERSION1_6) > 0 ? "ISO_32000_" : "PDF_") + getStringWithUnderScore();
 	}
 
 	public static PDFVersion getPDFVersion(String string) {
