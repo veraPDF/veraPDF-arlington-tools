@@ -13,17 +13,21 @@ public class ProfileGeneration {
 		} else {
 			profileWriter.println("\t\t<rule object=\"" + object + "\">");
 		}
-		profileWriter.println("\t\t\t<id specification=\"" + version.getSpecification() + "\" clause=\"" + clause + "\" testNumber=\"" + ruleNumber + "\"/>");//todo specification
-		profileWriter.println("\t\t\t<description>" + getXMLString(description) + "</description>");//++rulesNumber
+		profileWriter.println("\t\t\t<id specification=\"" + version.getSpecification() + "\" clause=\"" + clause + "\" testNumber=\"" + ruleNumber + "\"/>");
+		profileWriter.println("\t\t\t<description>" + getXMLString(description) + "</description>");
 		profileWriter.println("\t\t\t<test>" + getXMLString(test) + "</test>");
 		profileWriter.println("\t\t\t<error>");
 		profileWriter.println("\t\t\t\t<message>" + getXMLString(errorMessage) + "</message>");
-		if (errorArguments.length == 0) {
+		boolean containsKeyName = errorMessage.contains("%keyName%");
+		if (errorArguments.length == 0 && !containsKeyName) {
 			profileWriter.println("\t\t\t\t<arguments/>");
 		} else {
 			profileWriter.println("\t\t\t\t<arguments>");
 			for (String errorArgument : errorArguments) {
 				profileWriter.println("\t\t\t\t\t<argument>" + getXMLString(errorArgument) + "</argument>");
+			}
+			if (containsKeyName) {
+				profileWriter.println("\t\t\t\t\t<argument name=\"" + Constants.KEY_NAME + "\">" + Constants.KEY_NAME + "</argument>");
 			}
 			profileWriter.println("\t\t\t\t</arguments>");
 		}
@@ -81,7 +85,7 @@ public class ProfileGeneration {
 					stringBuilder.append(" ").append(entry.getName());
 				}
 			} else if (!isDescription) {
-				stringBuilder.append(" ").append("%1");
+				stringBuilder.append(" ").append("%keyName%");
 			}
 			if (type != null) {
 				stringBuilder.append(" with type ");

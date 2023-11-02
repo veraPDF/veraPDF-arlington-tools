@@ -559,6 +559,15 @@ public class JavaGeneration {
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
+	
+	public void addEntryTypeMethod(String entryName) {
+		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
+				getGetterName(Entry.getEntryTypePropertyName(entryName)));
+		String objectName = getObjectByEntryName(entryName);
+		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Constants.OBJECT_TYPE), objectName) + ";");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
 
 	public void addHasTypeMethod(Object multiObject, String entryName, Type type) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
@@ -1236,8 +1245,8 @@ public class JavaGeneration {
 	}
 
 	public void addGetObjectType() {
-		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
-				getGetterName(Constants.OBJECT_TYPE));
+		printMethodSignature(false, "public", false, Type.STRING.getJavaType(),
+				getGetterName(Constants.OBJECT_TYPE), "COSObject object");
 		for (Type type : Type.values()) {
 			if (type == Type.BITMASK || type == Type.DATE || type == Type.MATRIX || type == Type.ENTRY || 
 					type == Type.RECTANGLE || type == Type.NAME_TREE || type == Type.NUMBER_TREE || 
@@ -1245,7 +1254,7 @@ public class JavaGeneration {
 					type == Type.SUB_ARRAY) {
 				continue;
 			}
-			javaWriter.println("\t\tif (baseObject.getType() == " + type.getCosObjectType() + ") {");
+			javaWriter.println("\t\tif (object.getType() == " + type.getCosObjectType() + ") {");
 			javaWriter.println("\t\t\treturn \"" + type.getType() + "\";");
 			javaWriter.println("\t\t}");
 		}

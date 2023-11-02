@@ -49,7 +49,7 @@ public class Constants {
 	public static final String IMAGE_IS_STRUCT_CONTENT_ITEM = "imageIsStructContentItem";
 	public static final String IS_ENCRYPTED_WRAPPER = "isEncryptedWrapper";
 	public static final String IS_PDF_TAGGED = "isPDFTagged";
-	public static final String OBJECT_TYPE = "objectType";
+	public static final String OBJECT_TYPE = "ObjectType";
 	public static final String NOT_STANDARD_14_FONT = "notStandard14Font";
 	public static final String SUB_ARRAYS = "subArrays";
 	public static final String HAS_CYCLE = "hasCycle";

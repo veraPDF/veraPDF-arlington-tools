@@ -173,8 +173,7 @@ public class Rules {
 						String.format(LINKS_DESCRIPTION,
 								ProfileGeneration.getErrorMessageStart(true, object, entry, type), objectsString),
 						String.format(LINKS_ERROR_MESSAGE,
-								ProfileGeneration.getErrorMessageStart(false, object, entry, type), objectsString),
-						Constants.KEY_NAME);
+								ProfileGeneration.getErrorMessageStart(false, object, entry, type), objectsString));
 			}
 		}
 	}
@@ -201,8 +200,7 @@ public class Rules {
 				String.format(SPECIAL_CASE_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry, type), specialCase),
 				String.format(SPECIAL_CASE_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry, type), specialCase),
-				Constants.KEY_NAME);
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type), specialCase));
 	}
 
 	private static void hasWrongType(PDFVersion version, Object object, Entry entry) {
@@ -231,8 +229,8 @@ public class Rules {
 				String.format(currentTypes.size() != 1 ? POSSIBLE_TYPES_DESCRIPTION : POSSIBLE_TYPE_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), typesString),
 				String.format(currentTypes.size() != 1 ? POSSIBLE_TYPES_ERROR_MESSAGE : POSSIBLE_TYPE_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry), "%2", typesString),
-				Constants.KEY_NAME, Constants.OBJECT_TYPE);
+						ProfileGeneration.getErrorMessageStart(false, object, entry), "%1", typesString),
+				Entry.getEntryTypePropertyName(entry.getName()));
 	}
 
 	private static void containsExtraEntries(PDFVersion version, Object object) {
@@ -424,8 +422,7 @@ public class Rules {
 					String.format(isIndirect ? INDIRECT_DESCRIPTION : DIRECT_DESCRIPTION,
 							ProfileGeneration.getErrorMessageStart(true, object, entry, type)),
 					String.format(isIndirect ? INDIRECT_ERROR_MESSAGE : DIRECT_ERROR_MESSAGE,
-							ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
-					Constants.KEY_NAME);
+							ProfileGeneration.getErrorMessageStart(false, object, entry, type)));
 		} else if (entry.getIndirectReference(type) != null &&
 				entry.getIndirectReference(type).contains(PredicatesParser.PREDICATE_PREFIX)) {
 			StringBuilder test = new StringBuilder();
@@ -447,8 +444,7 @@ public class Rules {
 								ProfileGeneration.getErrorMessagePart(true, object, entry, type),
 								indirectReference),
 						String.format(INDIRECT_ERROR_MESSAGE,
-								ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
-						Constants.KEY_NAME);
+								ProfileGeneration.getErrorMessageStart(false, object, entry, type)));
 			} else if (entry.mustBeDirect(type)) {
 				ProfileGeneration.writeRule(version, 16, object.getModelType(), getClause(object, entry, type),
 						test.toString(),
@@ -456,8 +452,7 @@ public class Rules {
 								ProfileGeneration.getErrorMessagePart(true, object, entry, type),
 								indirectReference),
 						String.format(DIRECT_ERROR_MESSAGE,
-								ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
-						Constants.KEY_NAME);
+								ProfileGeneration.getErrorMessageStart(false, object, entry, type)));
 			}
 		}
 	}
@@ -496,8 +491,8 @@ public class Rules {
 					String.format(possibleValues.size() == 1 ? POSSIBLE_VALUE_DESCRIPTION : POSSIBLE_VALUES_DESCRIPTION,
 							ProfileGeneration.getErrorMessageStart(true, object, entry, type), valuesString),
 					String.format(POSSIBLE_VALUE_ERROR_MESSAGE,
-							ProfileGeneration.getErrorMessageStart(false, object, entry, type), "%2", valuesString),
-					Constants.KEY_NAME, propertyName);
+							ProfileGeneration.getErrorMessageStart(false, object, entry, type), "%1", valuesString),
+					propertyName);
 		}
 	}
 
@@ -615,8 +610,7 @@ public class Rules {
 				String.format(possibleValues.size() == 1 ? POSSIBLE_VALUE_DESCRIPTION : POSSIBLE_VALUES_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry, type), valuesString),
 				String.format(ARRAY_POSSIBLE_VALUE_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry, type), valuesString),
-				Constants.KEY_NAME);
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type), valuesString));
 	}
 
 	private static void requiredValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue,
@@ -632,8 +626,7 @@ public class Rules {
 						value, new PredicatesParserDescription(object, entry, version, type, 
 								Constants.REQUIRED_VALUE_COLUMN).parse(PredicatesParser.getPredicateFirstArgument(propertyValue))),
 				String.format(REQUIRED_VALUE_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry), value),
-				Constants.KEY_NAME);
+						ProfileGeneration.getErrorMessageStart(false, object, entry), value));
 	}
 
 	private static void deprecatedValues(Set<String> deprecatedValues, PDFVersion version, Object object, Entry entry, Type type) {
@@ -651,16 +644,15 @@ public class Rules {
 							ProfileGeneration.getErrorMessageStart(true, object, entry, type), valuesString),
 					String.format(DEPRECATED_VALUE_ERROR_MESSAGE,
 							ProfileGeneration.getErrorMessageStart(false, object, entry, type),
-							deprecatedValues.iterator().next()),
-					Constants.KEY_NAME);
+							deprecatedValues.iterator().next()));
 		} else {
 			ProfileGeneration.writeRule(version, 19, object.getModelType(), getClause(object, entry, type),
 					deprecatedTest.toString(),
 					String.format(DEPRECATED_VALUES_DESCRIPTION,
 							ProfileGeneration.getErrorMessageStart(true, object, entry, type), valuesString),
 					String.format(DEPRECATED_VALUE_ERROR_MESSAGE,
-							ProfileGeneration.getErrorMessageStart(false, object, entry, type), "%2"),
-					Constants.KEY_NAME, entry.getTypeValuePropertyName(type));
+							ProfileGeneration.getErrorMessageStart(false, object, entry, type), "%1"),
+					entry.getTypeValuePropertyName(type));
 		}
 	}
 
@@ -678,8 +670,7 @@ public class Rules {
 						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType(),
 						value, condition),
 				String.format(VALUE_ONLY_WHEN_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry), value, condition),
-				Constants.KEY_NAME);
+						ProfileGeneration.getErrorMessageStart(false, object, entry), value, condition));
 	}
 
 	private static boolean isDeprecatedValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
@@ -706,8 +697,7 @@ public class Rules {
 				String.format(POSSIBLE_VALUE_CONDITION_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry, type), value),
 				String.format(POSSIBLE_VALUE_ERROR_CONDITION_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry, type), value),
-				Constants.KEY_NAME);
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type), value));
 	}
 
 	private static void typesPredicates(PDFVersion version, Object object, Entry entry) {
@@ -738,8 +728,7 @@ public class Rules {
 				String.format(DEPRECATED_TYPE_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType()),
 				String.format(DEPRECATED_TYPE_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry, type)),
-				Constants.KEY_NAME);
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type)));
 	}
 
 	private static void requiredEntry(PDFVersion version, Object object, Entry entry) {
@@ -748,8 +737,7 @@ public class Rules {
 			ProfileGeneration.writeRule(version, 7, object.getModelType(), getClause(object, entry),
 					propertyName + " == true",
 					String.format(REQUIRED_DESCRIPTION, ProfileGeneration.getErrorMessageStart(true, object, entry)),
-					String.format(REQUIRED_ERROR_MESSAGE, ProfileGeneration.getErrorMessageStart(false, object, entry)),
-					Constants.KEY_NAME);
+					String.format(REQUIRED_ERROR_MESSAGE, ProfileGeneration.getErrorMessageStart(false, object, entry)));
 			entry.setContainsProperty(true);
 		} else if (!Constants.CURRENT_ENTRY.equals(entry.getName()) && entry.getRequired().contains(PredicatesParser.PREDICATE_PREFIX)) {
 			String test = new PredicatesParser(object, entry, version, null, Constants.REQUIRED_COLUMN).parse(entry.getRequired());
@@ -765,8 +753,7 @@ public class Rules {
 					String.format(Constants.TRUE.equals(result) ? REQUIRED_DESCRIPTION : REQUIRED_CONDITION_DESCRIPTION,
 							ProfileGeneration.getErrorMessageStart(true, object, entry), requiredArgument),
 					String.format(REQUIRED_ERROR_MESSAGE,
-							ProfileGeneration.getErrorMessageStart(false, object, entry)),
-					Constants.KEY_NAME);
+							ProfileGeneration.getErrorMessageStart(false, object, entry)));
 		}
 	}
 
@@ -789,8 +776,7 @@ public class Rules {
 				String.format(SINCE_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), entry.getSinceString()),
 				String.format(SINCE_ERROR_MESSAGE,
-						ProfileGeneration.getErrorMessageStart(false, object, entry)),
-				Constants.KEY_NAME);
+						ProfileGeneration.getErrorMessageStart(false, object, entry)));
 	}
 
 	private static void deprecatedEntry(PDFVersion version, Object object, Entry entry) {
@@ -802,8 +788,7 @@ public class Rules {
 							ProfileGeneration.getErrorMessageStart(true, object, entry),
 							entry.getDeprecatedVersion().getString()),
 					String.format(DEPRECATED_ENTRY_ERROR_MESSAGE,
-							ProfileGeneration.getErrorMessageStart(false, object, entry)),
-					Constants.KEY_NAME);
+							ProfileGeneration.getErrorMessageStart(false, object, entry)));
 			if (!Constants.CURRENT_ENTRY.equals(entry.getName())) {
 				entry.setContainsProperty(true);
 			}

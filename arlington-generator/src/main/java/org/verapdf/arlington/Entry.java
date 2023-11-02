@@ -250,6 +250,10 @@ public class Entry implements Comparable<Entry> {
 		return getCorrectEntryName(entryName) + "HasType" + type.getType();
 	}
 
+	public static String getEntryTypePropertyName(String entryName) {
+		return getCorrectEntryName(entryName) + "Type";
+	}
+
 	public String getTypeValuePropertyName(Type type) {
 		return getTypeValuePropertyName(getName(), type);
 	}

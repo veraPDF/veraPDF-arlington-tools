@@ -15,6 +15,9 @@ public class Properties {
 			if (multiEntry.getIndirectProperty()) {
 				addIndirect(multiObject, multiEntry);
 			}
+			if (!multiEntry.getHasTypeProperties().isEmpty()) {
+				addEntryType(multiObject, multiEntry.getName());
+			}
 			for (Type type : multiEntry.getHasTypeProperties()) {
 				addHasType(multiObject, multiEntry.getName(), type);
 			}
@@ -157,6 +160,11 @@ public class Properties {
 		multiObject.getJavaGeneration().addHasTypeMethod(multiObject, entryName, type);
 	}
 
+	private static void addEntryType(MultiObject multiObject, String entryName) {
+		ModelGeneration.addProperty(Entry.getEntryTypePropertyName(entryName), Type.STRING.getModelType());
+		multiObject.getJavaGeneration().addEntryTypeMethod(entryName);
+	}
+	
 	private static void addContains(MultiObject multiObject, String entryName) {
 		ModelGeneration.addProperty(Entry.getContainsPropertyName(entryName), Type.BOOLEAN.getModelType());
 		multiObject.getJavaGeneration().addContainsMethod(multiObject, entryName);
