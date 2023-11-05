@@ -47,7 +47,7 @@ public class JavaGeneration {
 
 		javaWriter.println("\t@Override");
 		javaWriter.println("\tpublic String getID() {");
-		javaWriter.println("\t\tCOSKey key = baseObject.getObjectKey();");
+		javaWriter.println("\t\tCOSKey key = baseObject != null ? baseObject.getObjectKey() : null;");
 		javaWriter.println("\t\treturn key != null ? (getObjectType() + \" \" + key.toString()) : null;");
 		javaWriter.println("\t}");
 		javaWriter.println();
@@ -959,12 +959,13 @@ public class JavaGeneration {
 		if (Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) {
 			javaWriter.println("\t\treturn " +
 					getMethodCall(getGetterName(Entry.getContainsPropertyName(Constants.XREF_STM))) + ";");
-		} else if (Constants.FILE_TRAILER.equals(object.getId()) && (Constants.OBJECT_STREAMS.equals(entryName) ||
-				Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName))) {
+		} else if (Constants.DOCUMENT.equals(object.getId()) && (Constants.OBJECT_STREAMS.equals(entryName) ||
+				Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName) || 
+				Constants.XREF_STREAM.equals(entryName) || Constants.FILE_TRAILER.equals(entryName))) {
 				javaWriter.println("\t\treturn " +
 						getMethodCall(getGetterName(Entry.getValuePropertyName(entryName))) + " != null;");
 		} else if (Constants.STAR.equals(finalEntryName)) {
-			javaWriter.println("\t\treturn " + objectName + ".getKeySet() != null && !" + objectName +
+			javaWriter.println("\t\treturn " + objectName + " != null && " + objectName + ".getKeySet() != null && !" + objectName +
 					".getKeySet().isEmpty();");
 		} else if (Entry.isNumber(finalEntryName)) {
 			javaWriter.println("\t\treturn " + objectName + ".size() > " + finalEntryName + ";");
@@ -1501,10 +1502,17 @@ public class JavaGeneration {
 					getMethodCall(getGetterName(Entry.getTypeValuePropertyName(Constants.XREF_STM, Type.INTEGER))) + ";");
 			javaWriter.println("\t\tCOSObject object = offset != null ? " +
 					"StaticResources.getDocument().getDocument().getObject(offset) : null;");
-		} else if (Constants.FILE_TRAILER.equals(multiObject.getId()) && Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName)) {
+		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName)) {
 				javaWriter.println("\t\tCOSObject object = StaticResources.getDocument().getDocument().getLinearizationDictionary();");
-		} else if (Constants.FILE_TRAILER.equals(multiObject.getId()) && Constants.OBJECT_STREAMS.equals(entryName)) {
+		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.OBJECT_STREAMS.equals(entryName)) {
 			javaWriter.println("\t\tCOSObject object = new COSObject(new COSArray(StaticResources.getDocument().getDocument().getObjectStreamsList()));");
+		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.XREF_STREAM.equals(entryName)) {
+			javaWriter.println("\t\tCOSObject object = StaticResources.getDocument().getDocument().getLastXRefStream();");
+		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.FILE_TRAILER.equals(entryName)) {
+			javaWriter.println("\t\tif (StaticResources.getDocument().getDocument().getLastXRefStream() == null) {");
+			javaWriter.println("\t\t\treturn null;");
+			javaWriter.println("\t\t}");
+			javaWriter.println("\t\tCOSObject object = StaticResources.getDocument().getDocument().getTrailer().getObject();");
 		} else if (Constants.CURRENT_ENTRY.equals(entryName)) {
 			javaWriter.println("\t\tCOSObject object = new COSObject(this.baseObject);");
 		} else if (Entry.isNumber(entryName)) {

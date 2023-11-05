@@ -29,9 +29,8 @@ public class Main {
 			objectNames.addAll(version.getObjectIdMap().keySet());
 		}
 		findParents();
-		addXRefStream();
-		addLinearizationDictionary();
-		addStreamObjects();
+		addDocument();
+		addXRefStreamToFileTrailer();
 		addStarObjects();
 		generate();
 		ModelGeneration.close();
@@ -81,9 +80,9 @@ public class Main {
 
 	private static void findActiveObjects(PDFVersion version) {
 		Stack<String> currentObjectNames = new Stack<>();
-		currentObjectNames.add(Constants.FILE_TRAILER);
+		currentObjectNames.add(Constants.DOCUMENT);
 		Set<String> activeObjectNames = new HashSet<>();
-		activeObjectNames.add(Constants.FILE_TRAILER);
+		activeObjectNames.add(Constants.DOCUMENT);
 		while (!currentObjectNames.isEmpty()) {
 			String objectName = currentObjectNames.pop();
 			Object object = version.getObjectIdMap().get(objectName);
@@ -127,7 +126,19 @@ public class Main {
 		writer.println(Constants.IMPORT + " " + importName + ";");
 	}
 
-	private static void addXRefStream() {
+	private static void addDocument() {
+		for (PDFVersion version : PDFVersion.values()) {
+			version.getObjectIdMap().put(Constants.DOCUMENT, new Object(Constants.DOCUMENT, new TreeSet<>()));
+			objectNames.add(Constants.DOCUMENT);
+		}
+
+		addLinearizationDictionary();
+		addStreamObjects();
+		addXRefStreamToDocument();
+		addFileTrailer();
+	}
+	
+	private static void addXRefStreamToFileTrailer() {
 		Entry entry = new Entry();
 		entry.setName(Constants.XREF_STREAM);
 		entry.getTypes().add(Type.STREAM);
@@ -144,6 +155,38 @@ public class Main {
 		}
 	}
 
+	private static void addFileTrailer() {
+		Entry entry = new Entry();
+		entry.setName(Constants.FILE_TRAILER);
+		entry.getTypes().add(Type.DICTIONARY);
+		List<String> links = new LinkedList<>();
+		links.add(Constants.FILE_TRAILER);
+		entry.getLinks().put(Type.DICTIONARY, links);
+		entry.getTypesPredicates().add("");
+		entry.setRequired("");
+		for (PDFVersion version : PDFVersion.values()) {
+			Object object = version.getObjectIdMap().get(Constants.DOCUMENT);
+			object.addEntry(entry);
+		}
+	}
+
+	private static void addXRefStreamToDocument() {
+		Entry entry = new Entry();
+		entry.setName(Constants.XREF_STREAM);
+		entry.getTypes().add(Type.STREAM);
+		List<String> links = new LinkedList<>();
+		links.add(Constants.XREF_STREAM);
+		entry.getLinks().put(Type.STREAM, links);
+		entry.getTypesPredicates().add("");
+		entry.setRequired("");
+		for (PDFVersion version : PDFVersion.values()) {
+			if (PDFVersion.compare(version, PDFVersion.VERSION1_5) >= 0) {
+				Object object = version.getObjectIdMap().get(Constants.DOCUMENT);
+				object.addEntry(entry);
+			}
+		}
+	}
+
 	private static void addLinearizationDictionary() {
 		Entry entry = new Entry();
 		entry.setName(Constants.LINEARIZATION_PARAMETER_DICTIONARY);
@@ -155,7 +198,7 @@ public class Main {
 		entry.setRequired("");
 		for (PDFVersion version : PDFVersion.values()) {
 			if (PDFVersion.compare(version, PDFVersion.VERSION1_2) >= 0) {
-				Object object = version.getObjectIdMap().get(Constants.FILE_TRAILER);
+				Object object = version.getObjectIdMap().get(Constants.DOCUMENT);
 				object.addEntry(entry);
 			}
 		}
@@ -172,7 +215,7 @@ public class Main {
 		entry.setRequired("");
 		for (PDFVersion version : PDFVersion.values()) {
 			if (PDFVersion.compare(version, PDFVersion.VERSION1_5) >= 0) {
-				Object object = version.getObjectIdMap().get(Constants.FILE_TRAILER);
+				Object object = version.getObjectIdMap().get(Constants.DOCUMENT);
 				object.addEntry(entry);
 			}
 		}
@@ -180,7 +223,7 @@ public class Main {
 		for (PDFVersion version : PDFVersion.values()) {
 			if (PDFVersion.compare(version, PDFVersion.VERSION1_5) >= 0) {
 				Set<String> possibleParents = new HashSet<>();
-				possibleParents.add(Constants.FILE_TRAILER);
+				possibleParents.add(Constants.DOCUMENT);
 				Entry starEntry = new Entry();
 				starEntry.setName(Constants.STAR);
 				starEntry.getTypes().add(Type.STREAM);

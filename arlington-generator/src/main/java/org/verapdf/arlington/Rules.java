@@ -42,6 +42,9 @@ public class Rules {
 	private static final String EXTRA_ENTRIES_DESCRIPTION = "%s shall not contain entries except %s";
 	private static final String EXTRA_ENTRIES_ERROR_MESSAGE = "%s contains entry(ies) %s";
 
+	private static final String DOCUMENT_FUTURE_ENTRIES_DESCRIPTION = "%s shall not contain %s in PDF %s";
+	private static final String DOCUMENT_FUTURE_ENTRIES_ERROR_MESSAGE = "%s contains %s";
+
 	private static final String FUTURE_ENTRIES_DESCRIPTION = "%s shall not contain entries %s in PDF %s. These entries appear in later pdf versions";
 	private static final String FUTURE_ENTRIES_ERROR_MESSAGE = "%s contains entry(ies) %s";
 
@@ -204,7 +207,7 @@ public class Rules {
 	}
 
 	private static void hasWrongType(PDFVersion version, Object object, Entry entry) {
-		if (Constants.FILE_TRAILER.equals(object.getId()) && (Constants.OBJECT_STREAMS.equals(entry.getName()) ||
+		if (Constants.DOCUMENT.equals(object.getId()) && (Constants.OBJECT_STREAMS.equals(entry.getName()) ||
 				Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entry.getName()))) {
 			return;
 		}
@@ -234,7 +237,7 @@ public class Rules {
 	}
 
 	private static void containsExtraEntries(PDFVersion version, Object object) {
-		if (Constants.STREAM.equals(object.getId())) {
+		if (Constants.DOCUMENT.equals(object.getId()) || Constants.STREAM.equals(object.getId())) {
 			return;
 		}
 		if (object.getEntries().stream().noneMatch(Entry::isStar)) {
@@ -246,6 +249,7 @@ public class Rules {
 			Set<String> entryNamesSet = object.getEntriesNames();
 			if (Constants.FILE_TRAILER.equals(object.getId())) {
 				entryNamesSet.remove(Constants.XREF_STREAM);
+			} else if (Constants.DOCUMENT.equals(object.getId())) {
 				entryNamesSet.remove(Constants.LINEARIZATION_PARAMETER_DICTIONARY);
 				entryNamesSet.remove(Constants.OBJECT_STREAMS);
 			}
@@ -286,6 +290,10 @@ public class Rules {
 		if (Constants.STREAM.equals(object.getId())) {
 			return;
 		}
+		if (Constants.DOCUMENT.equals(object.getId())) {
+			documentContainsFutureObjects(version, object);
+			return;
+		}
 		if (object.getEntries().stream().noneMatch(Entry::isStar)) {
 			StringBuilder test = new StringBuilder();
 			StringBuilder errorArgument = new StringBuilder();
@@ -316,6 +324,20 @@ public class Rules {
 						String.format(FUTURE_ENTRIES_DESCRIPTION, object.getId(), keysString, version.getString()),
 						String.format(FUTURE_ENTRIES_ERROR_MESSAGE, object.getId(), "%1"),
 						errorArgument.toString());
+			}
+		}
+	}
+
+	private static void documentContainsFutureObjects(PDFVersion version, Object object) {
+		Object multiObject = object.getMultiObject();
+		for (Entry entry : multiObject.getEntries()) {
+			if (!object.getEntriesNames().contains(entry.getName())) {
+				StringBuilder test = new StringBuilder();
+				entry.setContainsProperty(true);
+				test.append(Entry.getContainsPropertyName(entry.getName())).append(" == false");
+				ProfileGeneration.writeRule(version, 25, object.getModelType(), getClause(object, entry), test.toString(),
+						String.format(DOCUMENT_FUTURE_ENTRIES_DESCRIPTION, object.getId(), entry.getName(), version.getString()),
+						String.format(DOCUMENT_FUTURE_ENTRIES_ERROR_MESSAGE, object.getId(), entry.getName()));
 			}
 		}
 	}

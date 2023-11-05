@@ -12,6 +12,7 @@ public class Constants {
 	public static final String STRUCTURE_ATTRIBUTE_DICTIONARY = "StructureAttributesDict";
 	public static final String FONT_FILE_2 = "FontFile2";
 	public static final String FILE_TRAILER = "FileTrailer";
+	public static final String DOCUMENT = "Document";
 	public static final String OBJECT_REFERENCE = "ObjectReference";
 	public static final String OBJECT_STREAM = "ObjectStream";
 	public static final String OBJECT_STREAMS = "ObjectStreams";
