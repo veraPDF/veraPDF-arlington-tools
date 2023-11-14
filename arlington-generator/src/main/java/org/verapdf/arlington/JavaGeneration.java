@@ -1505,7 +1505,8 @@ public class JavaGeneration {
 		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName)) {
 				javaWriter.println("\t\tCOSObject object = StaticResources.getDocument().getDocument().getLinearizationDictionary();");
 		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.OBJECT_STREAMS.equals(entryName)) {
-			javaWriter.println("\t\tCOSObject object = new COSObject(new COSArray(StaticResources.getDocument().getDocument().getObjectStreamsList()));");
+			javaWriter.println("\t\tList<COSObject> objectStreamsList = StaticResources.getDocument().getDocument().getObjectStreamsList();");
+			javaWriter.println("\t\tCOSObject object = objectStreamsList.isEmpty() ? null : new COSObject(new COSArray(objectStreamsList));");
 		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.XREF_STREAM.equals(entryName)) {
 			javaWriter.println("\t\tCOSObject object = StaticResources.getDocument().getDocument().getLastXRefStream();");
 		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.FILE_TRAILER.equals(entryName)) {
