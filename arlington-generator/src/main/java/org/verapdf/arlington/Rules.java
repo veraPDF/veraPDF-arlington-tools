@@ -46,8 +46,12 @@ public class Rules {
 	private static final String DOCUMENT_FUTURE_ENTRIES_ERROR_MESSAGE = "%s contains %s";
 
 	private static final String FUTURE_ENTRIES_DESCRIPTION = "%s shall not contain entries %s in PDF %s. These entries appear in later pdf versions";
+	private static final String FUTURE_ENTRY_DESCRIPTION = "%s shall not contain entry %s in PDF %s. This entry appears in later pdf versions";
+
 	private static final String FUTURE_ENTRIES_ERROR_MESSAGE = "%s contains entry(ies) %s";
 
+	private static final String FUTURE_ENTRY_ERROR_MESSAGE = "%s contains entry %s";
+	
 	private static final String REQUIRED_VALUE_DESCRIPTION = "%s shall have %s value %s, if this object satisfies condition %s";
 	private static final String REQUIRED_VALUE_ERROR_MESSAGE = "%s does not have value %s";
 
@@ -321,8 +325,10 @@ public class Rules {
 				errorArgument.delete(errorArgument.length() - 4, errorArgument.length());
 				errorArgument.append(").toString()");
 				ProfileGeneration.writeRule(version, 22, object.getModelType(), getClause(object), test.toString(),
-						String.format(FUTURE_ENTRIES_DESCRIPTION, object.getId(), keysString, version.getString()),
-						String.format(FUTURE_ENTRIES_ERROR_MESSAGE, object.getId(), "%1"),
+						String.format(entries.size() != 1 ? FUTURE_ENTRIES_DESCRIPTION : FUTURE_ENTRY_DESCRIPTION, 
+								object.getId(), keysString, version.getString()),
+						String.format(entries.size() != 1 ? FUTURE_ENTRIES_ERROR_MESSAGE : FUTURE_ENTRY_ERROR_MESSAGE, 
+								object.getId(), "%1"),
 						errorArgument.toString());
 			}
 		}
