@@ -161,8 +161,7 @@ public class Rules {
 //					String.format(links.size() == 1 ? LINK_DESCRIPTION : LINKS_DESCRIPTION,
 //							ProfileGeneration.getErrorMessageStart(true, object, entry), objectsString),
 //					String.format(links.size() == 1 ? LINK_ERROR_MESSAGE : LINKS_ERROR_MESSAGE,
-//							ProfileGeneration.getErrorMessageStart(false, object, entry), objectsString),
-//					Constants.KEY_NAME);
+//							ProfileGeneration.getErrorMessageStart(false, object, entry), objectsString));
 		} else {
 			for (Type type : linkTypes) {
 				List<String> links = entry.getLinks(type);

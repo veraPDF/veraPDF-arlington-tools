@@ -743,6 +743,7 @@ public class PredicatesParser {
 			String argument = getPropertyOrMethodName(Entry.getArrayLengthPropertyName(arrayEntryName));
 			output.push(new Part(argument, arrayEntryName, Type.ARRAY));
 			object.getArraySizeProperties().add(arrayEntryName);
+			object.getComplexObjectProperties().add(arrayEntryName);
 		} else {
 			throw new RuntimeException("Invalid entry name in arrayLength");
 		}
