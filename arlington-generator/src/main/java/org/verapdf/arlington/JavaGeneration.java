@@ -293,7 +293,6 @@ public class JavaGeneration {
 			javaWriter.println("\t\tsuper(baseObject, parentObject, keyName, \"" + object.getModelType() + "\");");
 		}
 		if (Constants.FILE_TRAILER.equals(object.getId())) {
-			javaWriter.println("\t\tGFAObject.clearAllContainers();");
 		} else if (Constants.OBJECT_REFERENCE.equals(object.getId())) {
 			javaWriter.println("\t\tCOSObject obj = this.baseObject.getKey(ASAtom.OBJ);");
 			javaWriter.println("\t\tif (obj != null && obj.getKey() != null) {");
@@ -572,20 +571,17 @@ public class JavaGeneration {
 	public void addHasTypeMethod(Object multiObject, String entryName, Type type) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Entry.getHasTypePropertyName(entryName, type)));
-		String objectName = entryName.contains("::") ? getComplexObject(multiObject, entryName) :
-				getObjectByEntryName(entryName);
-		String[] objects = entryName.split("::");
 		String arlingtonObject = multiObject.getEntryNameToArlingtonObjectMap().get(entryName);
+		String objectName = entryName.contains("::") ? getComplexObject(arlingtonObject != null ? 
+				entryName.substring(0, entryName.lastIndexOf("::")) : entryName) :
+				getObjectByEntryName(entryName);
 		if (arlingtonObject != null) {
-			String object = objects[objects.length - 2];
-			if (Constants.PARENT.equals(object)) {
-				object = "this.parentObject";
-			} else if (Constants.CATALOG.equals(object)) {
-				object = Constants.ROOT;
-			}
-			javaWriter.println("\t\treturn " + constructorGFAObject(entryName, arlingtonObject,  object +
+			String[] objects = entryName.split("::");
+			String finalEntryName = objects[objects.length - 1].replaceAll("@","");
+			checkComplexObjectLastEntry(objectName, finalEntryName);
+			javaWriter.println("\t\treturn " + constructorGFAObject(entryName, arlingtonObject,  objectName +
 					".getDirectBase()", null, null) + "." +
-					getGetterName(Entry.getHasTypePropertyName(objects[objects.length - 1], type)) + "();");
+					getGetterName(Entry.getHasTypePropertyName(finalEntryName, type)) + "();");
 			javaWriter.println("\t}");
 			javaWriter.println();
 			return;
@@ -599,19 +595,17 @@ public class JavaGeneration {
 	public void addGetValueMethod(MultiObject multiObject, String entryName, Type type) {
 		printMethodSignature(true, "public", false, type.getJavaType(),
 				getGetterName(Entry.getTypeValuePropertyName(entryName, type)));
-		String objectName = entryName.contains("::") ? getComplexObject(multiObject, entryName) : getObjectByEntryName(entryName);
-		String[] objects = entryName.split("::");
 		String arlingtonObject = multiObject.getEntryNameToArlingtonObjectMap().get(entryName);
+		String objectName = entryName.contains("::") ? getComplexObject(arlingtonObject != null ?
+				entryName.substring(0, entryName.lastIndexOf("::")) : entryName) :
+				getObjectByEntryName(entryName);
 		if (arlingtonObject != null) {
-			String object = objects[objects.length - 2];
-			if (Constants.PARENT.equals(object)) {
-				object = "this.parentObject";
-			} else if (Constants.CATALOG.equals(object)) {
-				object = Constants.ROOT;
-			}
-			javaWriter.println("\t\treturn " + constructorGFAObject(entryName, arlingtonObject,  object +
+			String[] objects = entryName.split("::");
+			String finalEntryName = objects[objects.length - 1].replaceAll("@","");
+			checkComplexObjectLastEntry(objectName, finalEntryName);
+			javaWriter.println("\t\treturn " + constructorGFAObject(entryName, arlingtonObject, objectName +
 					".getDirectBase()", null, null) + "." +
-					getMethodCall(getGetterName(Entry.getTypeValuePropertyName(objects[objects.length - 1], type))) + ";");
+					getMethodCall(getGetterName(Entry.getTypeValuePropertyName(finalEntryName, type))) + ";");
 			javaWriter.println("\t}");
 			javaWriter.println();
 			return;
@@ -620,6 +614,21 @@ public class JavaGeneration {
 				objectName) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
+	}
+
+	private void checkComplexObjectLastEntry(String objectName, String finalEntryName) {
+		if (finalEntryName.matches(Constants.NUMBER_REGEX)) {
+			javaWriter.println("\t\tif (" + objectName + " == null || " + objectName +
+					".getType() != " + Type.ARRAY.getCosObjectType() + ") {");
+			javaWriter.println("\t\t\treturn null;");
+			javaWriter.println("\t\t}");
+			javaWriter.println("\t\tif (" + objectName + ".size() <= " + finalEntryName + ") {");
+		} else {
+			javaWriter.println("\t\tif (" + objectName + " == null || !" + objectName +
+					".getType().isDictionaryBased()) {");
+		}
+		javaWriter.println("\t\t\treturn null;");
+		javaWriter.println("\t\t}");
 	}
 
 	public void addGetValueMethod(Type type) {
@@ -954,7 +963,7 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Entry.getContainsPropertyName(entryName)));
 		int index = entryName.lastIndexOf("::");
-		String objectName = index != -1 ? getComplexObject(object, entryName.substring(0, index)) : "this.baseObject";
+		String objectName = index != -1 ? getComplexObject(entryName.substring(0, index)) : "this.baseObject";
 		String finalEntryName = index != -1 ? entryName.substring(index + 2) : entryName;
 		if (Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) {
 			javaWriter.println("\t\treturn " +
@@ -1489,8 +1498,13 @@ public class JavaGeneration {
 	}
 
 	public String getObjectByEntryName(String entryName) {
-		javaWriter.println("\t\tCOSObject object = " + getMethodCall(getGetterName(Entry.getValuePropertyName(entryName))) + ";");
-		return "object";
+		String correctEntryName = Entry.getCorrectEntryName(entryName);
+		if (correctEntryName.isEmpty()) {
+			correctEntryName = "entry";
+		}
+		javaWriter.println("\t\tCOSObject " + correctEntryName + " = " + 
+				getMethodCall(getGetterName(Entry.getValuePropertyName(entryName))) + ";");
+		return correctEntryName;
 	}
 
 	public void getEntryCOSObject(Object multiObject, String entryName) {
