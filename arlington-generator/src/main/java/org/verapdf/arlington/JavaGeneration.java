@@ -307,7 +307,7 @@ public class JavaGeneration {
 		if (object.isNameTree() || object.isNumberTree()) {
 			printMethodSignature(true, "public", false, Type.INTEGER.getJavaType(),
 					getGetterName(Constants.SIZE));
-			if (Object.isNameTree(object.getId())) {
+			if (object.isNameTree()) {
 				javaWriter.println("\t\treturn PDNameTreeNode.create(new COSObject(baseObject)).size();");
 			} else {
 				javaWriter.println("\t\treturn new PDNumberTreeNode(new COSObject(baseObject)).size();");

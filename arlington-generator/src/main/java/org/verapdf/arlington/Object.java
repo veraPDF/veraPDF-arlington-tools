@@ -95,7 +95,7 @@ public class Object {
 	}
 
 	public static boolean isNameTree(String id) {
-		return id.contains("NameTree");
+		return id.contains("NameTree") && !id.endsWith("Entry");
 	}
 
 	public boolean isNumberTree() {
@@ -103,7 +103,7 @@ public class Object {
 	}
 
 	public static boolean isNumberTree(String id) {
-		return id.contains("NumberTree");
+		return id.contains("NumberTree") && !id.endsWith("Entry");
 	}
 
 	public boolean isSubArray() {
