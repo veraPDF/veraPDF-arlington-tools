@@ -82,4 +82,15 @@ public class Constants {
 		reservedVeraPDFNames.add("ID");
 	}
 
+	public static final Set<String> widgetAnnotFieldsNames = new HashSet<>();
+
+	static {
+		widgetAnnotFieldsNames.add("AnnotWidgetField");
+		widgetAnnotFieldsNames.add("AnnotWidgetFieldSig");
+		widgetAnnotFieldsNames.add("AnnotWidgetFieldTx");
+		widgetAnnotFieldsNames.add("AnnotWidgetFieldBtnCheckbox");
+		widgetAnnotFieldsNames.add("AnnotWidgetFieldBtnRadio");
+		widgetAnnotFieldsNames.add("AnnotWidgetFieldBtnPush");
+		widgetAnnotFieldsNames.add("AnnotWidgetFieldChoice");
+	}
 }

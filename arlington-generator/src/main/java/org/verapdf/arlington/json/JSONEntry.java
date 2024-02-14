@@ -46,6 +46,9 @@ public class JSONEntry {
 	public List<Type> getTypes() {
 		List<Type> result = new LinkedList<>();
 		for (JSONValue value : types) {
+			if (value.getValue().isEmpty()) {
+				continue;
+			}
 			Type type = Type.getType(value.getValue());
 			if (type != null) {
 				result.add(type);

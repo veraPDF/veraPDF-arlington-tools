@@ -56,6 +56,35 @@ public class LinkHelper {
 		helpers.put("ActionURI", new DifferentKeysValuesLinkHelper("ActionURI", new Key("S", Type.NAME, "URI")));
 		helpersList.add(helpers);
 
+		helpers = new HashMap<>();
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 16, "0")));
+		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Ff", Type.BITMASK, 16, "1")));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 17, "0")));
+		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Ff", Type.BITMASK, 17, "0")));
+		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnPush", new Key("Ff", Type.BITMASK, 17, "1")));
+		helpersList.add(helpers);
+
+		//fields
+		helpers = new HashMap<>();
+		helpers.put("AnnotWidget", new DifferentKeysLinkHelper("AnnotWidget", ""));
+		helpers.put("AnnotWidgetField", new DifferentKeysLinkHelper("AnnotWidgetField", "Parent", "T", "TU", "TM", "Ff", "AA"));
+		helpersList.add(helpers);
+
+		//fields
+		helpers = new HashMap<>();
+		helpers.put("AnnotWidget", new DifferentKeysValuesLinkHelper("AnnotWidget", new Key("FT", Type.NAME, true, false)));
+		helpers.put("AnnotWidgetField", new DifferentKeysValuesLinkHelper("AnnotWidgetField", new Key("FT", Type.NAME, true, false)));
+		helpers.put("AnnotWidgetFieldSig", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldSig", new Key("FT", Type.NAME, "Sig")));
+		helpers.put("AnnotWidgetFieldTx", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldTx", new Key("FT", Type.NAME, "Tx")));
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("FT", Type.NAME, "Btn")));
+		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("FT", Type.NAME, "Btn")));
+		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnPush", new Key("FT", Type.NAME, "Btn")));
+		helpers.put("AnnotWidgetFieldChoice", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldChoice", new Key("FT", Type.NAME, "Ch")));
+		helpersList.add(helpers);
+
 		//annotations
 		helpers = new HashMap<>();
 		helpers.put("Annot3D", new DifferentKeysValuesLinkHelper("Annot3D", new Key("Subtype", Type.NAME, "3D")));
@@ -86,6 +115,14 @@ public class LinkHelper {
 		helpers.put("AnnotUnderline", new DifferentKeysValuesLinkHelper("AnnotUnderline", new Key("Subtype", Type.NAME, "Underline")));
 		helpers.put("AnnotWatermark", new DifferentKeysValuesLinkHelper("AnnotWatermark", new Key("Subtype", Type.NAME, "Watermark")));
 		helpers.put("AnnotWidget", new DifferentKeysValuesLinkHelper("AnnotWidget", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetField", new DifferentKeysValuesLinkHelper("AnnotWidgetField", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldSig", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldSig", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldTx", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldTx", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnPush", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldChoice", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldChoice", new Key("Subtype", Type.NAME, "Widget")));
+
 		helpersList.add(helpers);
 
 		//exDatas
@@ -386,6 +423,13 @@ public class LinkHelper {
 		//fields
 		helpers = new HashMap<>();
 		helpers.put("AnnotWidget", new DifferentKeysValuesLinkHelper("AnnotWidget", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetField", new DifferentKeysValuesLinkHelper("AnnotWidgetField", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldSig", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldSig", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldTx", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldTx", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnPush", new Key("Subtype", Type.NAME, "Widget")));
+		helpers.put("AnnotWidgetFieldChoice", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldChoice", new Key("Subtype", Type.NAME, "Widget")));
 		helpers.put("Field", new DifferentKeysValuesLinkHelper("Field", new Key("Subtype", Type.NAME, true, false)));
 		helpers.put("FieldSig", new DifferentKeysValuesLinkHelper("FieldSig", new Key("Subtype", Type.NAME, true, false)));
 		helpers.put("FieldTx", new DifferentKeysValuesLinkHelper("FieldTx", new Key("Subtype", Type.NAME, true, false)));

@@ -79,7 +79,7 @@ public class ProfileGeneration {
 			stringBuilder.append(Constants.FILE_TRAILER);			
 		} else {
 			if (isStart) {
-				stringBuilder.append("Entry");
+				stringBuilder.append(Type.ENTRY.getType());
 			} else {
 				stringBuilder.append("entry");
 			}

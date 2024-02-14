@@ -375,20 +375,21 @@ public class JavaGeneration {
 	}
 
 	public void addLinkGetterByDifferentKeys(Map<String, LinkHelper> map, Object object, Entry entry, Type type,
-											 PDFVersion version) {
+											 PDFVersion version, int index, String methodNamePostfix) {
 		String linkName = Links.getLinkName(entry.getName());
 		printMethodSignature(false, "private", false,
-				Constants.BASE_MODEL_OBJECT_PATH, getGetterName(linkName + type.getType() +
+				Constants.BASE_MODEL_OBJECT_PATH, getGetterName(linkName + type.getType() + methodNamePostfix +
 						version.getStringWithUnderScore()), "COSBase base", "String keyName");
-		SortedMap<String, Set<String>> newMap = Links.getDifferentKeysLinksMap(entry.getLinks(type), map);
-		int index = 0;
+		List<String> links = entry.getLinks(type).stream().filter(link -> map.containsKey(link.contains(PredicatesParser.PREDICATE_PREFIX) ?
+				PredicatesParser.getPredicateLastArgument(link) : link)).collect(Collectors.toList());
+		SortedMap<String, Set<String>> newMap = Links.getDifferentKeysLinksMap(links, map);
 		for (Map.Entry<String, Set<String>> mapEntry : newMap.entrySet()) {
 			if (mapEntry.getKey().isEmpty()) {
 				continue;
 			}
 			javaWriter.println("\t\tif (base.knownKey(" + getASAtomFromString(mapEntry.getKey()) + ")) {");
 			if (mapEntry.getValue().size() != 1) {
-				javaWriter.println("\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() +
+				javaWriter.println("\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() + methodNamePostfix +
 						mapEntry.getKey() + version.getStringWithUnderScore()), "base", "keyName") + ";");
 			} else {
 				javaWriter.println("\t\t\treturn " + constructorGFAObject(entry.getName(), mapEntry.getValue().iterator().next(),
@@ -408,7 +409,7 @@ public class JavaGeneration {
 			if (mapEntry.getValue().size() != 1) {
 				Map<String, LinkHelper> newHelperMap = LinkHelper.getMap(mapEntry.getValue());
 				if (newHelperMap != null) {
-					addLinkGetterByKeyValues(newHelperMap, object, entry, type, version, index + 1, mapEntry.getKey());
+					addLinkGetterByKeyValues(newHelperMap, object, entry, type, version, index + 1, methodNamePostfix + mapEntry.getKey());
 				}
 			}
 		}
@@ -428,20 +429,18 @@ public class JavaGeneration {
 		calculateSubtype(object, entry, key);
 		javaWriter.println("\t\t" + key.getType().getJavaType() + " subtypeValue = subtype" +
 				key.getType().getParserMethod() + ";");
-		Set<String> defaultSet = addDefaultCaseLinkGetterByKeyValues(map, version, entry, type, linkName, correctLinks);
+		Set<String> defaultSet = addDefaultCaseLinkGetterByKeyValues(map, version, entry, type, linkName, correctLinks, methodNamePostfix);
 		SortedMap<String, Set<String>> newMap = addSwitchLinkGetterByKeyValues(map, version, object, entry, type, key, links,
-				correctLinks, linkName);
+				correctLinks, linkName, methodNamePostfix);
 		javaWriter.println("\t}");
 		javaWriter.println();
 		for (Map.Entry<String, Set<String>> mapEntry : newMap.entrySet()) {
 			if (mapEntry.getValue().size() != 1) {
-				addLinkGetterByKeyValues(LinkHelper.getMap(mapEntry.getValue()), object, entry, type, version,
-						index + 1, mapEntry.getKey());
+				Links.addGetter(LinkHelper.getMap(mapEntry.getValue()), object, entry, type, version, index + 1, methodNamePostfix + mapEntry.getKey());
 			}
 		}
 		if (defaultSet.size() > 1) {
-			addLinkGetterByKeyValues(LinkHelper.getMap(defaultSet), object, entry, type, version, index + 1,
-					"Default");
+			Links.addGetter(LinkHelper.getMap(defaultSet), object, entry, type, version, index + 1, methodNamePostfix + "Default");
 		}
 	}
 
@@ -470,7 +469,7 @@ public class JavaGeneration {
 	}
 
 	private Set<String> addDefaultCaseLinkGetterByKeyValues(Map<String, LinkHelper> map, PDFVersion version, Entry entry,
-															Type type, String linkName, List<String> correctLinks) {
+															Type type, String linkName, List<String> correctLinks, String methodNamePostfix) {
 		javaWriter.println("\t\tif (subtypeValue == null) {");
 		Set<String> defaultSet = new HashSet<>();
 		for (String link : correctLinks) {//refactoring
@@ -485,8 +484,8 @@ public class JavaGeneration {
 			javaWriter.println("\t\t\treturn " + constructorGFAObject(entry.getName(), defaultSet.iterator().next(),
 					"base", "this.baseObject", "keyName") + ";");
 		} else {
-			javaWriter.println("\t\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() + "Default" +
-					version.getStringWithUnderScore()), "base", "keyName") + ";");
+			javaWriter.println("\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() + methodNamePostfix + 
+					"Default" + version.getStringWithUnderScore()), "base", "keyName") + ";");
 		}
 		javaWriter.println("\t\t}");
 		return defaultSet;
@@ -495,7 +494,8 @@ public class JavaGeneration {
 	private SortedMap<String, Set<String>> addSwitchLinkGetterByKeyValues(Map<String, LinkHelper> map, PDFVersion version,
 																		  Object object, Entry entry, Type type,
 																		  Key key, List<String> links,
-																		  List<String> correctLinks, String linkName) {
+																		  List<String> correctLinks, String linkName, 
+																		  String methodNamePostfix) {
 		if (key.getBit() != null) {
 			javaWriter.println("\t\tswitch (subtypeValue.intValue() >> " + key.getBit() + ") {");
 		} else if (Type.INTEGER == key.getType()) {
@@ -508,7 +508,7 @@ public class JavaGeneration {
 			javaWriter.println("\t\t\tcase " + key.getType().getValueWithSeparator(mapEntry.getKey()) + ":");
 			if (mapEntry.getValue().size() != 1) {
 				javaWriter.println("\t\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() +
-						mapEntry.getKey() + version.getStringWithUnderScore()), "base", "keyName") + ";");
+						methodNamePostfix + mapEntry.getKey() + version.getStringWithUnderScore()), "base", "keyName") + ";");
 			} else {
 				String link = mapEntry.getValue().iterator().next();
 				int index1 = correctLinks.indexOf(link);

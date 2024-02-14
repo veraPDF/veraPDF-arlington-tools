@@ -40,9 +40,15 @@ public class Entry implements Comparable<Entry> {
 		this.indirectReference = new HashMap<>(entry.indirectReference);
 		this.inheritable = entry.inheritable;
 		this.defaultValue = entry.defaultValue;
-		this.possibleValues = new HashMap<>(entry.possibleValues);
+		this.possibleValues = new HashMap<>();
+		for (Map.Entry<Type, List<String>> e : entry.possibleValues.entrySet()) {
+			possibleValues.put(e.getKey(), new LinkedList<>(e.getValue()));
+		}
 		this.specialCases = new HashMap<>(entry.specialCases);
-		this.links = new HashMap<>(entry.links);
+		this.links = new HashMap<>();
+		for (Map.Entry<Type, List<String>> e : entry.links.entrySet()) {
+			links.put(e.getKey(), new LinkedList<>(e.getValue()));
+		}
 	}
 
 	public static Entry getEntryFromJSON(JSONEntry jsonEntry) {

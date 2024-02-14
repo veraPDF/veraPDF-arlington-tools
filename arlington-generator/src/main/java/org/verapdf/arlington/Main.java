@@ -28,6 +28,7 @@ public class Main {
 			ProfileGeneration.startProfile(version, version.getProfileWriter());
 			objectNames.addAll(version.getObjectIdMap().keySet());
 		}
+		addMergedWidgetAnnotFields();
 		findParents();
 		addDocument();
 		addXRefStreamToFileTrailer();
@@ -37,6 +38,63 @@ public class Main {
 		for (PDFVersion version : PDFVersion.values()) {
 			ProfileGeneration.endProfile(version.getProfileWriter());
 			version.getProfileWriter().close();
+		}
+	}
+	
+	private static void addMergedWidgetAnnotFields() {
+		for (PDFVersion version : PDFVersion.values()) {
+			Object widgetAnnot = version.getObjectIdMap().get("AnnotWidget");
+			if (widgetAnnot == null) {
+				continue;
+			}
+			Set<Object> newObjects = new HashSet<>();
+			for (Object object : version.getObjectIdMap().values()) {
+				if (Object.isField(object.getObjectName())) {
+					SortedSet<Entry> entries = new TreeSet<>();
+					for (Entry entry : object.getEntries()) {
+						if (!"Kids".equals(entry.getName())) {
+							entries.add(new Entry(entry));
+						}
+					}
+					for (Entry entry : widgetAnnot.getEntries()) {
+						entries.add(new Entry(entry));
+					}
+					String newObjectName = "AnnotWidget" + object.getObjectName();
+					newObjects.add(new Object(newObjectName, entries));
+					objectNames.add(newObjectName);
+				}
+			}
+			for (Object object : newObjects) {
+				version.getObjectIdMap().put(object.getObjectName(), object);
+			}
+		}
+		for (PDFVersion version : PDFVersion.values()) {
+			for (Object object : version.getObjectIdMap().values()) {
+				for (Entry entry : object.getEntries()) {
+					for (Type type : Type.values()) {
+						List<String> links = entry.getLinksWithoutPredicatesList(type);
+						for (String link : links) {
+							if (Object.isField(link)) {
+								entry.getLinks().get(type).add("AnnotWidget" + link);
+							}
+						}						
+					}
+				}
+			}
+		}
+		for (PDFVersion version : PDFVersion.values()) {
+			for (Object object : version.getObjectIdMap().values()) {
+				for (Entry entry : object.getEntries()) {
+					for (Type type : Type.values()) {
+						List<String> links = entry.getLinksWithoutPredicatesList(type);
+						for (String link : links) {
+							if (link.equals("AnnotWidget")) {
+								entry.getLinks().get(type).addAll(Constants.widgetAnnotFieldsNames);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 

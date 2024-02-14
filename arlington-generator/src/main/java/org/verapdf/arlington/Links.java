@@ -98,15 +98,15 @@ public class Links {
 		}
 	}
 
-	private static void addGetter(Map<String, LinkHelper> map, Object object, Entry entry,
-								  Type type, PDFVersion version) {
+	public static void addGetter(Map<String, LinkHelper> map, Object object, Entry entry,
+								  Type type, PDFVersion version, Integer index, String methodNamePostfix) {
 		LinkHelper linkHelper = map.values().iterator().next();
 		if (linkHelper instanceof DifferentKeysValuesLinkHelper)  {
-			object.getJavaGeneration().addLinkGetterByKeyValues(map, object, entry, type, version, 0, "");
+			object.getJavaGeneration().addLinkGetterByKeyValues(map, object, entry, type, version, index, methodNamePostfix);
 		} else if (linkHelper instanceof SizeLinkHelper) {
 			object.getJavaGeneration().addLinkGetterBySize(map, object, entry, type, version);
 		} else if (linkHelper instanceof DifferentKeysLinkHelper) {
-			object.getJavaGeneration().addLinkGetterByDifferentKeys(map, object, entry, type, version);
+			object.getJavaGeneration().addLinkGetterByDifferentKeys(map, object, entry, type, version, index, methodNamePostfix);
 		} else if (linkHelper instanceof KeyNameLinkHelper) {
 			object.getJavaGeneration().addLinkGetterByKeyName(map, object, entry, type, version);
 		}
@@ -147,7 +147,7 @@ public class Links {
 			return "Entries";
 		}
 		if (Constants.CURRENT_ENTRY.equals(entryName)) {
-			return "Entry";
+			return Type.ENTRY.getType();
 		}
 		return Entry.getCorrectEntryName(entryName);
 	}

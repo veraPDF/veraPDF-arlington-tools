@@ -83,7 +83,7 @@ public class Object {
 	}
 
 	public static boolean isArray(String id) {
-		return id.endsWith("Array") || id.endsWith("ColorSpace") || (id.startsWith("ArrayOf") && !id.endsWith("Entry"));
+		return id.endsWith("Array") || id.endsWith("ColorSpace") || (id.startsWith("ArrayOf") && !id.endsWith(Type.ENTRY.getType()));
 	}
 
 	public boolean isStream() {
@@ -95,7 +95,7 @@ public class Object {
 	}
 
 	public static boolean isNameTree(String id) {
-		return id.contains("NameTree") && !id.endsWith("Entry");
+		return id.contains("NameTree") && !id.endsWith(Type.ENTRY.getType());
 	}
 
 	public boolean isNumberTree() {
@@ -103,7 +103,7 @@ public class Object {
 	}
 
 	public static boolean isNumberTree(String id) {
-		return id.contains("NumberTree") && !id.endsWith("Entry");
+		return id.contains("NumberTree") && !id.endsWith(Type.ENTRY.getType());
 	}
 
 	public boolean isSubArray() {
