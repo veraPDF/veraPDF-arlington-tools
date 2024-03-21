@@ -321,14 +321,20 @@ public class Rules {
 				test.append(ProfileGeneration.split(Constants.KEYS_STRING, true, entries)).append(" == 0");
 				keysString.deleteCharAt(keysString.length() - 1);
 				keysString.deleteCharAt(keysString.length() - 1);
-				errorArgument.delete(errorArgument.length() - 4, errorArgument.length());
-				errorArgument.append(").toString()");
-				ProfileGeneration.writeRule(version, 22, object.getModelType(), getClause(object), test.toString(),
-						String.format(entries.size() != 1 ? FUTURE_ENTRIES_DESCRIPTION : FUTURE_ENTRY_DESCRIPTION, 
-								object.getId(), keysString, version.getString()),
-						String.format(entries.size() != 1 ? FUTURE_ENTRIES_ERROR_MESSAGE : FUTURE_ENTRY_ERROR_MESSAGE, 
-								object.getId(), "%1"),
-						errorArgument.toString());
+				if (entries.size() != 1) {
+					errorArgument.delete(errorArgument.length() - 4, errorArgument.length());
+					errorArgument.append(").toString()");
+					ProfileGeneration.writeRule(version, 22, object.getModelType(), getClause(object), test.toString(),
+							String.format(FUTURE_ENTRIES_DESCRIPTION, object.getId(), keysString, version.getString()),
+							String.format(FUTURE_ENTRIES_ERROR_MESSAGE, object.getId(), "%1"),
+							errorArgument.toString());
+				} else {
+					String entryName = PredicatesParser.removeQuotes(entries.get(0));
+					test = new StringBuilder(Entry.getContainsPropertyName(entryName) + " == " + Constants.FALSE);
+					ProfileGeneration.writeRule(version, 22, object.getModelType(), getClause(object), test.toString(),
+							String.format(FUTURE_ENTRY_DESCRIPTION, object.getId(), keysString, version.getString()),
+							String.format(FUTURE_ENTRY_ERROR_MESSAGE, object.getId(), entryName));
+				}
 			}
 		}
 	}
