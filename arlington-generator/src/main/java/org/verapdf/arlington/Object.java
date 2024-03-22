@@ -189,4 +189,8 @@ public class Object {
 	public JavaGeneration getJavaGeneration() {
 		return multiObject.getJavaGeneration();
 	}
+	
+	public static boolean isField(String objectName) {
+		return objectName.startsWith("Field") && !"FieldMDPTransformParameters".equals(objectName);
+	}
 }

@@ -93,7 +93,7 @@ public class Links {
 				if (map == null) {
 					continue;
 				}
-				addGetter(map, object, entry, type, version);
+				addGetter(map, object, entry, type, version, 0, "");
 			}
 		}
 	}

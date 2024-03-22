@@ -383,11 +383,23 @@ public class JavaGeneration {
 		List<String> links = entry.getLinks(type).stream().filter(link -> map.containsKey(link.contains(PredicatesParser.PREDICATE_PREFIX) ?
 				PredicatesParser.getPredicateLastArgument(link) : link)).collect(Collectors.toList());
 		SortedMap<String, Set<String>> newMap = Links.getDifferentKeysLinksMap(links, map);
+		String string = "base";
+		if (((DifferentKeysLinkHelper)map.values().iterator().next()).isChild()) {
+			string = "objectBase";
+			javaWriter.println("\t\tCOSBase objectBase = COSDictionary.construct().getDirectBase();");
+			javaWriter.println("\t\tfor (ASAtom key : base.getKeySet()) {");
+			javaWriter.println("\t\t\tCOSObject obj = base.getKey(key);");
+			javaWriter.println("\t\t\tif (obj != null && obj.getDirectBase() != null) {");
+			javaWriter.println("\t\t\t\tobjectBase = obj.getDirectBase();");
+			javaWriter.println("\t\t\t\tbreak;");
+			javaWriter.println("\t\t\t}");
+			javaWriter.println("\t\t}");
+		}
 		for (Map.Entry<String, Set<String>> mapEntry : newMap.entrySet()) {
 			if (mapEntry.getKey().isEmpty()) {
 				continue;
 			}
-			javaWriter.println("\t\tif (base.knownKey(" + getASAtomFromString(mapEntry.getKey()) + ")) {");
+			javaWriter.println("\t\tif (" + string + ".knownKey(" + getASAtomFromString(mapEntry.getKey()) + ")) {");//merge cases
 			if (mapEntry.getValue().size() != 1) {
 				javaWriter.println("\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() + methodNamePostfix +
 						mapEntry.getKey() + version.getStringWithUnderScore()), "base", "keyName") + ";");
@@ -530,7 +542,9 @@ public class JavaGeneration {
 		printMethodSignature(false, "private", false, Constants.BASE_MODEL_OBJECT_PATH,
 				getGetterName(linkName + type.getType() + version.getStringWithUnderScore()),
 				"COSBase base", "String keyName");
-		javaWriter.println("\t\tswitch (keyName) {");
+		
+		String string = ((KeyNameLinkHelper)map.values().iterator().next()).isCheckCollectionName() ? "collectionName" : "keyName";
+		javaWriter.println("\t\tswitch (" + string + ") {");
 		String defaultLink = null;
 		for (String link : entry.getLinks(type)) {
 			if (link.contains(PredicatesParser.PREDICATE_PREFIX)) {
@@ -1524,7 +1538,7 @@ public class JavaGeneration {
 		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.XREF_STREAM.equals(entryName)) {
 			javaWriter.println("\t\tCOSObject object = StaticResources.getDocument().getDocument().getLastXRefStream();");
 		} else if (Constants.DOCUMENT.equals(multiObject.getId()) && Constants.FILE_TRAILER.equals(entryName)) {
-			javaWriter.println("\t\tif (StaticResources.getDocument().getDocument().getLastXRefStream() == null) {");
+			javaWriter.println("\t\tif (StaticResources.getDocument().getDocument().getLastXRefStream() != null) {");
 			javaWriter.println("\t\t\treturn null;");
 			javaWriter.println("\t\t}");
 			javaWriter.println("\t\tCOSObject object = StaticResources.getDocument().getDocument().getTrailer().getObject();");

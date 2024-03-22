@@ -57,7 +57,9 @@ public class Main {
 						}
 					}
 					for (Entry entry : widgetAnnot.getEntries()) {
-						entries.add(new Entry(entry));
+						if (!"Kids".equals(entry.getName())) {
+							entries.add(new Entry(entry));
+						}
 					}
 					String newObjectName = "AnnotWidget" + object.getObjectName();
 					newObjects.add(new Object(newObjectName, entries));

@@ -273,8 +273,8 @@ public class LinkHelper {
 
 		//beads
 		helpers = new HashMap<>();
-		helpers.put("Bead", new KeyNameLinkHelper("Bead", null));
-		helpers.put("BeadFirst", new KeyNameLinkHelper("BeadFirst", "0"));
+		helpers.put("Bead", new KeyNameLinkHelper("Bead", null, false));
+		helpers.put("BeadFirst", new KeyNameLinkHelper("BeadFirst", "0", false));
 		helpersList.add(helpers);
 
 		//requirements
@@ -419,7 +419,6 @@ public class LinkHelper {
 		helpers.put("FieldChoice", new DifferentKeysValuesLinkHelper("FieldChoice", new Key("FT", Type.NAME, "Ch")));
 		helpersList.add(helpers);
 
-
 		//fields
 		helpers = new HashMap<>();
 		helpers.put("AnnotWidget", new DifferentKeysValuesLinkHelper("AnnotWidget", new Key("Subtype", Type.NAME, "Widget")));
@@ -500,5 +499,15 @@ public class LinkHelper {
 		helpersList.add(helpers);
 
 		//CryptFilterMap,CryptFilterPublicKeyMap
+
+		helpers = new HashMap<>();
+		helpers.put("CryptFilterMap", new DifferentKeysLinkHelper("CryptFilterMap", true, ""));
+		helpers.put("CryptFilterPublicKeyMap", new DifferentKeysLinkHelper("CryptFilterPublicKeyMap", true, "Recipients"));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("DevExtensions", new KeyNameLinkHelper("DevExtensions", null, true));
+		helpers.put("ISO_DevExtensions", new KeyNameLinkHelper("ISO_DevExtensions", "ISO_", true));
+		helpersList.add(helpers);
 	}
 }
