@@ -70,7 +70,7 @@ public class LinkHelper {
 		//fields
 		helpers = new HashMap<>();
 		helpers.put("AnnotWidget", new DifferentKeysLinkHelper("AnnotWidget", ""));
-		helpers.put("AnnotWidgetField", new DifferentKeysLinkHelper("AnnotWidgetField", "Parent", "T", "TU", "TM", "Ff", "AA"));
+		helpers.put("AnnotWidgetField", new DifferentKeysLinkHelper("AnnotWidgetField", "T", "TU", "TM", "Ff", "AA"));
 		helpersList.add(helpers);
 
 		//fields

@@ -633,10 +633,7 @@ public class JavaGeneration {
 	private void checkComplexObjectLastEntry(String objectName, String finalEntryName) {
 		if (finalEntryName.matches(Constants.NUMBER_REGEX)) {
 			javaWriter.println("\t\tif (" + objectName + " == null || " + objectName +
-					".getType() != " + Type.ARRAY.getCosObjectType() + ") {");
-			javaWriter.println("\t\t\treturn null;");
-			javaWriter.println("\t\t}");
-			javaWriter.println("\t\tif (" + objectName + ".size() <= " + finalEntryName + ") {");
+					".getType() != " + Type.ARRAY.getCosObjectType() + " || " + objectName + ".size() <= " + finalEntryName + ") {");
 		} else {
 			javaWriter.println("\t\tif (" + objectName + " == null || !" + objectName +
 					".getType().isDictionaryBased()) {");
@@ -1457,7 +1454,8 @@ public class JavaGeneration {
 			}
 			if (newEntryName.matches(Constants.NUMBER_REGEX)) {
 				javaWriter.println("\t\tif (" + currentObjectName + " == null || " + currentObjectName +
-						".getType() != " + Type.ARRAY.getCosObjectType() + ") {");
+						".getType() != " + Type.ARRAY.getCosObjectType() + " || " + 
+						currentObjectName + ".size() <= " + newEntryName + ") {");
 			} else {
 				javaWriter.println("\t\tif (" + currentObjectName + " == null || !" + currentObjectName +
 						".getType().isDictionaryBased()) {");

@@ -1455,24 +1455,24 @@ public class PredicatesParser {
 		if (Constants.TRAILER.equals(array.get(0))) {
 			index += 1;
 			if (Constants.CATALOG.equals(array.get(1))) {
-				initialObjects.add(version.getObjectIdMap().get(Constants.CATALOG));
+				initialObjects.add(Main.objectIdMap.get(Constants.CATALOG));
 				index += 1;
 			} else {
-				initialObjects.add(version.getObjectIdMap().get(Constants.FILE_TRAILER));
+				initialObjects.add(Main.objectIdMap.get(Constants.FILE_TRAILER));
 			}
 		} else if (Constants.PAGE.equals(array.get(0))) {
 			index += 2;
-			initialObjects.add(version.getObjectIdMap().get(Constants.PAGE_OBJECT));
+			initialObjects.add(Main.objectIdMap.get(Constants.PAGE_OBJECT));
 		} else if (Constants.CURRENT_ENTRY.equals(entry.getName()) && Constants.STAR.equals(array.get(0))) {
-			initialObjects.add(object);
+			initialObjects.add(object.getMultiObject());
 			index += 1;
 		} else {
-			initialObjects.add(object);
+			initialObjects.add(object.getMultiObject());
 			while (Constants.PARENT.equals(array.get(index))) {
 				List<Object> futureObjects = new LinkedList<>();
 				for (Object currentObject : initialObjects) {
 					for (String parentName : currentObject.getPossibleParents()) {
-						Object parent = version.getObjectIdMap().get(parentName);
+						Object parent = Main.objectIdMap.get(parentName);
 						if (parent != null) {
 							futureObjects.add(parent);
 						}
@@ -1513,7 +1513,7 @@ public class PredicatesParser {
 				}
 				for (Type type : entry.getUniqLinkTypes()) {
 					for (String linkName : entry.getLinks(type)) {
-						Object futureObject = version.getObjectIdMap().get(linkName);
+						Object futureObject = Main.objectIdMap.get(linkName);
 						if (futureObject != null) {
 							futureObjects.add(futureObject);
 						}

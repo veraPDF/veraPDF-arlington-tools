@@ -33,10 +33,20 @@ public class MultiObject extends Object {
 				continue;
 			}
 			object.setMultiObject(this);
+			getPossibleParents().addAll(object.getPossibleParents());
 			for (Entry entry : object.getEntries()) {
 				MultiEntry multiEntry = (MultiEntry)getEntry(entry.getName());
 				if (multiEntry == null) {
 					multiEntry = new MultiEntry(entry.getName());
+				}
+				multiEntry.getTypes().addAll(entry.getTypes());
+				for (Map.Entry<Type,List<String>> en : entry.getLinks().entrySet()) {
+					List<String> types = multiEntry.getLinks().computeIfAbsent(en.getKey(), k -> new LinkedList<>());
+					for (String type : en.getValue()) {
+						if (!types.contains(type)) {
+							types.add(type);
+						}
+					}
 				}
 				entry.setMultiEntry(multiEntry);
 				entries.add(multiEntry);
