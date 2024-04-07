@@ -47,7 +47,7 @@ public class Object {
 	}
 
 	public Set<String> getEntriesNames() {
-		return getEntries().stream().map(Entry::getName).collect(Collectors.toSet());
+		return getEntries().stream().map(Entry::getName).collect(Collectors.toCollection(TreeSet::new));
 	}
 
 	public Entry getEntry(String entryName) {
@@ -95,7 +95,7 @@ public class Object {
 	}
 
 	public static boolean isNameTree(String id) {
-		return id.contains("NameTree") && !id.endsWith(Type.ENTRY.getType());
+		return id.contains("NameTree") && !id.endsWith(Type.ENTRY.getType()) && !id.contains("NameTreeNode");
 	}
 
 	public boolean isNumberTree() {
@@ -103,7 +103,7 @@ public class Object {
 	}
 
 	public static boolean isNumberTree(String id) {
-		return id.contains("NumberTree") && !id.endsWith(Type.ENTRY.getType());
+		return id.contains("NumberTree") && !id.endsWith(Type.ENTRY.getType()) && !id.contains("NumberTreeNode");
 	}
 
 	public boolean isSubArray() {

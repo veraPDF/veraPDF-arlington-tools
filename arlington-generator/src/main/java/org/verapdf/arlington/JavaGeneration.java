@@ -976,6 +976,9 @@ public class JavaGeneration {
 		int index = entryName.lastIndexOf("::");
 		String objectName = index != -1 ? getComplexObject(entryName.substring(0, index)) : "this.baseObject";
 		String finalEntryName = index != -1 ? entryName.substring(index + 2) : entryName;
+		if (finalEntryName.endsWith(Constants.TREE_NODE)) {
+			finalEntryName = finalEntryName.substring(0, finalEntryName.length() - 8);
+		}
 		if (Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) {
 			javaWriter.println("\t\treturn " +
 					getMethodCall(getGetterName(Entry.getContainsPropertyName(Constants.XREF_STM))) + ";");
@@ -1467,9 +1470,6 @@ public class JavaGeneration {
 				newCorrectEntryName = "baseObject";
 				javaWriter.println("\t\tCOSObject " + newCorrectEntryName + " = new COSObject(" + currentObjectName + ");");
 			} else if (newEntryName.matches(Constants.NUMBER_REGEX)) {
-				javaWriter.println("\t\tif (" + currentObjectName + ".size() <= " + newEntryName + ") {");
-				javaWriter.println("\t\t\treturn null;");
-				javaWriter.println("\t\t}");
 				javaWriter.println("\t\tCOSObject " + newCorrectEntryName + " = " + currentObjectName + ".at(" + newEntryName + ");");
 			} else {
 				javaWriter.println("\t\tCOSObject " + newCorrectEntryName + " = " + currentObjectName + ".getKey(" +
@@ -1523,6 +1523,9 @@ public class JavaGeneration {
 		boolean addDefault = multiObject.getJavaGeneration().getDefaultObject(multiObject, entryName);
 		printMethodSignature(false, "public", false, "COSObject",
 				getGetterName(Entry.getValuePropertyName(entryName)));
+		if (entryName.endsWith(Constants.TREE_NODE)) {
+			entryName = entryName.substring(0, entryName.length() - 8);
+		}
 		if (Constants.FILE_TRAILER.equals(multiObject.getId()) && Constants.XREF_STREAM.equals(entryName)) {
 			javaWriter.println("\t\tLong offset = " +
 					getMethodCall(getGetterName(Entry.getTypeValuePropertyName(Constants.XREF_STM, Type.INTEGER))) + ";");

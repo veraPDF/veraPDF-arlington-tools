@@ -257,9 +257,9 @@ public class Rules {
 				entryNamesSet.remove(Constants.OBJECT_STREAMS);
 			}
 			for (String entryName : object.getMultiObject().getEntriesNames()) {
-				if (Constants.FILE_TRAILER.equals(object.getId()) && (Constants.XREF_STREAM.equals(entryName) ||
-						Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName) ||
-						Constants.OBJECT_STREAMS.equals(entryName))) {
+				if ((Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) ||
+						(Constants.DOCUMENT.equals(object.getId()) && (Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName) ||
+						Constants.OBJECT_STREAMS.equals(entryName))) || entryName.endsWith(Constants.TREE_NODE)) {
 					continue;
 				}
 				if (entryNamesSet.contains(entryName)) {
@@ -305,9 +305,9 @@ public class Rules {
 			List<String> entries = new LinkedList<>();
 			Set<String> entryNamesSet = object.getEntriesNames();
 			for (String entryName : object.getMultiObject().getEntriesNames()) {
-				if (Constants.FILE_TRAILER.equals(object.getId()) && (Constants.XREF_STREAM.equals(entryName) ||
-						Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName) ||
-						Constants.OBJECT_STREAMS.equals(entryName))) {
+				if ((Constants.FILE_TRAILER.equals(object.getId()) && Constants.XREF_STREAM.equals(entryName)) ||
+						(Constants.DOCUMENT.equals(object.getId()) && (Constants.LINEARIZATION_PARAMETER_DICTIONARY.equals(entryName) || 
+								Constants.OBJECT_STREAMS.equals(entryName))) || entryName.endsWith(Constants.TREE_NODE)) {
 					continue;
 				}
 				if (!entryNamesSet.contains(entryName)) {

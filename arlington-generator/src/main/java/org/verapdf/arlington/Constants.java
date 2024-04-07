@@ -17,6 +17,16 @@ public class Constants {
 	public static final String OBJECT_STREAM = "ObjectStream";
 	public static final String OBJECT_STREAMS = "ObjectStreams";
 	public static final String ARRAY_OF_OBJECT_STREAMS = "ArrayOfObjectStreams";
+	public static final String NAME_TREE_NODE = "NameTreeNode";
+	public static final String NUMBER_TREE_NODE = "NumberTreeNode";
+	public static final String NAME_TREE_NODES_ARRAY = NAME_TREE_NODE + "s" + "Array";
+	public static final String NUMBER_TREE_NODES_ARRAY = NUMBER_TREE_NODE + "s" + "Array";
+	public static final String NAME_TREE_NODE_LIMITS_ARRAY = NAME_TREE_NODE + "Limits" + "Array";
+	public static final String NUMBER_TREE_NODE_LIMITS_ARRAY = NUMBER_TREE_NODE + "Limits" + "Array";
+	public static final String NAME_TREE_NODE_NAMES_ARRAY = NAME_TREE_NODE + "Names" + "Array";
+	public static final String NUMBER_TREE_NODE_NUMS_ARRAY = NUMBER_TREE_NODE + "Nums" + "Array";
+	public static String ANNOT_WIDGET = "AnnotWidget";
+	public static final String TREE_NODE = "TreeNode";
 	public static final String XREF_STREAM = "XRefStream";
 	public static final String XREF_STM = "XRefStm";
 	public static final String LINEARIZATION_PARAMETER_DICTIONARY = "LinearizationParameterDict";
