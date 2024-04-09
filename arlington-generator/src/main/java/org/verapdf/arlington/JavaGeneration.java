@@ -105,6 +105,9 @@ public class JavaGeneration {
 		addGetInheritable();
 		addPageObjectMethod();
 		addContainsInheritableValueMethod();
+		for (String extensionName : Main.extensionNames) {
+			addHasExtensionMethod(extensionName);
+		}
 		for (Type type : Type.values()) {
 			addGetValueMethod(type);
 			addHasTypeMethod(type);
@@ -1371,7 +1374,7 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	public void addHasExtensionMethod(MultiObject multiObject, String extensionName) {
+	public void addHasExtensionMethod(String extensionName) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Object.getHasExtensionPropertyName(extensionName)));
 		javaWriter.println("\t\treturn false;");

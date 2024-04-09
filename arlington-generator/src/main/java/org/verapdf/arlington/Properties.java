@@ -85,9 +85,6 @@ public class Properties {
 		for (String entryName : multiObject.getEntriesStringProperties()) {
 			addEntriesString(multiObject, entryName);
 		}
-		for (String extensionName : multiObject.getExtensionProperties()) {
-			addHasExtension(multiObject, extensionName);
-		}
 	}
 
 	private static void addPageContainsStructContentItems(MultiObject multiObject) {
@@ -143,11 +140,6 @@ public class Properties {
 	private static void addEntriesString(MultiObject multiObject, String entryName) {
 		ModelGeneration.addProperty(Entry.getEntriesStringPropertyName(entryName), Type.STRING.getModelType());
 		multiObject.getJavaGeneration().addEntriesStringMethod(multiObject, entryName);
-	}
-
-	private static void addHasExtension(MultiObject multiObject, String extensionName) {
-		ModelGeneration.addProperty(Object.getHasExtensionPropertyName(extensionName), Type.BOOLEAN.getModelType());
-		multiObject.getJavaGeneration().addHasExtensionMethod(multiObject, extensionName);
 	}
 
 	private static void addKeysString(MultiObject multiObject, String entryName) {

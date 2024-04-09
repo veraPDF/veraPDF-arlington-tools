@@ -63,10 +63,6 @@ public class MultiObject extends Object {
 		return arraySizeProperties;
 	}
 
-	public Set<String> getExtensionProperties() {
-		return extensionProperties;
-	}
-
 	public Set<String> getKeysStringProperties() {
 		return keysStringProperties;
 	}

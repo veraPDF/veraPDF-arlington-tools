@@ -872,24 +872,24 @@ public class PredicatesParser {
 		if (isDefault()) {
 			processTokens(getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "?",
 					type.getCreationCOSObject(arguments.get(1).getString()), ":");
-			object.getExtensionProperties().add(extensionName);
+			Main.extensionNames.add(extensionName);
 			return;
 		}
 		if (arguments.size() == 1) {
 			output.push("(" + getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)) + " == true)");
-			object.getExtensionProperties().add(extensionName);
+			Main.extensionNames.add(extensionName);
 		} else if (!isProfile || Constants.SINCE_COLUMN.equals(columnName)) {
 			PDFVersion version = PDFVersion.getPDFVersion(getEntryName(arguments.get(1).getString()));
 			if (version == null || PDFVersion.compare(this.version, version) >= 0) {
 				output.push("(" + getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)) + " == true)");
-				object.getExtensionProperties().add(extensionName);
+				Main.extensionNames.add(extensionName);
 			} else {
 				output.push("false");
 			}
 		} else {
 			processTokens("(", "(", getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "==",
 					"true", ")", "&&", getNewPart(arguments.subList(1, arguments.size())), ")");
-			object.getExtensionProperties().add(extensionName);
+			Main.extensionNames.add(extensionName);
 		}
 	}
 

@@ -138,10 +138,6 @@ public class Object {
 		return "hasExtension" + extensionName;
 	}
 
-	public Set<String> getExtensionProperties() {
-		return multiObject.getExtensionProperties();
-	}
-
 	public Set<String> getKeysStringProperties() {
 		return multiObject.getKeysStringProperties();
 	}

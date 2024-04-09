@@ -20,9 +20,6 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 		ModelGeneration.addPackageAndImportsToModel();
-		ModelGeneration.addAObject();
-		JavaGeneration gfaObjectGeneration = new JavaGeneration(new PrintWriter(new FileWriter(Main.folder + "GFAObject.java")));
-		gfaObjectGeneration.addGFAObject();
 		for (PDFVersion version : PDFVersion.values()) {
 			createObjectIdMapFromJSON(version);
 			ProfileGeneration.startProfile(version, version.getProfileWriter());
@@ -78,6 +75,9 @@ public class Main {
 		for (String objectName : objectNames) {
 			generate(objectName);
 		}
+		JavaGeneration gfaObjectGeneration = new JavaGeneration(new PrintWriter(new FileWriter(Main.folder + "GFAObject.java")));
+		gfaObjectGeneration.addGFAObject();
+		ModelGeneration.addAObject();
 	}
 
 	private static void findActiveObjects(PDFVersion version) {

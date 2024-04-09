@@ -58,6 +58,9 @@ public class ModelGeneration {
 		ModelGeneration.addProperty(Constants.IS_PDF_TAGGED, Type.BOOLEAN.getModelType());
 		ModelGeneration.addProperty(Constants.NOT_STANDARD_14_FONT, Type.BOOLEAN.getModelType());
 		ModelGeneration.addProperty(Constants.IS_ENCRYPTED_WRAPPER, Type.BOOLEAN.getModelType());
+		for (String extensionName : Main.extensionNames) {
+			ModelGeneration.addProperty(Object.getHasExtensionPropertyName(extensionName), Type.BOOLEAN.getModelType());
+		}
 		ModelGeneration.addEndType();
 	}
 
