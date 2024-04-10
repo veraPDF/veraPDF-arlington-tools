@@ -56,33 +56,40 @@ public class LinkHelper {
 		helpers.put("ActionURI", new DifferentKeysValuesLinkHelper("ActionURI", new Key("S", Type.NAME, "URI")));
 		helpersList.add(helpers);
 
+		//widget annot + fields
 		helpers = new HashMap<>();
-		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 16, "0")));
-		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Ff", Type.BITMASK, 16, "1")));
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 16, true, "0")));
+		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Ff", Type.BITMASK, 16, true, "1")));
 		helpersList.add(helpers);
 
+		//widget annot + fields
 		helpers = new HashMap<>();
-		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 17, "0")));
-		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Ff", Type.BITMASK, 17, "0")));
-		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnPush", new Key("Ff", Type.BITMASK, 17, "1")));
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 17, true, "0")));
+		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Ff", Type.BITMASK, 17, true, "0")));
+		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnPush", new Key("Ff", Type.BITMASK, 17, true, "1")));
 		helpersList.add(helpers);
 
-		//fields
+		//widget annot + fields
+		helpers = new HashMap<>();
+		helpers.put("AnnotWidgetField", new DifferentKeysValuesLinkHelper("AnnotWidgetField", new Key("FT", Type.NAME, true, false)));
+		helpers.put("AnnotWidgetFieldSig", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldSig", new Key("FT", Type.NAME, true, "Sig")));
+		helpers.put("AnnotWidgetFieldTx", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldTx", new Key("FT", Type.NAME, true, "Tx")));
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("FT", Type.NAME, true, "Btn")));
+		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("FT", Type.NAME, true, "Btn")));
+		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnPush", new Key("FT", Type.NAME, true, "Btn")));
+		helpers.put("AnnotWidgetFieldChoice", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldChoice", new Key("FT", Type.NAME, true, "Ch")));
+		helpersList.add(helpers);
+
+		//widget annot + fields
 		helpers = new HashMap<>();
 		helpers.put("AnnotWidget", new DifferentKeysLinkHelper("AnnotWidget", ""));
-		helpers.put("AnnotWidgetField", new DifferentKeysLinkHelper("AnnotWidgetField", "T", "TU", "TM", "Ff", "AA"));
-		helpersList.add(helpers);
-
-		//fields
-		helpers = new HashMap<>();
-		helpers.put("AnnotWidget", new DifferentKeysValuesLinkHelper("AnnotWidget", new Key("FT", Type.NAME, true, false)));
-		helpers.put("AnnotWidgetField", new DifferentKeysValuesLinkHelper("AnnotWidgetField", new Key("FT", Type.NAME, true, false)));
-		helpers.put("AnnotWidgetFieldSig", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldSig", new Key("FT", Type.NAME, "Sig")));
-		helpers.put("AnnotWidgetFieldTx", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldTx", new Key("FT", Type.NAME, "Tx")));
-		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("FT", Type.NAME, "Btn")));
-		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("FT", Type.NAME, "Btn")));
-		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnPush", new Key("FT", Type.NAME, "Btn")));
-		helpers.put("AnnotWidgetFieldChoice", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldChoice", new Key("FT", Type.NAME, "Ch")));
+		helpers.put("AnnotWidgetField", new DifferentKeysLinkHelper("AnnotWidgetField", "T"));
+		helpers.put("AnnotWidgetFieldSig", new DifferentKeysLinkHelper("AnnotWidgetFieldSig", "T"));
+		helpers.put("AnnotWidgetFieldTx", new DifferentKeysLinkHelper("AnnotWidgetFieldTx", "T"));
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysLinkHelper("AnnotWidgetFieldBtnCheckbox", "T"));
+		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysLinkHelper("AnnotWidgetFieldBtnRadio", "T"));
+		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysLinkHelper("AnnotWidgetFieldBtnPush", "T"));
+		helpers.put("AnnotWidgetFieldChoice", new DifferentKeysLinkHelper("AnnotWidgetFieldChoice", "T"));
 		helpersList.add(helpers);
 
 		//annotations
@@ -398,25 +405,25 @@ public class LinkHelper {
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("Ff", Type.BITMASK, 16, "0")));
-		helpers.put("FieldBtnRadio", new DifferentKeysValuesLinkHelper("FieldBtnRadio", new Key("Ff", Type.BITMASK, 16, "1")));
+		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("Ff", Type.BITMASK, 16, true, "0")));
+		helpers.put("FieldBtnRadio", new DifferentKeysValuesLinkHelper("FieldBtnRadio", new Key("Ff", Type.BITMASK, 16, true, "1")));
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("Ff", Type.BITMASK, 17, "0")));
-		helpers.put("FieldBtnRadio", new DifferentKeysValuesLinkHelper("FieldBtnRadio", new Key("Ff", Type.BITMASK, 17, "0")));
-		helpers.put("FieldBtnPush", new DifferentKeysValuesLinkHelper("FieldBtnPush", new Key("Ff", Type.BITMASK, 17, "1")));
+		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("Ff", Type.BITMASK, 17, true, "0")));
+		helpers.put("FieldBtnRadio", new DifferentKeysValuesLinkHelper("FieldBtnRadio", new Key("Ff", Type.BITMASK, 17, true, "0")));
+		helpers.put("FieldBtnPush", new DifferentKeysValuesLinkHelper("FieldBtnPush", new Key("Ff", Type.BITMASK, 17, true, "1")));
 		helpersList.add(helpers);
 
 		//fields
 		helpers = new HashMap<>();
 		helpers.put("Field", new DifferentKeysValuesLinkHelper("Field", new Key("FT", Type.NAME, true, false)));
-		helpers.put("FieldSig", new DifferentKeysValuesLinkHelper("FieldSig", new Key("FT", Type.NAME, "Sig")));
-		helpers.put("FieldTx", new DifferentKeysValuesLinkHelper("FieldTx", new Key("FT", Type.NAME, "Tx")));
-		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("FT", Type.NAME, "Btn")));
-		helpers.put("FieldBtnRadio", new DifferentKeysValuesLinkHelper("FieldBtnRadio", new Key("FT", Type.NAME, "Btn")));
-		helpers.put("FieldBtnPush", new DifferentKeysValuesLinkHelper("FieldBtnPush", new Key("FT", Type.NAME, "Btn")));
-		helpers.put("FieldChoice", new DifferentKeysValuesLinkHelper("FieldChoice", new Key("FT", Type.NAME, "Ch")));
+		helpers.put("FieldSig", new DifferentKeysValuesLinkHelper("FieldSig", new Key("FT", Type.NAME, true, "Sig")));
+		helpers.put("FieldTx", new DifferentKeysValuesLinkHelper("FieldTx", new Key("FT", Type.NAME, true, "Tx")));
+		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("FT", Type.NAME, true, "Btn")));
+		helpers.put("FieldBtnRadio", new DifferentKeysValuesLinkHelper("FieldBtnRadio", new Key("FT", Type.NAME, true, "Btn")));
+		helpers.put("FieldBtnPush", new DifferentKeysValuesLinkHelper("FieldBtnPush", new Key("FT", Type.NAME, true, "Btn")));
+		helpers.put("FieldChoice", new DifferentKeysValuesLinkHelper("FieldChoice", new Key("FT", Type.NAME, true, "Ch")));
 		helpersList.add(helpers);
 
 		//fields

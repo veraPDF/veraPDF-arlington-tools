@@ -478,6 +478,13 @@ public class JavaGeneration {
 		} else {
 			javaWriter.println("\t\tCOSObject subtype = " + objectName + ".getKey(" + getASAtomFromString(keyName) + ");");
 		}
+		if (key.isInherited()) {
+			javaWriter.println("\t\tCOSObject parent = " + objectName + ".getKey(" + getASAtomFromString(Constants.PARENT_KEY) + ");");
+			javaWriter.println("\t\twhile ((subtype == null || subtype.empty()) && (parent != null && !parent.empty())) {");
+			javaWriter.println("\t\t\tsubtype = " + objectName + ".getKey(" + getASAtomFromString(keyName) + ");");
+			javaWriter.println("\t\t\tparent = " + objectName + ".getKey(" + getASAtomFromString(Constants.PARENT_KEY) + ");");
+			javaWriter.println("\t\t}");
+		}
 		javaWriter.println("\t\tif (subtype == null) {");
 		javaWriter.println("\t\t\treturn null;");
 		javaWriter.println("\t\t}");
@@ -512,7 +519,7 @@ public class JavaGeneration {
 																		  List<String> correctLinks, String linkName, 
 																		  String methodNamePostfix) {
 		if (key.getBit() != null) {
-			javaWriter.println("\t\tswitch (subtypeValue.intValue() >> " + key.getBit() + ") {");
+			javaWriter.println("\t\tswitch (subtypeValue.intValue() >> " + (key.getBit() - 1) + ") {");
 		} else if (Type.INTEGER == key.getType()) {
 			javaWriter.println("\t\tswitch (subtypeValue.intValue()) {");
 		} else {
