@@ -351,9 +351,9 @@ public class JavaGeneration {
 		javaWriter.println();
 		Main.addImport(javaWriter, "org.verapdf.cos.*");
 		Main.addImport(javaWriter, "org.verapdf.model.alayer.*");
-		if (!Constants.OBJECT.equals(objectName)) {
-			Main.addImport(javaWriter, "org.verapdf.gf.model.impl.containers.StaticContainers");
-		} else {
+		Main.addImport(javaWriter, "org.verapdf.gf.model.impl.containers.StaticContainers");
+		if (Constants.OBJECT.equals(objectName)) {
+			Main.addImport(javaWriter, "org.verapdf.extensions.ExtensionObjectType");
 			Main.addImport(javaWriter, "org.verapdf.model.GenericModelObject");
 			Main.addImport(javaWriter, "org.verapdf.pd.PDDocument");
 			Main.addImport(javaWriter, "org.verapdf.pd.PDCatalog");
@@ -1384,7 +1384,7 @@ public class JavaGeneration {
 	public void addHasExtensionMethod(String extensionName) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Object.getHasExtensionPropertyName(extensionName)));
-		javaWriter.println("\t\treturn false;");
+		javaWriter.println("\t\treturn StaticContainers.getEnabledExtensions().contains(ExtensionObjectType." + extensionName + ");");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
