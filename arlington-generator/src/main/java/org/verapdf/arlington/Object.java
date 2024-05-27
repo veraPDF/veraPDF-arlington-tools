@@ -1,7 +1,11 @@
 package org.verapdf.arlington;
 
+import javafx.util.Pair;
+
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.verapdf.arlington.Entry.getCorrectEntryName;
 
 public class Object {
 //	@XmlAttribute
@@ -132,6 +136,14 @@ public class Object {
 
 	public Set<String> getArraySizeProperties() {
 		return multiObject.getArraySizeProperties();
+	}
+
+	public Set<Pair<String, String>> getIsInArrayProperties() {
+		return multiObject.getIsInArrayProperties();
+	}
+
+	public static String getIsInArrayPropertyName(String entryName, String arrayName) {
+		return getCorrectEntryName(entryName) + "IsInArray" + getCorrectEntryName(arrayName);
 	}
 
 	public static String getHasExtensionPropertyName(String extensionName) {

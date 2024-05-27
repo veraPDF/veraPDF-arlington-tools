@@ -603,6 +603,9 @@ public class PredicatesParser {
 			case "fn:IsHexString":
 				isHexString();
 				break;
+			case "fn:IsInArray":
+				isInArray();
+				break;
 //			case "fn:IsLastInNumberFormatArray":
 //				break;
 //			case "fn:IsMeaningful":
@@ -1022,6 +1025,30 @@ public class PredicatesParser {
 		}
 		output.push(getPropertyOrMethodName(entry.getIsHexStringPropertyName()) + " == true");
 		entry.setHexStringProperty(true);
+	}
+
+	private void isInArray() {
+		if (arguments.size() != 2) {
+			throw new RuntimeException("Invalid number of arguments of isInArray");
+		}
+		String entryName = getEntryName(arguments.get(0).getString());
+		String arrayEntryName = getEntryName(arguments.get(1).getString());
+		Entry entry = object.getEntry(entryName);
+		Entry arrayEntry = object.getEntry(arrayEntryName);
+		//contains("::") create separate methods
+		if (entry != null || entryName.contains("::") || arrayEntry != null || arrayEntryName.contains("::")) {
+			object.getIsInArrayProperties().add(new Pair<>(entryName, arrayEntryName));
+			String argument = getPropertyOrMethodName(Object.getIsInArrayPropertyName(entryName, arrayEntryName));
+			output.push(argument + " == true");
+			if (entryName.contains("::")) {
+				object.getComplexObjectProperties().add(entryName);
+			}
+			if (arrayEntryName.contains("::")) {
+				object.getComplexObjectProperties().add(arrayEntryName);
+			}
+		} else {
+			throw new RuntimeException("Invalid entry name in isInArray");
+		}
 	}
 
 	private void isPresent() {

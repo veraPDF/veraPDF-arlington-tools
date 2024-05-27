@@ -70,6 +70,9 @@ public class Properties {
 		for (String entryName : multiObject.getArraySizeProperties()) {
 			addArraySize(multiObject, entryName);
 		}
+		for (Pair<String, String> entryNames : multiObject.getIsInArrayProperties()) {
+			addIsInArray(multiObject, entryNames);
+		}
 		for (String entryName : multiObject.getKeysStringProperties()) {
 			addKeysString(multiObject, entryName);
 		}
@@ -145,6 +148,11 @@ public class Properties {
 	private static void addKeysString(MultiObject multiObject, String entryName) {
 		ModelGeneration.addProperty(Entry.getKeysStringPropertyName(entryName), Type.STRING.getModelType());
 		multiObject.getJavaGeneration().addKeysStringMethod(multiObject, entryName);
+	}
+
+	private static void addIsInArray(MultiObject multiObject, Pair<String, String> entryNames) {
+		ModelGeneration.addProperty(Object.getIsInArrayPropertyName(entryNames.getKey(), entryNames.getValue()), Type.BOOLEAN.getModelType());
+		multiObject.getJavaGeneration().addIsInArrayMethod(entryNames.getKey(), entryNames.getValue());
 	}
 
 	private static void addHasType(MultiObject multiObject, String entryName, Type type) {

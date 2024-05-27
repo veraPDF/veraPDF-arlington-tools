@@ -257,7 +257,7 @@ public class ObjectCreation {
                 numbers.getTypesPredicates().add("");
                 numbers.setRequired("");
                 numbers.setRequired("fn:IsRequired(fn:Not(fn:IsPresent(Kids)))");
-                numbers.getSpecialCases().put(Type.ARRAY, "fn:Not(fn:IsPresent(fn:IsPresent(Kids)))");
+                numbers.getSpecialCases().put(Type.ARRAY, "fn:Not(fn:IsPresent(fn:IsPresent(Kids))) && fn:ArraySortAscending(Nums,2)");
 
                 Entry limits = new Entry();
                 limits.setName("Limits");
@@ -475,6 +475,10 @@ public class ObjectCreation {
         Entry treeNodeEntry = new Entry(entry);
         Entry newEntry = new Entry();
         newEntry.setName(Constants.STAR);
+        if (entry.getSpecialCase(type) != null && entry.getSpecialCase(type).contains("fn:AllowNull(" + entry.getName() + ")")) {
+            newEntry.getTypes().add(Type.NULL);
+            newEntry.getTypesPredicates().add(Type.NULL.getType());
+        }
         for (String link : entry.getLinks(type)) {
             Object currentObject = version.getObjectIdMap().get(link);
             Type currentType = Type.DICTIONARY;
@@ -483,9 +487,11 @@ public class ObjectCreation {
             } else if (currentObject.isStream()) {
                 currentType = Type.STREAM;
             }
-            newEntry.getTypes().add(currentType);
-            newEntry.getTypesPredicates().add(currentType.getType());
-            newEntry.setIndirectReference(currentType, entry.getIndirectReference(type));
+            if (!newEntry.getTypes().contains(currentType)) {
+                newEntry.getTypes().add(currentType);
+                newEntry.getTypesPredicates().add(currentType.getType());
+                newEntry.setIndirectReference(currentType, entry.getIndirectReference(type));
+            }
             List<String> links = newEntry.getLinks(currentType);
             if (links.isEmpty()) {
                 links = new LinkedList<>();

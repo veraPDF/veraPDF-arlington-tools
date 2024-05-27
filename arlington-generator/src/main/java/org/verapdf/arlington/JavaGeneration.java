@@ -1445,6 +1445,26 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	public void addIsInArrayMethod(String entryName, String arrayEntryName) {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getGetterName(Object.getIsInArrayPropertyName(entryName, arrayEntryName)));
+		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String arrayObjectName = arrayEntryName.contains("::") ? getComplexObject(arrayEntryName) : getObjectByEntryName(arrayEntryName);
+		javaWriter.println("\t\tif (" + objectName + ".getKey() == null) {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tif (" + arrayObjectName + " != null && " + arrayObjectName + ".getType() == " + Type.ARRAY.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\tfor (COSObject object : (COSArray)" + arrayObjectName + ".getDirectBase()) {");
+		javaWriter.println("\t\t\t\tif (Objects.equals(object.getKey(), " + objectName + ".getKey())) {");
+		javaWriter.println("\t\t\t\t\treturn true;");
+		javaWriter.println("\t\t\t\t}");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn false;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	private String getComplexObject(String entryName) {
 		if (Constants.PARENT.equals(entryName)) {
 			return "this.parentObject";
