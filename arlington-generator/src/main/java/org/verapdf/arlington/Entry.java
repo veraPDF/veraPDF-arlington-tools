@@ -348,21 +348,16 @@ public class Entry implements Comparable<Entry> {
 		return getCorrectEntryName(name) + "EntriesString";
 	}
 
-	public String getEntryIsIndexInNameTreePropertyName(String entryName) {
-		return getCorrectEntryName(getName() + "EntryIsIndexInNameTree" + entryName);
-	}
-
-	public String getEntryIsValueInNameTreePropertyName(String entryName) {
-		return getCorrectEntryName(getName() + "EntryIsValueInNameTree" + entryName);
-	}
-
-
 	public static String getIsHexStringPropertyName(String entryName) {
 		return getCorrectEntryName("is" + entryName) + "HexString";
 	}
 
 	public static String getKeysStringPropertyName(String entryName) {
 		return getCorrectEntryName("keysString" + entryName);
+	}
+	
+	public static boolean isComplexEntry(String entryName) {
+		return entryName.contains("::");
 	}
 
 	public void setName(String name) {

@@ -110,6 +110,7 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 		boolean previousChildIsFunction = false;
 		boolean previousChildIsToken = false;
 		boolean previousChildIsPath = false;
+		boolean previousChildIsValue = false;
 		boolean isFirstElement = true;
 		boolean previousChildIsNumberKeyValue = false;
 		for (iterator = node.elements(); iterator.hasNext();) {
@@ -117,6 +118,7 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 			boolean isToken = false;
 			boolean isKeyPath = false;
 			boolean isNumberKeyValue = false;
+			boolean isValue = false;
 			String stringValue;
 			JsonNode child = iterator.next();
 			if (child.isArray()) {
@@ -131,8 +133,11 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 					} else if (!KEY_VALUE.equals(type.asText())) {
 						isToken = true;
 					}
-					if (KEY_VALUE.equals(type.asText()) && value.asText().matches("@" + Constants.NUMBER_REGEX)) {
-						isNumberKeyValue = true;
+					if (KEY_VALUE.equals(type.asText())) {
+						isValue = true;
+						if (value.asText().matches("@" + Constants.NUMBER_REGEX)) {
+							isNumberKeyValue = true;
+						}
 					}
 					if (KEY_PATH.equals(type.asText()) || PDF_PATH.equals(type.asText())) {
 						isKeyPath = true;
@@ -144,7 +149,7 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 					removeTrailingSpace(stringBuilder);
 				}
 			}
-			if (isArguments && !isToken && !previousChildIsToken && !isFirstElement &&
+			if (isArguments && (!isToken || (isKeyPath && previousChildIsValue)) && !previousChildIsToken && !isFirstElement &&
 					(!Constants.STAR.equals(child.asText()) || !previousChildIsNumberKeyValue)) {
 				removeTrailingSpace(stringBuilder);
 				stringBuilder.append(", ");
@@ -160,6 +165,7 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 			}
 			previousChildIsPath = isKeyPath;
 			previousChildIsNumberKeyValue = isNumberKeyValue;
+			previousChildIsValue = isValue;
 			previousChildIsFunction = isFunction;
 			previousChildIsToken = isToken;
 			isFirstElement = false;

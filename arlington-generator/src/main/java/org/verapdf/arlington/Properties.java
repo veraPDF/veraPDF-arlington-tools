@@ -54,9 +54,6 @@ public class Properties {
 			if (multiEntry.getHasCycleProperty()) {
 				addHasCycle(multiObject, multiEntry);
 			}
-			for (String entryName : multiEntry.getInNameTreeProperties()) {
-				addEntryIsIndexInNameTree(multiObject, multiEntry, entryName);
-			}
 		}
 		for (String entry : multiObject.getComplexObjectProperties()) {
 			multiObject.getJavaGeneration().getComplexCOSObject(multiObject, entry);
@@ -72,6 +69,18 @@ public class Properties {
 		}
 		for (Pair<String, String> entryNames : multiObject.getIsInArrayProperties()) {
 			addIsInArray(multiObject, entryNames);
+		}
+		for (Pair<String, String> entryNames : multiObject.getIsNameTreeIndexProperties()) {
+			addIsNameTreeIndex(multiObject, entryNames);
+		}
+		for (Pair<String, String> entryNames : multiObject.getIsNameTreeValueProperties()) {
+			addIsNameTreeValue(multiObject, entryNames);
+		}
+		for (Pair<String, String> entryNames : multiObject.getIsNumberTreeIndexProperties()) {
+			addIsNumberTreeIndex(multiObject, entryNames);
+		}
+		for (Pair<String, String> entryNames : multiObject.getIsNumberTreeValueProperties()) {
+			addIsNumberTreeValue(multiObject, entryNames);
 		}
 		for (String entryName : multiObject.getKeysStringProperties()) {
 			addKeysString(multiObject, entryName);
@@ -153,6 +162,26 @@ public class Properties {
 	private static void addIsInArray(MultiObject multiObject, Pair<String, String> entryNames) {
 		ModelGeneration.addProperty(Object.getIsInArrayPropertyName(entryNames.getKey(), entryNames.getValue()), Type.BOOLEAN.getModelType());
 		multiObject.getJavaGeneration().addIsInArrayMethod(entryNames.getKey(), entryNames.getValue());
+	}
+
+	private static void addIsNameTreeIndex(MultiObject multiObject, Pair<String, String> entryNames) {
+		ModelGeneration.addProperty(Object.getIsNameTreeIndexPropertyName(entryNames.getKey(), entryNames.getValue()), Type.BOOLEAN.getModelType());
+		multiObject.getJavaGeneration().addIsNameTreeIndexMethod(entryNames.getKey(), entryNames.getValue());
+	}
+
+	private static void addIsNameTreeValue(MultiObject multiObject, Pair<String, String> entryNames) {
+		ModelGeneration.addProperty(Object.getIsNameTreeValuePropertyName(entryNames.getKey(), entryNames.getValue()), Type.BOOLEAN.getModelType());
+		multiObject.getJavaGeneration().addIsNameTreeValueMethod(entryNames.getKey(), entryNames.getValue());
+	}
+
+	private static void addIsNumberTreeIndex(MultiObject multiObject, Pair<String, String> entryNames) {
+		ModelGeneration.addProperty(Object.getIsNumberTreeIndexPropertyName(entryNames.getKey(), entryNames.getValue()), Type.BOOLEAN.getModelType());
+		multiObject.getJavaGeneration().addIsNumberTreeIndexMethod(entryNames.getKey(), entryNames.getValue());
+	}
+
+	private static void addIsNumberTreeValue(MultiObject multiObject, Pair<String, String> entryNames) {
+		ModelGeneration.addProperty(Object.getIsNumberTreeValuePropertyName(entryNames.getKey(), entryNames.getValue()), Type.BOOLEAN.getModelType());
+		multiObject.getJavaGeneration().addIsNumberTreeValueMethod(entryNames.getKey(), entryNames.getValue());
 	}
 
 	private static void addHasType(MultiObject multiObject, String entryName, Type type) {

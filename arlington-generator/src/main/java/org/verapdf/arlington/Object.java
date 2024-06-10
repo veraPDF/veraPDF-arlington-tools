@@ -142,8 +142,40 @@ public class Object {
 		return multiObject.getIsInArrayProperties();
 	}
 
+	public Set<Pair<String, String>> getIsNameTreeIndexProperties() {
+		return multiObject.getIsNameTreeIndexProperties();
+	}
+
+	public Set<Pair<String, String>> getIsNameTreeValueProperties() {
+		return multiObject.getIsNameTreeValueProperties();
+	}
+
+	public Set<Pair<String, String>> getIsNumberTreeIndexProperties() {
+		return multiObject.getIsNumberTreeIndexProperties();
+	}
+
+	public Set<Pair<String, String>> getIsNumberTreeValueProperties() {
+		return multiObject.getIsNumberTreeValueProperties();
+	}
+
 	public static String getIsInArrayPropertyName(String entryName, String arrayName) {
 		return getCorrectEntryName(entryName) + "IsInArray" + getCorrectEntryName(arrayName);
+	}
+
+	public static String getIsNameTreeIndexPropertyName(String entryName, String treeName) {
+		return getCorrectEntryName(entryName) + "IsNameTree" + getCorrectEntryName(treeName) + "Index";
+	}
+
+	public static String getIsNameTreeValuePropertyName(String entryName, String treeName) {
+		return getCorrectEntryName(entryName) + "IsNameTree" + getCorrectEntryName(treeName) + "Value";
+	}
+
+	public static String getIsNumberTreeIndexPropertyName(String entryName, String treeName) {
+		return (Entry.isNumber(entryName) ? "number" + entryName : getCorrectEntryName(entryName)) + "IsNumberTree" + getCorrectEntryName(treeName) + "Index";
+	}
+
+	public static String getIsNumberTreeValuePropertyName(String entryName, String treeName) {
+		return getCorrectEntryName(entryName) + "IsNumberTree" + getCorrectEntryName(treeName) + "Value";
 	}
 
 	public static String getHasExtensionPropertyName(String extensionName) {

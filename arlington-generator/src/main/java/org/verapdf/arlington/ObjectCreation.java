@@ -511,6 +511,7 @@ public class ObjectCreation {
                 object.getPossibleParents()));
 
         treeNodeEntry.setName(treeNodeEntry.getName() + Constants.TREE_NODE);
+        treeNodeEntry.getSpecialCases().clear();
         List<String> treeNodeEntryLinks = new LinkedList<>();
         treeNodeEntryLinks.add(type == Type.NAME_TREE ? Constants.NAME_TREE_NODE : Constants.NUMBER_TREE_NODE);
         treeNodeEntry.getLinks().put(type, treeNodeEntryLinks);

@@ -72,7 +72,7 @@ public class PredicatesParser {
 			if (result == null) {
 				return null;
 			}
-			if (result.contains("@") || result.contains("::")) {
+			if (result.contains("@") || Entry.isComplexEntry(result)) {
 				LOGGER.log(Level.WARNING, getString() + " result: " + result + " original: " + str);
 				return null;
 			}
@@ -417,7 +417,7 @@ public class PredicatesParser {
 				undefinedEntriesNames.put(undefinedEntry.getKey(), undefinedEntry.getValue());
 				continue;
 			}
-			if (undefinedEntry.getKey().contains("::")) {
+			if (Entry.isComplexEntry(undefinedEntry.getKey())) {
 				object.getEntriesHasTypeProperties().put(undefinedEntry.getKey(), undefinedEntry.getValue());
 			} else {
 				Entry entry = object.getEntry(undefinedEntry.getKey());
@@ -586,9 +586,9 @@ public class PredicatesParser {
 			case "fn:InKeyMap":
 				inKeyMap();
 				break;
-			case "fn:InNameTree":
-				inNameTree();
-				break;
+//			case "fn:InNameTree":
+//				inNameTree();
+//				break;
 //			case "fn:IsAssociatedFile":
 //				break;
 			case "fn:IsDictionary":
@@ -605,6 +605,18 @@ public class PredicatesParser {
 				break;
 			case "fn:IsInArray":
 				isInArray();
+				break;
+			case "fn:IsNameTreeIndex":
+				isNameTreeIndex();
+				break;
+			case "fn:IsNameTreeValue":
+				isNameTreeValue();
+				break;
+			case "fn:IsNumberTreeIndex":
+				isNumberTreeIndex();
+				break;
+			case "fn:IsNumberTreeValue":
+				isNumberTreeValue();
 				break;
 //			case "fn:IsLastInNumberFormatArray":
 //				break;
@@ -742,7 +754,7 @@ public class PredicatesParser {
 			}
 			output.push(part);
 			arrayEntry.setArraySizeProperty(true);
-		} else if (arrayEntryName.contains("::")) {
+		} else if (Entry.isComplexEntry(arrayEntryName)) {
 			String argument = getPropertyOrMethodName(Entry.getArrayLengthPropertyName(arrayEntryName));
 			output.push(new Part(argument, arrayEntryName, Type.ARRAY));
 			object.getArraySizeProperties().add(arrayEntryName);
@@ -906,7 +918,7 @@ public class PredicatesParser {
 		}
 		String entryName = getEntryName(arguments.get(0).getString());
 		Entry arrayEntry = object.getEntry(entryName);
-		if (arrayEntry == null && !entryName.contains("::")) {
+		if (arrayEntry == null && !Entry.isComplexEntry(entryName)) {
 			throw new RuntimeException("Invalid entry name in hasProcessColorants");
 		}
 		output.push("(" + getPropertyOrMethodName(Entry.getEntriesStringPropertyName(entryName)) + " != null && " +
@@ -920,13 +932,13 @@ public class PredicatesParser {
 		}
 		String entryName = getEntryName(arguments.get(0).getString());
 		Entry arrayEntry = object.getEntry(entryName);
-		if (arrayEntry == null && !entryName.contains("::")) {
+		if (arrayEntry == null && !Entry.isComplexEntry(entryName)) {
 			throw new RuntimeException("Invalid entry name in hasSpotColorants");
 		}
 		output.push("(" + getPropertyOrMethodName(Entry.getEntriesStringPropertyName(entryName)) + " != null && " +
 				split(getPropertyOrMethodName(Entry.getEntriesStringPropertyName(entryName)), false, colorants) + " > 0)");
 		object.getEntriesStringProperties().add(entryName);
-		if (entryName.contains("::")) {
+		if (Entry.isComplexEntry(entryName)) {
 			object.getComplexObjectProperties().add(entryName);
 		}
 	}
@@ -947,13 +959,13 @@ public class PredicatesParser {
 		}
 		String entryName = getEntryName(arguments.get(0).getString());
 		Entry keyMapEntry = object.getEntry(entryName);
-		if (keyMapEntry == null && !entryName.contains("::")) {
+		if (keyMapEntry == null && !Entry.isComplexEntry(entryName)) {
 			throw new RuntimeException("Invalid entry name in inKeyMap");
 		}
 		output.push("(" + split(getPropertyOrMethodName(Entry.getKeysStringPropertyName(entryName)), true,
 				Collections.singletonList(getPropertyOrMethodName(entry.getTypeValuePropertyName(Type.NAME)))) + " > 0)");
 		object.getKeysStringProperties().add(entryName);
-		if (entryName.contains("::")) {
+		if (Entry.isComplexEntry(entryName)) {
 			object.getComplexObjectProperties().add(entryName);
 		}
 		entry.getTypeValueProperties().add(Type.NAME);
@@ -964,22 +976,6 @@ public class PredicatesParser {
 			return ProfileGeneration.split(stringName, equals, values);
 		} else {
 			return JavaGeneration.split(stringName, equals, values);
-		}
-	}
-
-	private void inNameTree() {
-		if (arguments.size() != 1) {
-			throw new RuntimeException("Invalid number of arguments of inNameTree");
-		}
-		String entryName = getEntryName(arguments.get(0).getString());
-		Entry nameTreeEntry = object.getEntry(entryName);
-		if (nameTreeEntry == null && !entryName.contains("::")) {
-			throw new RuntimeException("Invalid entry name in inNameTree");
-		}
-		output.push("(" + getPropertyOrMethodName(entry.getEntryIsIndexInNameTreePropertyName(entryName)) + " == true)");
-		entry.getInNameTreeProperties().add(entryName);
-		if (entryName.contains("::")) {
-			object.getComplexObjectProperties().add(entryName);
 		}
 	}
 
@@ -1006,7 +1002,7 @@ public class PredicatesParser {
 		if (entry != null) {
 			output.push(getPropertyOrMethodName(Entry.getHasTypePropertyName(entryName, Type.DICTIONARY)) + " == true");
 			entry.setFieldNameProperty(true);
-		} else if (entryName.contains("::")) {
+		} else if (Entry.isComplexEntry(entryName)) {
 			output.push(getPropertyOrMethodName(Entry.getHasTypePropertyName(entryName, Type.DICTIONARY)) + " == true");
 			object.getEntriesHasTypeProperties().put(entryName, Type.DICTIONARY);
 			object.getComplexObjectProperties().add(entryName);
@@ -1036,18 +1032,110 @@ public class PredicatesParser {
 		Entry entry = object.getEntry(entryName);
 		Entry arrayEntry = object.getEntry(arrayEntryName);
 		//contains("::") create separate methods
-		if (entry != null || entryName.contains("::") || arrayEntry != null || arrayEntryName.contains("::")) {
+		if (entry != null || Entry.isComplexEntry(entryName) || arrayEntry != null || Entry.isComplexEntry(arrayEntryName)) {
 			object.getIsInArrayProperties().add(new Pair<>(entryName, arrayEntryName));
 			String argument = getPropertyOrMethodName(Object.getIsInArrayPropertyName(entryName, arrayEntryName));
 			output.push(argument + " == true");
-			if (entryName.contains("::")) {
+			if (Entry.isComplexEntry(entryName)) {
 				object.getComplexObjectProperties().add(entryName);
 			}
-			if (arrayEntryName.contains("::")) {
+			if (Entry.isComplexEntry(arrayEntryName)) {
 				object.getComplexObjectProperties().add(arrayEntryName);
 			}
 		} else {
 			throw new RuntimeException("Invalid entry name in isInArray");
+		}
+	}
+	
+	private void isNameTreeIndex() {
+		if (arguments.size() != 2) {
+			throw new RuntimeException("Invalid number of arguments of isNameTreeIndex");
+		}
+		String treeEntryName = getEntryName(arguments.get(0).getString());
+		String entryName = getEntryName(arguments.get(1).getString());
+		Entry entry = object.getEntry(entryName);
+		Entry treeEntry = object.getEntry(treeEntryName);
+		if (entry != null || Entry.isComplexEntry(entryName) || treeEntry != null || Entry.isComplexEntry(treeEntryName)) {
+			object.getIsNameTreeIndexProperties().add(new Pair<>(entryName, treeEntryName));
+			String argument = getPropertyOrMethodName(Object.getIsNameTreeIndexPropertyName(entryName, treeEntryName));
+			output.push(argument + " == true");
+			if (Entry.isComplexEntry(entryName)) {
+				object.getComplexObjectProperties().add(entryName);
+			}
+			if (Entry.isComplexEntry(treeEntryName)) {
+				object.getComplexObjectProperties().add(treeEntryName);
+			}
+		} else {
+			throw new RuntimeException("Invalid entry name in isNameTreeIndex");
+		}
+	}
+
+	private void isNameTreeValue() {
+		if (arguments.size() != 2) {
+			throw new RuntimeException("Invalid number of arguments of isNameTreeValue");
+		}
+		String treeEntryName = getEntryName(arguments.get(0).getString());
+		String entryName = getEntryName(arguments.get(1).getString());
+		Entry entry = object.getEntry(entryName);
+		Entry treeEntry = object.getEntry(treeEntryName);
+		if (entry != null || Entry.isComplexEntry(entryName) || treeEntry != null || Entry.isComplexEntry(treeEntryName)) {
+			object.getIsNameTreeValueProperties().add(new Pair<>(entryName, treeEntryName));
+			String argument = getPropertyOrMethodName(Object.getIsNameTreeValuePropertyName(entryName, treeEntryName));
+			output.push(argument + " == true");
+			if (Entry.isComplexEntry(entryName)) {
+				object.getComplexObjectProperties().add(entryName);
+			}
+			if (Entry.isComplexEntry(treeEntryName)) {
+				object.getComplexObjectProperties().add(treeEntryName);
+			}
+		} else {
+			throw new RuntimeException("Invalid entry name in isNameTreeValue");
+		}
+	}
+
+	private void isNumberTreeIndex() {
+		if (arguments.size() != 2) {
+			throw new RuntimeException("Invalid number of arguments of isNumberTreeIndex");
+		}
+		String treeEntryName = getEntryName(arguments.get(0).getString());
+		String entryName = getEntryName(arguments.get(1).getString());
+		Entry entry = object.getEntry(entryName);
+		Entry treeEntry = object.getEntry(treeEntryName);
+		if (entry != null || Entry.isComplexEntry(entryName) || treeEntry != null || Entry.isComplexEntry(treeEntryName)) {
+			object.getIsNumberTreeIndexProperties().add(new Pair<>(entryName, treeEntryName));
+			String argument = getPropertyOrMethodName(Object.getIsNumberTreeIndexPropertyName(entryName, treeEntryName));
+			output.push(argument + " == true");
+			if (Entry.isComplexEntry(entryName)) {
+				object.getComplexObjectProperties().add(entryName);
+			}
+			if (Entry.isComplexEntry(treeEntryName)) {
+				object.getComplexObjectProperties().add(treeEntryName);
+			}
+		} else {
+			throw new RuntimeException("Invalid entry name in isNumberTreeIndex");
+		}
+	}
+
+	private void isNumberTreeValue() {
+		if (arguments.size() != 2) {
+			throw new RuntimeException("Invalid number of arguments of isNumberTreeValue");
+		}
+		String treeEntryName = getEntryName(arguments.get(0).getString());
+		String entryName = getEntryName(arguments.get(1).getString());
+		Entry entry = object.getEntry(entryName);
+		Entry treeEntry = object.getEntry(treeEntryName);
+		if (entry != null || Entry.isComplexEntry(entryName) || treeEntry != null || Entry.isComplexEntry(treeEntryName)) {
+			object.getIsNumberTreeValueProperties().add(new Pair<>(entryName, treeEntryName));
+			String argument = getPropertyOrMethodName(Object.getIsNumberTreeValuePropertyName(entryName, treeEntryName));
+			output.push(argument + " == true");
+			if (Entry.isComplexEntry(entryName)) {
+				object.getComplexObjectProperties().add(entryName);
+			}
+			if (Entry.isComplexEntry(treeEntryName)) {
+				object.getComplexObjectProperties().add(treeEntryName);
+			}
+		} else {
+			throw new RuntimeException("Invalid entry name in isNumberTreeValue");
 		}
 	}
 
@@ -1059,7 +1147,7 @@ public class PredicatesParser {
 		Entry entry = object.getEntry(entryName);
 		if ((entry != null || entryName.matches(ENTRY_REGEX)) &&
 				!arguments.get(0).getString().contains("@")) {
-			if (entry == null && !entryName.contains("::")) {
+			if (entry == null && !Entry.isComplexEntry(entryName)) {
 				output.push("@" + entryName);
 				return;
 			}
@@ -1182,7 +1270,7 @@ public class PredicatesParser {
 		}
 		String entryName = getEntryName(arguments.get(0).getString());
 		Entry entry = object.getEntry(entryName);
-		if (entry == null && !entryName.contains("::")) {
+		if (entry == null && !Entry.isComplexEntry(entryName)) {
 			throw new RuntimeException("Invalid entryName in pageProperty");
 		}
 		output.push("page::" + entryName + "::" + getEntryName(arguments.get(1).getString()));
@@ -1340,7 +1428,7 @@ public class PredicatesParser {
 
 	protected String addQuotes(String argument) {
 		if (!isDescription && argument.matches(ENTRY_REGEX) && !argument.startsWith("@") && !argument.startsWith(PREDICATE_PREFIX) &&
-				!argument.contains("::") && !argument.matches("-?" + Constants.NUMBER_REGEX) &&
+				!Entry.isComplexEntry(argument) && !argument.matches("-?" + Constants.NUMBER_REGEX) &&
 				!Constants.STAR.equals(argument) && !argument.matches("-?" + Constants.DOUBLE_REGEX) &&
 				!Constants.TRUE.equals(argument) && !Constants.FALSE.equals(argument)) {
 			return "\"" + removeQuotes(argument) + "\"";
@@ -1612,7 +1700,7 @@ public class PredicatesParser {
 					createArlingtonObject = true;
 				}
 			}
-			if (argument.contains("::")) {
+			if (Entry.isComplexEntry(argument)) {
 				if (createArlingtonObject) {
 					object.getComplexObjectProperties().add(argument.substring(0, argument.lastIndexOf("::")));
 				} else {

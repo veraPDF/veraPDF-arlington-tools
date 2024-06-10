@@ -10,9 +10,12 @@ public class MultiObject extends Object {
 
 	private boolean pageContainsStructContentItemsProperty = false;
 	private boolean imageIsStructContentItemProperty = false;
-	private final Set<String> extensionProperties = new TreeSet<>();
 	private final Set<String> arraySizeProperties = new TreeSet<>();
 	private final Set<Pair<String, String>> isInArrayProperties = new HashSet<>();
+	private final Set<Pair<String, String>> isNameTreeIndexProperties = new HashSet<>();
+	private final Set<Pair<String, String>> isNameTreeValueProperties = new HashSet<>();
+	private final Set<Pair<String, String>> isNumberTreeIndexProperties = new HashSet<>();
+	private final Set<Pair<String, String>> isNumberTreeValueProperties = new HashSet<>();
 	private final Set<String> keysStringProperties = new TreeSet<>();
 	private final Set<String> entriesStringProperties = new TreeSet<>();
 	private final Set<String> containsEntriesProperties = new TreeSet<>();
@@ -62,34 +65,62 @@ public class MultiObject extends Object {
 		return entries;
 	}
 
+	@Override
 	public Set<String> getArraySizeProperties() {
 		return arraySizeProperties;
 	}
 
+	@Override
 	public Set<Pair<String, String>> getIsInArrayProperties() {
 		return isInArrayProperties;
 	}
 
+	@Override
+	public Set<Pair<String, String>> getIsNameTreeIndexProperties() {
+		return isNameTreeIndexProperties;
+	}
+
+	@Override
+	public Set<Pair<String, String>> getIsNameTreeValueProperties() {
+		return isNumberTreeValueProperties;
+	}
+
+	@Override
+	public Set<Pair<String, String>> getIsNumberTreeIndexProperties() {
+		return isNumberTreeIndexProperties;
+	}
+
+	@Override
+	public Set<Pair<String, String>> getIsNumberTreeValueProperties() {
+		return isNameTreeValueProperties;
+	}
+
+	@Override
 	public Set<String> getKeysStringProperties() {
 		return keysStringProperties;
 	}
 
+	@Override
 	public Set<String> getEntriesStringProperties() {
 		return entriesStringProperties;
 	}
 
+	@Override
 	public Map<String, Type> getEntriesValuesProperties() {
 		return entriesValuesProperties;
 	}
 
+	@Override
 	public Map<String, Type> getEntriesHasTypeProperties() {
 		return entriesHasTypeProperties;
 	}
 
+	@Override
 	public Set<String> getContainsEntriesProperties() {
 		return containsEntriesProperties;
 	}
 
+	@Override
 	public void setPageContainsStructContentItemsProperty(boolean pageContainsStructContentItemsProperty) {
 		this.pageContainsStructContentItemsProperty = pageContainsStructContentItemsProperty;
 	}
@@ -98,6 +129,7 @@ public class MultiObject extends Object {
 		return pageContainsStructContentItemsProperty;
 	}
 
+	@Override
 	public Map<String, String> getEntryNameToArlingtonObjectMap() {
 		return entryNameToArlingtonObjectMap;
 	}
@@ -106,10 +138,12 @@ public class MultiObject extends Object {
 		return imageIsStructContentItemProperty;
 	}
 
+	@Override
 	public void setImageIsStructContentItemProperty(boolean imageIsStructContentItemProperty) {
 		this.imageIsStructContentItemProperty = imageIsStructContentItemProperty;
 	}
 
+	@Override
 	public JavaGeneration getJavaGeneration() {
 		return javaGeneration;
 	}
@@ -118,6 +152,7 @@ public class MultiObject extends Object {
 		this.javaGeneration = javaGeneration;
 	}
 
+	@Override
 	public Set<String> getComplexObjectProperties() {
 		return complexObjectProperties;
 	}

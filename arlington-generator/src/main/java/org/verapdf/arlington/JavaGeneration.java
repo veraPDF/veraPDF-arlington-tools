@@ -596,7 +596,7 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Entry.getHasTypePropertyName(entryName, type)));
 		String arlingtonObject = multiObject.getEntryNameToArlingtonObjectMap().get(entryName);
-		String objectName = entryName.contains("::") ? getComplexObject(arlingtonObject != null ? 
+		String objectName = Entry.isComplexEntry(entryName) ? getComplexObject(arlingtonObject != null ? 
 				entryName.substring(0, entryName.lastIndexOf("::")) : entryName) :
 				getObjectByEntryName(entryName);
 		if (arlingtonObject != null) {
@@ -620,7 +620,7 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, type.getJavaType(),
 				getGetterName(Entry.getTypeValuePropertyName(entryName, type)));
 		String arlingtonObject = multiObject.getEntryNameToArlingtonObjectMap().get(entryName);
-		String objectName = entryName.contains("::") ? getComplexObject(arlingtonObject != null ?
+		String objectName = Entry.isComplexEntry(entryName) ? getComplexObject(arlingtonObject != null ?
 				entryName.substring(0, entryName.lastIndexOf("::")) : entryName) :
 				getObjectByEntryName(entryName);
 		if (arlingtonObject != null) {
@@ -1190,7 +1190,7 @@ public class JavaGeneration {
 	public void addArrayLengthMethod(Object object, String entryName) {
 		printMethodSignature(true, "public", false, Type.INTEGER.getJavaType(),
 				getGetterName(Entry.getArrayLengthPropertyName(entryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String objectName = Entry.isComplexEntry(entryName) ? getComplexObject(entryName) : getObjectByEntryName(entryName);
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getArrayLengthPropertyName("")), objectName) + ";");
 		javaWriter.println("\t}");
 		javaWriter.println();
@@ -1416,7 +1416,7 @@ public class JavaGeneration {
 	public void addEntriesStringMethod(Object object, String entryName) {//works only for name entries
 		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
 				getGetterName(Entry.getEntriesStringPropertyName(entryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String objectName = Entry.isComplexEntry(entryName) ? getComplexObject(entryName) : getObjectByEntryName(entryName);
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getEntriesStringPropertyName("")),
 				objectName) + ";");
 		javaWriter.println("\t}");
@@ -1438,7 +1438,7 @@ public class JavaGeneration {
 	public void addKeysStringMethod(Object object, String entryName) {
 		printMethodSignature(true, "public", false, Type.STRING.getJavaType(),
 				getGetterName(Entry.getKeysStringPropertyName(entryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String objectName = Entry.isComplexEntry(entryName) ? getComplexObject(entryName) : getObjectByEntryName(entryName);
 		javaWriter.println("\t\treturn " + getMethodCall(getGetterName(Entry.getKeysStringPropertyName("")),
 				objectName) + ";");
 		javaWriter.println("\t}");
@@ -1448,8 +1448,8 @@ public class JavaGeneration {
 	public void addIsInArrayMethod(String entryName, String arrayEntryName) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Object.getIsInArrayPropertyName(entryName, arrayEntryName)));
-		String objectName = entryName.contains("::") ? getComplexObject(entryName) : getObjectByEntryName(entryName);
-		String arrayObjectName = arrayEntryName.contains("::") ? getComplexObject(arrayEntryName) : getObjectByEntryName(arrayEntryName);
+		String objectName = Entry.isComplexEntry(entryName) ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String arrayObjectName = Entry.isComplexEntry(arrayEntryName) ? getComplexObject(arrayEntryName) : getObjectByEntryName(arrayEntryName);
 		javaWriter.println("\t\tif (" + objectName + ".getKey() == null) {");
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
@@ -1461,6 +1461,82 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\t}");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\treturn false;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addIsNameTreeIndexMethod(String entryName, String nameTreeEntryName) {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getGetterName(Object.getIsNameTreeIndexPropertyName(entryName, nameTreeEntryName)));
+		String objectName = Entry.isComplexEntry(entryName) ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String nameTreeObjectName = Entry.isComplexEntry(nameTreeEntryName) ? getComplexObject(nameTreeEntryName) : getObjectByEntryName(nameTreeEntryName);
+		javaWriter.println("\t\tif (" + objectName + " == null || " + objectName + ".getType() != " + Type.STRING.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tif (" + nameTreeObjectName + " == null || " + nameTreeObjectName + ".getType() != " +
+				Type.DICTIONARY.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tPDNameTreeNode nameTreeNode = PDNameTreeNode.create(" + nameTreeObjectName + ");");
+		javaWriter.println("\t\treturn nameTreeNode.containsKey(" + objectName + Type.STRING_BYTE.getParserMethod() + ");");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addIsNameTreeValueMethod(String entryName, String nameTreeEntryName) {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getGetterName(Object.getIsNameTreeValuePropertyName(entryName, nameTreeEntryName)));
+		String objectName = Entry.isComplexEntry(entryName) ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String nameTreeObjectName = Entry.isComplexEntry(nameTreeEntryName) ? getComplexObject(nameTreeEntryName) : getObjectByEntryName(nameTreeEntryName);
+		javaWriter.println("\t\tif (" + objectName + " == null) {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tif (" + nameTreeObjectName + " == null || " + nameTreeObjectName + ".getType() != " +
+				Type.DICTIONARY.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tPDNameTreeNode nameTreeNode = PDNameTreeNode.create(" + nameTreeObjectName + ");");
+		javaWriter.println("\t\treturn nameTreeNode.containsValue(" + objectName + ");");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addIsNumberTreeIndexMethod(String entryName, String numberTreeEntryName) {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getGetterName(Object.getIsNumberTreeIndexPropertyName(entryName, numberTreeEntryName)));
+		String objectName = null;
+		if (!Entry.isNumber(entryName)) {
+			objectName = Entry.isComplexEntry(entryName) ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+			javaWriter.println("\t\tif (" + objectName + " == null || " + objectName + ".getType() != " + Type.INTEGER.getCosObjectType() + ") {");
+			javaWriter.println("\t\t\treturn false;");
+			javaWriter.println("\t\t}");
+		}
+		String numberTreeObjectName = Entry.isComplexEntry(numberTreeEntryName) ? getComplexObject(numberTreeEntryName) : getObjectByEntryName(numberTreeEntryName);
+		javaWriter.println("\t\tif (" + numberTreeObjectName + " == null || " + numberTreeObjectName + ".getType() != " +
+				Type.DICTIONARY.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tPDNumberTreeNode numberTreeNode = new PDNumberTreeNode(" + numberTreeObjectName + ");");
+		String integer = Entry.isNumber(entryName) ? entryName + Type.INTEGER.getJavaPostfix() : objectName + Type.INTEGER.getParserMethod();
+		javaWriter.println("\t\treturn numberTreeNode.containsKey(" + integer + ");");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addIsNumberTreeValueMethod(String entryName, String numberTreeEntryName) {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getGetterName(Object.getIsNameTreeValuePropertyName(entryName, numberTreeEntryName)));
+		String objectName = Entry.isComplexEntry(entryName) ? getComplexObject(entryName) : getObjectByEntryName(entryName);
+		String numberTreeObjectName = Entry.isComplexEntry(numberTreeEntryName) ? getComplexObject(numberTreeEntryName) : getObjectByEntryName(numberTreeEntryName);
+		javaWriter.println("\t\tif (" + objectName + " == null) {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tif (" + numberTreeObjectName + " == null || " + numberTreeObjectName + ".getType() != " +
+				Type.DICTIONARY.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tPDNumberTreeNode numberTreeNode = new PDNumberTreeNode(" + numberTreeObjectName + ");");
+		javaWriter.println("\t\treturn numberTreeNode.containsValue(" + objectName + ");");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
