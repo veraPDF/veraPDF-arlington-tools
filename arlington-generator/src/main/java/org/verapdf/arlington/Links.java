@@ -66,7 +66,7 @@ public class Links {
 	public static void generateLinkGetters(Map.Entry<String, String> mapEntry, MultiObject multiObject) {
 		String entryName = mapEntry.getKey();
 		List<List<PDFVersion>> versions = getLinkVersions(multiObject.getId(), entryName);
-		multiObject.getJavaGeneration().addCommonGetLink(entryName, mapEntry.getValue(), versions);
+		multiObject.getJavaGeneration().addCommonGetLink(multiObject.getObjectName(), entryName, mapEntry.getValue(), versions);
 		for (List<PDFVersion> versionsList : versions) {
 			PDFVersion version = versionsList.get(0);
 			Object object = version.getObjectIdMap().get(multiObject.getId());

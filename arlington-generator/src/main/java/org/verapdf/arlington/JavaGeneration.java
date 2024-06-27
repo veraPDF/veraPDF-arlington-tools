@@ -23,8 +23,9 @@ public class JavaGeneration {
 		addPackageAndImportsToClass(Constants.OBJECT);
 		javaWriter.println("public class GFAObject extends GenericModelObject implements AObject {");
 		javaWriter.println();
-		javaWriter.println("\tprivate final static List<String> standardFonts = new LinkedList<>();");
+		javaWriter.println("\tprivate static final List<String> standardFonts = new LinkedList<>();");
 		javaWriter.println("\tprivate static final ThreadLocal<Set<COSKey>> keysSet = new ThreadLocal<>();");
+		javaWriter.println("\tprivate static final ThreadLocal<Set<COSKey>> afKeysSet = new ThreadLocal<>();");
 		javaWriter.println("\tprotected static final String PDF_DATE_FORMAT_REGEX = \"(D:)?(\\\\d\\\\d){2,7}(([Z+-]\\\\d\\\\d'(\\\\d\\\\d'?)?)?|Z)\";");
 
 		javaWriter.println("\tprotected final COSBase baseObject;");
@@ -36,6 +37,9 @@ public class JavaGeneration {
 		javaWriter.println("\t\tsuper(objectType);");
 		javaWriter.println("\t\tthis.baseObject = baseObject;");
 		javaWriter.println("\t\tthis.parentObject = parentObject;");
+		javaWriter.println("\t\tif (baseObject != null && baseObject.knownKey(ASAtom.AF)) {");
+		javaWriter.println("\t\t\tprocessAF(baseObject);");
+		javaWriter.println("\t\t}");
 		javaWriter.println("\t}");
 		javaWriter.println();
 
@@ -105,6 +109,8 @@ public class JavaGeneration {
 		addGetInheritable();
 		addPageObjectMethod();
 		addContainsInheritableValueMethod();
+		addProcessAFMethod();
+		addIsAssociatedFileMethod();
 		for (String extensionName : Main.extensionNames) {
 			addHasExtensionMethod(extensionName);
 		}
@@ -126,8 +132,22 @@ public class JavaGeneration {
 		javaWriter.println("\t}");
 		javaWriter.println();
 
+		javaWriter.println("\tpublic static Set<COSKey> getAFKeysSet() {");
+		javaWriter.println("\t\tif (afKeysSet.get() == null) {");
+		javaWriter.println("\t\t\tafKeysSet.set(new HashSet<>());");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn afKeysSet.get();");
+		javaWriter.println("\t}");
+		javaWriter.println();
+
+		javaWriter.println("\tpublic static void setAFKeysSet(Set<COSKey> afKeysSet) {");
+		javaWriter.println("\t\tGFAObject.afKeysSet.set(afKeysSet);");
+		javaWriter.println("\t}");
+		javaWriter.println();
+
 		javaWriter.println("\tpublic static void clearAllContainers() {");
 		javaWriter.println("\t\tkeysSet.set(new HashSet<>());");
+		javaWriter.println("\t\tafKeysSet.set(new HashSet<>());");
 		javaWriter.println("\t}");
 		javaWriter.println();
 
@@ -209,7 +229,6 @@ public class JavaGeneration {
 	public void addPageObjectMethod() {
 		printMethodSignature(false, "protected", true, "COSObject",
 				getGetterName(Constants.PAGE_OBJECT), "COSObject object");
-		javaWriter.println("\t\tLong pageNumber = null;");
 		javaWriter.println("\t\tif (object != null && object.getType() == " + Type.STRING_BYTE.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\tPDNamesDictionary names = StaticResources.getDocument().getCatalog().getNamesDictionary();");
 		javaWriter.println("\t\t\tif (names == null) {");
@@ -221,6 +240,7 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\t}");
 		javaWriter.println("\t\t\tobject = dests.getObject(object" + Type.STRING_BYTE.getParserMethod() + ");");
 		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tLong pageNumber = null;");
 		javaWriter.println("\t\tif (object != null && object.getType() == " + Type.INTEGER.getCosObjectType() + ") {");
 		javaWriter.println("\t\t\tpageNumber = object" + Type.INTEGER.getParserMethod() + ";");
 		javaWriter.println("\t\t}");
@@ -275,16 +295,20 @@ public class JavaGeneration {
 		javaWriter.println("public class " + object.getJavaClassName() + " extends GFAObject implements " +
 				object.getModelType() + " {");
 		javaWriter.println();
+		if (Constants.PAGE_OBJECT.equals(object.getObjectName())) {
+			javaWriter.println("\tprivate static final Logger LOGGER = Logger.getLogger(" + object.getJavaClassName() + ".class.getCanonicalName());");
+			javaWriter.println();
+		}
 		if (Constants.FONT_FILE_2.equals(object.getId())) {
-			javaWriter.println("\tprivate COSBase parentParentObject;");
+			javaWriter.println("\tprivate final COSBase parentParentObject;");
 			javaWriter.println();
 			javaWriter.println("\tpublic " + object.getJavaClassName() +
 					"(COSBase baseObject, COSBase parentObject, COSBase parentParentObject, String keyName) {");
 			javaWriter.println("\t\tsuper(baseObject, parentObject, keyName, \"" + object.getModelType() + "\");");
 			javaWriter.println("\t\tthis.parentParentObject = parentParentObject;");
 		} else if (object.isEntry()) {
-			javaWriter.println("\tprivate COSBase parentParentObject;");
-			javaWriter.println("\tprivate String collectionName;");
+			javaWriter.println("\tprivate final COSBase parentParentObject;");
+			javaWriter.println("\tprivate final String collectionName;");
 			javaWriter.println();
 			javaWriter.println("\tpublic " + object.getJavaClassName() +
 					"(COSBase baseObject, COSBase parentObject, COSBase parentParentObject, String collectionName, String keyName) {");
@@ -295,8 +319,7 @@ public class JavaGeneration {
 			javaWriter.println("\tpublic " + object.getJavaClassName() + "(COSBase baseObject, COSBase parentObject, String keyName) {");
 			javaWriter.println("\t\tsuper(baseObject, parentObject, keyName, \"" + object.getModelType() + "\");");
 		}
-		if (Constants.FILE_TRAILER.equals(object.getId())) {
-		} else if (Constants.OBJECT_REFERENCE.equals(object.getId())) {
+		if (Constants.OBJECT_REFERENCE.equals(object.getId())) {
 			javaWriter.println("\t\tCOSObject obj = this.baseObject.getKey(ASAtom.OBJ);");
 			javaWriter.println("\t\tif (obj != null && obj.getKey() != null) {");
 			javaWriter.println("\t\t\tGFAObject.getKeysSet().add(obj.getKey());");
@@ -373,6 +396,8 @@ public class JavaGeneration {
 			Main.addImport(javaWriter, "org.verapdf.as.io.ASInputStream");
 			Main.addImport(javaWriter, "org.verapdf.parser.PDFStreamParser");
 			Main.addImport(javaWriter, "java.io.IOException");
+			Main.addImport(javaWriter, "java.util.logging.Level");
+			Main.addImport(javaWriter, "java.util.logging.Logger");
 		}
 		javaWriter.println();
 	}
@@ -465,10 +490,10 @@ public class JavaGeneration {
 		if (Constants.ARRAY_OF_DECODE_PARAMS_ENTRY.equals(object.getId())) {
 			javaWriter.println("\t\tString name = \"FDecodeParms\".equals(collectionName) ? \"FFilter\" : \"Filter\";");
 			javaWriter.println("\t\tCOSObject object = this.parentParentObject.getKey(ASAtom.getASAtom(name));");
-			javaWriter.println("\t\tint keyNumber = Integer.parseInt(keyName);");
 			javaWriter.println("\t\tif (object == null) { ");
 			javaWriter.println("\t\t\treturn null;");
 			javaWriter.println("\t\t}");
+			javaWriter.println("\t\tint keyNumber = Integer.parseInt(keyName);");
 			javaWriter.println("\t\tCOSObject subtype = object.at(keyNumber);");
 		} else if (key.getKeyName().matches("\\d+")) {
 			javaWriter.println("\t\tif (" + objectName + ".size() <= " + keyName + ") {");
@@ -1050,42 +1075,6 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	public void addEntryIsIndexInNameTreeMethod(Object object, Entry entry, String nameTreeEntryName) {
-		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
-				getGetterName(entry.getEntryIsIndexInNameTreePropertyName(nameTreeEntryName)));
-		String entryName = getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\tif (" + entryName + " == null || " + entryName + ".getType() != " + Type.STRING.getCosObjectType() + ") {");
-		javaWriter.println("\t\t\treturn false;");
-		javaWriter.println("\t\t}");
-		String nameTreeFinalEntry = getComplexObject(nameTreeEntryName);
-		javaWriter.println("\t\tif (" + nameTreeFinalEntry + " == null || " + nameTreeFinalEntry + ".getType() != " +
-				Type.DICTIONARY.getCosObjectType() + ") {");
-		javaWriter.println("\t\t\treturn false;");
-		javaWriter.println("\t\t}");
-		javaWriter.println("\t\tPDNameTreeNode nameTreeNode = PDNameTreeNode.create(" + nameTreeFinalEntry + ");");
-		javaWriter.println("\t\treturn nameTreeNode.containsKey(" + entryName + ".getString());");
-		javaWriter.println("\t}");
-		javaWriter.println();
-	}
-
-	public void addEntryIsValueInNameTreeMethod(Object object, Entry entry, String nameTreeEntryName) {
-		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
-				getGetterName(entry.getEntryIsValueInNameTreePropertyName(nameTreeEntryName)));
-		String entryName = getObjectByEntryName(entry.getName());
-		javaWriter.println("\t\tif (" + entryName + " == null) {");
-		javaWriter.println("\t\t\treturn false;");
-		javaWriter.println("\t\t}");
-		String nameTreeFinalEntry = getComplexObject(nameTreeEntryName);
-		javaWriter.println("\t\tif (" + nameTreeFinalEntry + " == null || " + nameTreeFinalEntry + ".getType() != " +
-				Type.DICTIONARY.getCosObjectType() + ") {");
-		javaWriter.println("\t\t\treturn false;");
-		javaWriter.println("\t\t}");
-		javaWriter.println("\t\tPDNameTreeNode nameTreeNode = PDNameTreeNode.create(" + nameTreeFinalEntry + ");");
-		javaWriter.println("\t\treturn nameTreeNode.containsValue(object);");
-		javaWriter.println("\t}");
-		javaWriter.println();
-	}
-
 	public void addgetLinkedObjectsMethod(SortedMap<String, String> entries) {
 		printMethodSignature(true, "public", false, "List<? extends " +
 						Constants.BASE_MODEL_OBJECT_PATH + ">", "getLinkedObjects", "String link");
@@ -1139,6 +1128,8 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\t\t\t}");
 		javaWriter.println("\t\t\t\t}");
 		javaWriter.println("\t\t\t} catch (IOException exception) {");
+		javaWriter.println("\t\t\t\tLOGGER.log(Level.WARNING, \"Exception during processing " + 
+				Constants.PAGE_CONTAINS_STRUCT_CONTENT_ITEMS + " predicate.\");");
 		javaWriter.println("\t\t\t\treturn false;");
 		javaWriter.println("\t\t\t}");
 		javaWriter.println("\t\t}");
@@ -1153,6 +1144,74 @@ public class JavaGeneration {
 		javaWriter.println("\t\t} else {");
 		javaWriter.println("\t\t\treturn this.baseObject.knownKey(ASAtom.PARENT) ? getInheritableResources(this.baseObject.getKey(ASAtom.PARENT)) : null;");
 		javaWriter.println("\t\t}");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addProcessAFKeysMethod() {
+		printMethodSignature(false, "private", false, "void", "processAFKeys");
+		javaWriter.println("\t\tCOSObject contents = this.baseObject.getKey(ASAtom.CONTENTS);");
+		javaWriter.println("\t\tif (contents.getType() == COSObjType.COS_STREAM || contents.getType() == COSObjType.COS_ARRAY) {");
+		javaWriter.println("\t\t\ttry (ASInputStream opStream = contents.getDirectBase().getData(COSStream.FilterFlags.DECODE);");
+		javaWriter.println("\t\t\t\t PDFStreamParser streamParser = new PDFStreamParser(opStream)) {");
+		javaWriter.println("\t\t\t\tstreamParser.parseTokens();");
+		javaWriter.println("\t\t\t\tList<COSBase> arguments = new ArrayList<>();");
+		javaWriter.println("\t\t\t\tfor (java.lang.Object rawToken : streamParser.getTokens()) {");
+		javaWriter.println("\t\t\t\t\tif (rawToken instanceof COSBase) {");
+		javaWriter.println("\t\t\t\t\t\targuments.add((COSBase) rawToken);");
+		javaWriter.println("\t\t\t\t\t} else if (rawToken instanceof Operator) {");
+		javaWriter.println("\t\t\t\t\t\tString operatorName = ((Operator)rawToken).getOperator();");
+		javaWriter.println("\t\t\t\t\t\tif (Operators.BMC.equals(operatorName) || Operators.BDC.equals(operatorName)) {");
+		javaWriter.println("\t\t\t\t\t\t\tif (arguments.size() < 2) {");
+		javaWriter.println("\t\t\t\t\t\t\t\tcontinue;");
+		javaWriter.println("\t\t\t\t\t\t\t}");
+		javaWriter.println("\t\t\t\t\t\t\tCOSBase tag = arguments.get(arguments.size() - 2);");
+		javaWriter.println("\t\t\t\t\t\t\tCOSBase propKey = arguments.get(arguments.size() - 1);");
+		javaWriter.println("\t\t\t\t\t\t\tif (isMarkedContentAFKeyAndValueTypeCorrect(tag, propKey)) {");
+		javaWriter.println("\t\t\t\t\t\t\t\tCOSObject resources = getInheritableResources(new COSObject(this.baseObject));");
+		javaWriter.println("\t\t\t\t\t\t\t\tCOSObject properties = resources != null ? resources.getKey(ASAtom.PROPERTIES) : null;");
+		javaWriter.println("\t\t\t\t\t\t\t\tCOSObject property = properties != null ? properties.getKey(propKey.getName()) : null;");
+		javaWriter.println("\t\t\t\t\t\t\t\tif (property != null && property.getType() == COSObjType.COS_ARRAY) {");
+		javaWriter.println("\t\t\t\t\t\t\t\t\tfor (int i = 0; i < property.size(); i ++) {");
+		javaWriter.println("\t\t\t\t\t\t\t\t\t\tCOSObject obj = property.at(i);");
+		javaWriter.println("\t\t\t\t\t\t\t\t\t\tif (obj != null) {");
+		javaWriter.println("\t\t\t\t\t\t\t\t\t\t\tprocessAF(obj.getDirectBase());");
+		javaWriter.println("\t\t\t\t\t\t\t\t\t\t}");
+		javaWriter.println("\t\t\t\t\t\t\t\t\t}");
+		javaWriter.println("\t\t\t\t\t\t\t\t}");
+		javaWriter.println("\t\t\t\t\t\t\t}");
+		javaWriter.println("\t\t\t\t\t\t}");
+		javaWriter.println("\t\t\t\t\t\targuments = new ArrayList<>();");
+		javaWriter.println("\t\t\t\t\t}");
+		javaWriter.println("\t\t\t\t}");
+		javaWriter.println("\t\t\t} catch (IOException ignored) {");
+		javaWriter.println("\t\t\t\tLOGGER.log(Level.WARNING, \"Exception during processing " +
+				Constants.IS_ASSOCIATED_FILE + " predicate.\");");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t}");
+		javaWriter.println();
+
+		javaWriter.println("\tprivate static boolean isMarkedContentAFKeyAndValueTypeCorrect(COSBase tag, COSBase propKey) {");
+		javaWriter.println("\t\tif (tag == null || propKey == null) {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t} else if (tag.getType() != COSObjType.COS_NAME || propKey.getType() != COSObjType.COS_NAME) {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t} else if (ASAtom.AF != tag.getName()) {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn true;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	public void addIsAssociatedFile() {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(), 
+				getGetterName(Constants.IS_ASSOCIATED_FILE));
+		javaWriter.println("\t\tif (parentObject.getObjectKey() != null) {");
+		javaWriter.println("\t\t\treturn GFAObject.getAFKeysSet().contains(parentObject.getObjectKey());");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn false;");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
@@ -1686,11 +1745,14 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	public void addCommonGetLink(String entryName, String returnType, List<List<PDFVersion>> versions) {
+	public void addCommonGetLink(String objectName, String entryName, String returnType, List<List<PDFVersion>> versions) {
 		String linkName = Links.getLinkName(entryName);
 		String returnObjectType = Constants.OBJECT.equals(returnType) ? Constants.BASE_MODEL_OBJECT_PATH : returnType;
 		printMethodSignature(false, "private", false, "List<" + returnObjectType + ">",
 				getGetterName(linkName));
+		if (Constants.PAGE_OBJECT.equals(objectName) && "Contents".equals(entryName)) {
+			javaWriter.println("\t\tprocessAFKeys();");
+		}
 		if (versions.size() == 1 && versions.get(0).size() == PDFVersion.values().length) {
 			javaWriter.println("\t\treturn " + getMethodCall(getGetterName(linkName +
 					versions.get(0).get(0).getStringWithUnderScore())) + ";");

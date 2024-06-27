@@ -58,6 +58,7 @@ public class Constants {
 	public static final String NUMBER_OF_PAGES = "numberOfPages";
 	public static final String PAGE_CONTAINS_STRUCT_CONTENT_ITEMS = "pageContainsStructContentItems";
 	public static final String IMAGE_IS_STRUCT_CONTENT_ITEM = "imageIsStructContentItem";
+	public static final String IS_ASSOCIATED_FILE = "isAssociatedFile";
 	public static final String IS_ENCRYPTED_WRAPPER = "isEncryptedWrapper";
 	public static final String IS_PDF_TAGGED = "isPDFTagged";
 	public static final String OBJECT_TYPE = "ObjectType";

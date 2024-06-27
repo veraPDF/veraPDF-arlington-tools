@@ -61,6 +61,12 @@ public class Properties {
 		if (multiObject.getPageContainsStructContentItemsProperty()) {
 			addPageContainsStructContentItems(multiObject);
 		}
+		if (Constants.PAGE_OBJECT.equals(multiObject.getObjectName())) {
+			multiObject.getJavaGeneration().addProcessAFKeysMethod();
+		}
+		if ("EmbeddedFileParameter".equals(multiObject.getObjectName())) {
+			multiObject.getJavaGeneration().addIsAssociatedFile();
+		}
 		if (multiObject.getImageIsStructContentItemProperty()) {
 			addImageIsStructContentItem(multiObject);
 		}
@@ -212,15 +218,5 @@ public class Properties {
 	private static void addArraySortAscending(MultiObject multiObject, Entry entry, int number) {
 		ModelGeneration.addProperty(entry.getArraySortAscendingPropertyName(number), Type.BOOLEAN.getModelType());
 		multiObject.getJavaGeneration().addArraySortAscendingMethod(entry, number);
-	}
-
-	private static void addEntryIsIndexInNameTree(MultiObject multiObject, Entry entry, String entryName) {
-		ModelGeneration.addProperty(entry.getEntryIsIndexInNameTreePropertyName(entryName), Type.BOOLEAN.getModelType());
-		multiObject.getJavaGeneration().addEntryIsIndexInNameTreeMethod(multiObject, entry, entryName);
-	}
-
-	private static void addEntryIsValueInNameTree(MultiObject multiObject, Entry entry, String entryName) {
-		ModelGeneration.addProperty(entry.getEntryIsValueInNameTreePropertyName(entryName), Type.BOOLEAN.getModelType());
-		multiObject.getJavaGeneration().addEntryIsValueInNameTreeMethod(multiObject, entry, entryName);
 	}
 }

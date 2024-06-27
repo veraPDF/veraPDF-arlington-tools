@@ -37,7 +37,7 @@ public class ProfileGeneration {
 	}
 
 	private static boolean isDeferred(String test) {
-		return test.contains(Constants.IMAGE_IS_STRUCT_CONTENT_ITEM);
+		return test.contains(Constants.IMAGE_IS_STRUCT_CONTENT_ITEM) || test.contains(Constants.IS_ASSOCIATED_FILE);
 	}
 
 	public static void startProfile(PDFVersion version, PrintWriter profileWriter) {

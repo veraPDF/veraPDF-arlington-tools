@@ -589,8 +589,9 @@ public class PredicatesParser {
 //			case "fn:InNameTree":
 //				inNameTree();
 //				break;
-//			case "fn:IsAssociatedFile":
-//				break;
+			case "fn:IsAssociatedFile":
+				isAssociatedFile();
+				break;
 			case "fn:IsDictionary":
 				isDictionary();
 				break;
@@ -979,18 +980,8 @@ public class PredicatesParser {
 		}
 	}
 
-	private void isFieldName() {
-		if (arguments.size() != 1) {
-			throw new RuntimeException("Invalid number of arguments of isFieldName");
-		}
-		String entryName = getEntryName(arguments.get(0).getString());
-		Entry entry = object.getEntry(entryName);
-		if (entry != null) {
-			output.push(Entry.getIsFieldNamePropertyName(entry.getName()) + " == true");
-			entry.setFieldNameProperty(true);
-		} else {
-			throw new RuntimeException("Invalid argument of isFieldName");
-		}
+	private void isAssociatedFile() {
+		output.push(getPropertyOrMethodName(Constants.IS_ASSOCIATED_FILE));
 	}
 
 	private void isDictionary() {
@@ -1013,6 +1004,20 @@ public class PredicatesParser {
 
 	private void isEncryptedWrapped() {
 		output.push(getPropertyOrMethodName(Constants.IS_ENCRYPTED_WRAPPER));
+	}
+
+	private void isFieldName() {
+		if (arguments.size() != 1) {
+			throw new RuntimeException("Invalid number of arguments of isFieldName");
+		}
+		String entryName = getEntryName(arguments.get(0).getString());
+		Entry entry = object.getEntry(entryName);
+		if (entry != null) {
+			output.push(Entry.getIsFieldNamePropertyName(entry.getName()) + " == true");
+			entry.setFieldNameProperty(true);
+		} else {
+			throw new RuntimeException("Invalid argument of isFieldName");
+		}
 	}
 
 	private void isHexString() {
