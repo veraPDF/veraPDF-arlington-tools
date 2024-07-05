@@ -1057,6 +1057,60 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	private void addProcessAFMethod() {
+		printMethodSignature(false, "public", true, "void",
+				"processAF", "COSBase object");
+		javaWriter.println("\t\tCOSObject AF = object.getKey(ASAtom.getASAtom(\"AF\"));");
+		javaWriter.println("\t\tif (AF == null) {");
+		javaWriter.println("\t\t\treturn;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tCOSObject EF = AF.getKey(ASAtom.getASAtom(\"EF\"));");
+		javaWriter.println("\t\tif (EF != null) {");
+		javaWriter.println("\t\t\tCOSObject F = EF.getKey(ASAtom.getASAtom(\"F\"));");
+		javaWriter.println("\t\t\tif (F != null) {");
+		javaWriter.println("\t\t\t\tGFAObject.getAFKeysSet().add(F.getObjectKey());");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t\tCOSObject UF = EF.getKey(ASAtom.getASAtom(\"UF\"));");
+		javaWriter.println("\t\t\tif (UF != null) {");
+		javaWriter.println("\t\t\t\tGFAObject.getAFKeysSet().add(UF.getObjectKey());");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tCOSObject RF = AF.getKey(ASAtom.getASAtom(\"RF\"));");
+		javaWriter.println("\t\tif (RF != null) {");
+		javaWriter.println("\t\t\tCOSObject F = RF.getKey(ASAtom.getASAtom(\"F\"));");
+		javaWriter.println("\t\t\tif (F != null && F.getType() == COSObjType.COS_ARRAY) {");
+		javaWriter.println("\t\t\t\tfor (int i = 1; i < F.size(); i += 2) {");
+		javaWriter.println("\t\t\t\t\tCOSObject obj = F.at(i);");
+		javaWriter.println("\t\t\t\t\tif (obj != null) {");
+		javaWriter.println("\t\t\t\t\t\tGFAObject.getAFKeysSet().add(obj.getObjectKey());");
+		javaWriter.println("\t\t\t\t\t}");
+		javaWriter.println("\t\t\t\t}");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t\tCOSObject UF = RF.getKey(ASAtom.getASAtom(\"UF\"));");
+		javaWriter.println("\t\t\tif (UF != null && UF.getType() == COSObjType.COS_ARRAY) {");
+		javaWriter.println("\t\t\t\tfor (int i = 1; i < UF.size(); i += 2) {");
+		javaWriter.println("\t\t\t\t\tCOSObject obj = UF.at(i);");
+		javaWriter.println("\t\t\t\t\tif (obj != null) {");
+		javaWriter.println("\t\t\t\t\t\tGFAObject.getAFKeysSet().add(obj.getObjectKey());");
+		javaWriter.println("\t\t\t\t\t}");
+		javaWriter.println("\t\t\t\t}");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
+	private void addIsAssociatedFileMethod() {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getGetterName(Constants.IS_ASSOCIATED_FILE));
+		javaWriter.println("\t\tif (baseObject.getObjectKey() != null) {");
+		javaWriter.println("\t\t\treturn GFAObject.getAFKeysSet().contains(baseObject.getObjectKey());");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn false;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	public void addIndirectMethod() {
 		printMethodSignature(false, "public", true, Type.BOOLEAN.getJavaType(),
 				getGetterName(Entry.getIndirectPropertyName("")), "COSObject object");
