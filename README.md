@@ -9,13 +9,13 @@ This repository implements the Java-based utility performing this translation.
 
 Alington types
 ==============================
-The Arlington PDF model utilizes an [expanded set of types](https://github.com/pdf-association/arlington-pdf-model/blob/master/INTERNAL_GRAMMAR.md#column-2---type) in order to more precisely define PDF objects and data integrity relationships. veraPDF fully supports this expanded set and implements the necessary additional checks. These checks include:
-- all dictionary keys must be direct objects
+The Arlington PDF model utilizes an [expanded set of types](https://github.com/pdf-association/arlington-pdf-model/blob/master/INTERNAL_GRAMMAR.md#column-2---type) in order to more precisely define PDF objects and data integrity relationships. veraPDF fully supports this expanded set and implements certain additional checks. These checks include:
+- all dictionary keys need to be direct objects as is required by ISO 32000-2:2020 otherwise veraPDF will terminate processing with an exception message: `Exception: Caught unexpected runtime exception during validation caused by exception: Wrapp org.verapdf.exceptions.VeraPDFParserException: Error while parsing object X Y ... invalid pdf dictionary (object key - X Y obj, offset ZZZZ)`.
 - `dates` must be a valid PDF date string
 -` rectangle` must be a PDF array with precisely 4 entries
-- `matrix` must be a PDF array with precisely 6 entries and represent a valid affine transform
+- `matrix` must be a PDF array with precisely 6 entries. PDF matrices should also be valid affine transforms but this is not explicitly checked by veraPDF.
 - `bitmask` must be a PDF integer object
-- `string-ascii` must not start with a Unicode byte order marker 
+- `string-ascii` must contain only 7-bit ASCII characters (<= 0x7F)
 - `name-tree` is a complex data structure (see Table 36), internally comprising various PDF objects:
     - NameTreeNode shall not contain entries except **Kids**, **Limits**, **Names**.
     - Entry **Kids** in NameTreeNode shall have type Array.
