@@ -37,7 +37,7 @@ public class JavaGeneration {
 		javaWriter.println("\t\tsuper(objectType);");
 		javaWriter.println("\t\tthis.baseObject = baseObject;");
 		javaWriter.println("\t\tthis.parentObject = parentObject;");
-		javaWriter.println("\t\tif (baseObject != null && baseObject.knownKey(ASAtom.AF)) {");
+		javaWriter.println("\t\tif (baseObject != null && baseObject.getType() == COSObjType.COS_DICT && baseObject.knownKey(ASAtom.AF)) {");
 		javaWriter.println("\t\t\tprocessAF(baseObject);");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t}");
