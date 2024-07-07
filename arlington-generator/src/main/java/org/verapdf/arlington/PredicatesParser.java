@@ -1,5 +1,7 @@
 package org.verapdf.arlington;
 
+import javafx.util.Pair;
+
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,6 +70,9 @@ public class PredicatesParser {
 
 	public String parse(String str) {
 		try {
+			str = str.replace("fn:IsPresent(AP::N::*)", "fn:IsDictionary(AP::N)")
+					.replace("fn:IsPresent(AP::R::*)", "fn:IsDictionary(AP::R)")
+					.replace("fn:IsPresent(AP::D::*)", "fn:IsDictionary(AP::D)");
 			String result = parseString(str);
 			if (result == null) {
 				return null;
@@ -443,7 +448,7 @@ public class PredicatesParser {
 		output.add(getNewPart(argument1, "%", argument2));
 	}
 
-	private void equal(Part firstArgument, Part secondArgument) {
+	protected void equal(Part firstArgument, Part secondArgument) {
 		if (Constants.UNDEFINED.equals(firstArgument.getString()) || Constants.UNDEFINED.equals(secondArgument.getString())) {
 			output.add(Constants.UNDEFINED);
 			return;
@@ -479,7 +484,7 @@ public class PredicatesParser {
 		}
 	}
 
-	private void nonEqual(Part firstArgument, Part secondArgument) {
+	protected void nonEqual(Part firstArgument, Part secondArgument) {
 		if (Constants.UNDEFINED.equals(firstArgument.getString()) || Constants.UNDEFINED.equals(secondArgument.getString())) {
 			output.add(Constants.UNDEFINED);
 			return;
@@ -517,7 +522,7 @@ public class PredicatesParser {
 		}
 	}
 
-	private void executeFunction(String functionName) {
+	protected void executeFunction(String functionName) {
 		arguments = new LinkedList<>();
 		while (!"(".equals(output.peek().getString())) {
 			arguments.add(0, output.pop());

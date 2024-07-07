@@ -1,5 +1,7 @@
 package org.verapdf.arlington;
 
+import javafx.util.Pair;
+
 import java.util.Map;
 
 public class Properties {

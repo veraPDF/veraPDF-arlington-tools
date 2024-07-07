@@ -6,11 +6,13 @@ import java.io.PrintWriter;
 
 public class ModelGeneration {
 
+	private static final String MODEL_RESULT_FOLDER = "result_model/";
+
 	private static PrintWriter modelWriter;
 
 	static {
 		try {
-			modelWriter = new PrintWriter(new FileWriter(modelFolder + "ALayer.mdl"));
+			modelWriter = new PrintWriter(new FileWriter(MODEL_RESULT_FOLDER + "ALayer.mdl"));
 		} catch (IOException ignored) {
 		}
 	}

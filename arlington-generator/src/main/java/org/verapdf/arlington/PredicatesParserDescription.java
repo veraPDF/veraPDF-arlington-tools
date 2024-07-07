@@ -14,6 +14,23 @@ public class PredicatesParserDescription extends PredicatesParser {
 	}
 
 	@Override
+	public String parse(String str) {
+		try {
+			str = str.replace("fn:IsPresent(AP::N::*)", "fn:IsDictionary(AP::N)")
+					.replace("fn:IsPresent(AP::R::*)", "fn:IsDictionary(AP::R)")
+					.replace("fn:IsPresent(AP::D::*)", "fn:IsDictionary(AP::D)");
+			String result = parseString(str);
+			if (result == null) {
+				return str;
+			}
+			return result;
+		} catch (RuntimeException e) {
+			LOGGER.log(Level.WARNING, getString() + ": " + str + ". Error: " + e.getMessage());
+		}
+		return str;
+	}
+
+	@Override
 	protected void executeOperator(String operatorName, boolean isOriginal) {
 		Part secondArgument = output.pop();
 		Part firstArgument = output.pop();

@@ -14,9 +14,11 @@ import java.util.*;
 
 public class Main {
 
-	private static final SortedSet<String> objectNames = new TreeSet<>();
-	private static final Map<String, MultiObject> objectIdMap = new HashMap<>();
+	public static final SortedSet<String> objectNames = new TreeSet<>();
+	public static final SortedSet<String> extensionNames = new TreeSet<>();
+	public static final Map<String, MultiObject> objectIdMap = new HashMap<>();
 	private static final Map<PDFVersion, Set<String>> activeObjectNames = new HashMap<>();
+	private static final String VALIDATION_RESULT_FOLDER = "result_validation/";
 
 	public static void main(String[] args) throws IOException {
 		ModelGeneration.addPackageAndImportsToModel();
@@ -75,7 +77,7 @@ public class Main {
 		for (String objectName : objectNames) {
 			generate(objectName);
 		}
-		JavaGeneration gfaObjectGeneration = new JavaGeneration(new PrintWriter(new FileWriter(Main.folder + "GFAObject.java")));
+		JavaGeneration gfaObjectGeneration = new JavaGeneration(new PrintWriter(new FileWriter(Main.VALIDATION_RESULT_FOLDER + "GFAObject.java")));
 		gfaObjectGeneration.addGFAObject();
 		ModelGeneration.addAObject();
 	}
@@ -107,7 +109,7 @@ public class Main {
 
 	private static void generate(String objectName) throws IOException {
 		MultiObject multiObject = objectIdMap.get(objectName);
-		PrintWriter javaWriter = new PrintWriter(new FileWriter(folder + Object.getJavaClassName(objectName) + ".java"));
+		PrintWriter javaWriter = new PrintWriter(new FileWriter(VALIDATION_RESULT_FOLDER + Object.getJavaClassName(objectName) + ".java"));
 		multiObject.setJavaGeneration(new JavaGeneration(javaWriter));
 		multiObject.getJavaGeneration().addPackageAndImportsToClass(objectName);
 		multiObject.getJavaGeneration().addClassStart(multiObject);
