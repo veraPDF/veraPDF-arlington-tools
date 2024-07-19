@@ -13,7 +13,7 @@ The Arlington PDF model utilizes an [expanded set of types](https://github.com/p
 - all dictionary keys need to be direct objects as is required by ISO 32000-2:2020 otherwise veraPDF will terminate processing with an exception message: `Exception: Caught unexpected runtime exception during validation caused by exception: Wrapp org.verapdf.exceptions.VeraPDFParserException: Error while parsing object X Y ... invalid pdf dictionary (object key - X Y obj, offset ZZZZ)`.
 - `dates` must be a valid PDF date string
 - `rectangle` must be a PDF array with precisely 4 entries
-- `matrix` must be a PDF array with precisely 6 entries. PDF matrices should also be valid affine transforms but this is not explicitly checked by veraPDF.
+- `matrix` must be a PDF array with precisely 6 numeric entries
 - `bitmask` must be a PDF integer object
 - `string-ascii` must contain only 7-bit ASCII characters (<= 0x7F)
 - `name-tree` is a complex data structure (see Table 36), internally comprising various PDF objects:
@@ -58,7 +58,6 @@ The following [Arlington predicates](https://github.com/pdf-association/arlingto
 - AlwaysUnencrypted
 - FontHasLatinChars
 - Ignore
-- IsAssociatedFile
 - IsLastInNumberFormatArray
 - IsMeaningful
 - KeyNameIsColorant
