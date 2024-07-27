@@ -27,6 +27,7 @@ public class Main {
 			ProfileGeneration.startProfile(version, version.getProfileWriter());
 			objectNames.addAll(version.getObjectIdMap().keySet());
 		}
+		fixAnnotProjectionObjectAFEntry();
 		ObjectCreation.addMergedWidgetAnnotFields();
 		ObjectCreation.addNameAndNumberTreeEntries();
 		ObjectCreation.addDocument();
@@ -41,6 +42,17 @@ public class Main {
 		}
 	}
 
+	// temporary method while https://github.com/pdf-association/arlington-pdf-model/issues/113#issuecomment-2044977331 is not fixed
+	public static void fixAnnotProjectionObjectAFEntry() {
+		Object annotProjection2_0 = PDFVersion.VERSION2_0.getObjectIdMap().get("AnnotProjection");
+		Object annotProjection1_7 = PDFVersion.VERSION1_7.getObjectIdMap().get("AnnotProjection");
+		Entry af2_0 = annotProjection2_0.getEntry("AF");
+		Entry af1_7 = new Entry(af2_0);
+		af1_7.setSinceString("fn:Eval(fn:Extension(ADBE_Extn3,1.7) && fn:Extension(ISO_19005_3,1.7))");
+		af2_0.setSinceString("fn:Eval((fn:Extension(ADBE_Extn3,1.7) && fn:Extension(ISO_19005_3,1.7)) || 2.0)");
+		annotProjection1_7.addEntry(af1_7);
+	}
+	
 	public static void createObjectIdMapFromJSON(PDFVersion version) throws IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		InputStream jsonFileInputStream = new FileInputStream("arlington" + version.getString() + ".json");
