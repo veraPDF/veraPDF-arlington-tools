@@ -515,6 +515,7 @@ public class LinkHelper {
 		helpers = new HashMap<>();
 		helpers.put("DevExtensions", new KeyNameLinkHelper("DevExtensions", null, true));
 		helpers.put("ISO_DevExtensions", new KeyNameLinkHelper("ISO_DevExtensions", "ISO_", true));
+		helpers.put("GTSm_DevExtensions", new KeyNameLinkHelper("GTSm_DevExtensions", "GTSm_", true));
 		helpersList.add(helpers);
 	}
 }
