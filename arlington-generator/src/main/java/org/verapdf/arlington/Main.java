@@ -27,7 +27,7 @@ public class Main {
 			ProfileGeneration.startProfile(version, version.getProfileWriter());
 			objectNames.addAll(version.getObjectIdMap().keySet());
 		}
-		fixAnnotProjectionObjectAFEntry();
+//		fixAnnotProjectionObjectAFEntry();
 		ObjectCreation.addMergedWidgetAnnotFields();
 		ObjectCreation.addNameAndNumberTreeEntries();
 		ObjectCreation.addDocument();
