@@ -517,5 +517,11 @@ public class LinkHelper {
 		helpers.put("ISO_DevExtensions", new KeyNameLinkHelper("ISO_DevExtensions", "ISO_", true));
 		helpers.put("GTSm_DevExtensions", new KeyNameLinkHelper("GTSm_DevExtensions", "GTSm_", true));
 		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("FontFile3Type1", new DifferentKeysValuesLinkHelper("FontFile3Type1", new Key("Subtype", Type.NAME,"Type1C")));
+		helpers.put("FontFile3OpenType", new DifferentKeysValuesLinkHelper("FontFile3OpenType", new Key("Subtype", Type.NAME, "OpenType")));
+		helpers.put("FontFile3CIDType0", new DifferentKeysValuesLinkHelper("FontFile3CIDType0", new Key("Subtype", Type.NAME, "CIDFontType0C")));
+		helpersList.add(helpers);
 	}
 }
