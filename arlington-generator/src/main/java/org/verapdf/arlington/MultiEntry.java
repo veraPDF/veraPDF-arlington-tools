@@ -161,6 +161,9 @@ public class MultiEntry extends Entry {
 			if (defaultValue.startsWith("@")) {
 				defaultValue = JavaGeneration.getGetterName(Entry.getValuePropertyName(entryName)) + "()";
 			} else if (!defaultValue.contains(PredicatesParser.PREDICATE_PREFIX)) {
+				if (type != Type.MATRIX && type != Type.RECTANGLE) {
+					defaultValue = PredicatesParser.removeSquareBrackets(defaultValue);
+				}
 				defaultValue = PredicatesParser.removeQuotes(defaultValue);
 				defaultValue = type.getCreationCOSObject(type.getValueWithSeparator(defaultValue + type.getJavaPostfix()));
 			} else {
