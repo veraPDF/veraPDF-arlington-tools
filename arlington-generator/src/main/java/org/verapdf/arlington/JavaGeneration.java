@@ -1813,11 +1813,22 @@ public class JavaGeneration {
 		} else {
 			javaWriter.println("\t\tswitch (StaticContainers.getFlavour()) {");
 			for (List<PDFVersion> versionsList : versions) {
-				for (PDFVersion version : versionsList) {
-					javaWriter.println("\t\t\tcase ARLINGTON" + version.getStringWithUnderScore() + ":");
-				}
 				String versionString = versionsList.get(0).getStringWithUnderScore();
-				javaWriter.println("\t\t\t\treturn " + getMethodCall(getGetterName(linkName + versionString)) + ";");
+				Map<String, List<PDFVersion>> map = getLinkVersions(objectName, entryName, versionsList);
+				for (Map.Entry<String, List<PDFVersion>> mapEntry : map.entrySet()) {
+					for (PDFVersion version : mapEntry.getValue()) {
+						javaWriter.println("\t\t\tcase ARLINGTON" + version.getStringWithUnderScore() + ":");
+					}
+					if (mapEntry.getKey() != null) {
+						javaWriter.println("\t\t\t\tif (" + mapEntry.getKey() + ") {");
+						javaWriter.print('\t');
+					}
+					javaWriter.println("\t\t\t\treturn " + getMethodCall(getGetterName(linkName + versionString)) + ";");
+					if (mapEntry.getKey() != null) {
+						javaWriter.println("\t\t\t\t}");
+						javaWriter.println("\t\t\t\treturn Collections.emptyList();");
+					}
+				}
 			}
 			javaWriter.println("\t\t\tdefault:");
 			javaWriter.println("\t\t\t\treturn Collections.emptyList();");
@@ -1825,6 +1836,23 @@ public class JavaGeneration {
 		}
 		javaWriter.println("\t}");
 		javaWriter.println();
+	}
+
+	public static Map<String, List<PDFVersion>> getLinkVersions(String objectName, String entryName, List<PDFVersion> versionsList) {
+		Map<String, List<PDFVersion>> versions = new LinkedHashMap<>();
+		for (PDFVersion version : versionsList) {
+			Object object = version.getObjectIdMap().get(objectName);
+			Entry entry = object.getEntry(entryName);
+			String result = null;
+			if (entry.getSinceString() != null && entry.getSinceString().contains(PredicatesParser.PREDICATE_PREFIX)) {
+				result = new PredicatesParser(object, entry, version, null, Constants.SINCE_COLUMN, false).parse(entry.getSinceString());
+				if (Constants.TRUE.equals(result)) {
+					result = null;
+				}
+			}
+			versions.computeIfAbsent(result, x -> new ArrayList<>()).add(version);
+		}
+		return versions;
 	}
 
 	public static String getGetterName(String propertyName) {
