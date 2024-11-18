@@ -28,6 +28,9 @@ public class Rules {
 	private static final String DEPRECATED_TYPE_DESCRIPTION = "%s should not have deprecated type %s";
 	private static final String DEPRECATED_TYPE_ERROR_MESSAGE = "%s is present";
 
+	private static final String EXTENSION_TYPE_DESCRIPTION = "%s should not have type %s, if extension %s does not chosen";
+	private static final String EXTENSION_TYPE_ERROR_MESSAGE = "%s is present";
+
 	private static final String POSSIBLE_VALUE_CONDITION_DESCRIPTION = "%s shall satisfy possible value predicate: %s";
 	private static final String POSSIBLE_VALUE_ERROR_CONDITION_MESSAGE = "%s does not satisfy possible value predicate: %s";
 
@@ -742,9 +745,12 @@ public class Rules {
 			Type type = entry.getTypes().get(i);
 			if (typeString.contains(PredicatesParser.DEPRECATED_PREDICATE)) {
 				deprecatedType(version, object, entry, type, typeString);
+			} else if (typeString.contains(PredicatesParser.EXTENSION_PREDICATE)) {
+				extensionType(version, object, entry, type, typeString);
 			} else {
 				LOGGER.log(Level.INFO, Main.getString(version, object, entry, type) +
-						" column Type contains non " + PredicatesParser.DEPRECATED_PREDICATE + " predicate");
+						" column Type contains predicate different from " + PredicatesParser.DEPRECATED_PREDICATE +
+						" and " + PredicatesParser.EXTENSION_PREDICATE);
 			}
 		}
 	}
@@ -761,6 +767,17 @@ public class Rules {
 				String.format(DEPRECATED_TYPE_DESCRIPTION,
 						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType()),
 				String.format(DEPRECATED_TYPE_ERROR_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type)));
+	}
+
+	private static void extensionType(PDFVersion version, Object object, Entry entry, Type type, String typeString) {
+		String extensionName = PredicatesParser.getPredicateFirstArgument(typeString);
+		Main.extensionNames.add(extensionName);
+		ProfileGeneration.writeRule(version, 26, object.getModelType(), getClause(object, entry, type),
+				entry.getHasTypePropertyName(type) + " != true || " + Object.getHasExtensionPropertyName(extensionName) + " == true",
+				String.format(EXTENSION_TYPE_DESCRIPTION,
+						ProfileGeneration.getErrorMessageStart(true, object, entry), type.getType(), extensionName),
+				String.format(EXTENSION_TYPE_ERROR_MESSAGE,
 						ProfileGeneration.getErrorMessageStart(false, object, entry, type)));
 	}
 
