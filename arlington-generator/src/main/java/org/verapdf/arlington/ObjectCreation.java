@@ -6,7 +6,28 @@ public class ObjectCreation {
 
     public static void addMergedWidgetAnnotFields() {
         for (PDFVersion version : PDFVersion.values()) {
-            Object widgetAnnot = version.getObjectIdMap().get("AnnotWidget");
+            Object addActionFormField = version.getObjectIdMap().get("AddActionFormField");
+            Object addActionWidgetAnnotation = version.getObjectIdMap().get("AddActionWidgetAnnotation");
+            if (addActionFormField == null && addActionWidgetAnnotation == null) {
+                continue;
+            }
+            SortedSet<Entry> entries = new TreeSet<>();
+            if (addActionFormField != null) {
+                for (Entry entry : addActionFormField.getEntries()) {
+                    entries.add(new Entry(entry));
+                }
+            }
+            if (addActionWidgetAnnotation != null) {
+                for (Entry entry : addActionWidgetAnnotation.getEntries()) {
+                    entries.add(new Entry(entry));
+                }
+            }
+            Object addActionWidgetAnnotationFormField = new Object(Constants.ADD_ACTION_WIDGET_ANNOTATION_FORM_FIELD, entries);
+            version.getObjectIdMap().put(addActionWidgetAnnotationFormField.getObjectName(), addActionWidgetAnnotationFormField);
+            Main.objectNames.add(addActionWidgetAnnotationFormField.getObjectName());
+        }
+        for (PDFVersion version : PDFVersion.values()) {
+            Object widgetAnnot = version.getObjectIdMap().get(Constants.ANNOT_WIDGET);
             if (widgetAnnot == null) {
                 continue;
             }
@@ -25,7 +46,11 @@ public class ObjectCreation {
                         }
                     }
                     String newObjectName = Constants.ANNOT_WIDGET + object.getObjectName();
-                    newObjects.add(new Object(newObjectName, entries));
+                    Object newObject = new Object(newObjectName, entries);
+                    Entry aa = newObject.getEntry("AA");
+                    aa.getLinks().clear();
+                    aa.getLinks().put(Type.DICTIONARY, Collections.singletonList(Constants.ADD_ACTION_WIDGET_ANNOTATION_FORM_FIELD));
+                    newObjects.add(newObject);
                     Main.objectNames.add(newObjectName);
                 }
             }
