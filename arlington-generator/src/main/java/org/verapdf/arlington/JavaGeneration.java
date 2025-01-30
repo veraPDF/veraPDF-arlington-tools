@@ -505,9 +505,16 @@ public class JavaGeneration {
 		}
 		if (key.isInherited()) {
 			javaWriter.println("\t\tCOSObject parent = " + objectName + ".getKey(" + getASAtomFromString(Constants.PARENT_KEY) + ");");
+			javaWriter.println("\t\tSet<COSKey> visitedKeys = new HashSet<>();");
 			javaWriter.println("\t\twhile ((subtype == null || subtype.empty()) && (parent != null && !parent.empty())) {");
-			javaWriter.println("\t\t\tsubtype = " + objectName + ".getKey(" + getASAtomFromString(keyName) + ");");
-			javaWriter.println("\t\t\tparent = " + objectName + ".getKey(" + getASAtomFromString(Constants.PARENT_KEY) + ");");
+			javaWriter.println("\t\t\tsubtype = parent.getKey(" + getASAtomFromString(keyName) + ");");
+			javaWriter.println("\t\t\tif (parent.getKey() != null) {");
+			javaWriter.println("\t\t\t\tif (visitedKeys.contains(parent.getKey())) {");
+			javaWriter.println("\t\t\t\t\tbreak;");
+			javaWriter.println("\t\t\t\t}");
+			javaWriter.println("\t\t\t\tvisitedKeys.add(parent.getKey());");
+			javaWriter.println("\t\t\t}");
+			javaWriter.println("\t\t\tparent = parent.getKey(" + getASAtomFromString(Constants.PARENT_KEY) + ");");
 			javaWriter.println("\t\t}");
 		}
 		javaWriter.println("\t\tif (subtype == null) {");
@@ -895,8 +902,15 @@ public class JavaGeneration {
 				getGetterName(Constants.INHERITABLE_VALUE),"ASAtom key");
 		javaWriter.println("\t\tCOSObject keyObject = null;");
 		javaWriter.println("\t\tCOSObject currentObject = this.baseObject.getKey(" + getASAtomFromString(Constants.PARENT_KEY) + ");");
+		javaWriter.println("\t\tSet<COSKey> visitedKeys = new HashSet<>();");
 		javaWriter.println("\t\twhile ((keyObject == null || keyObject.empty()) && (currentObject != null && !currentObject.empty())) {");
 		javaWriter.println("\t\t\tkeyObject = currentObject.getKey(key);");
+		javaWriter.println("\t\t\tif (currentObject.getKey() != null) {");
+		javaWriter.println("\t\t\t\tif (visitedKeys.contains(currentObject.getKey())) {");
+		javaWriter.println("\t\t\t\t\tbreak;");
+		javaWriter.println("\t\t\t\t}");
+		javaWriter.println("\t\t\t\tvisitedKeys.add(currentObject.getKey());");
+		javaWriter.println("\t\t\t}");
 		javaWriter.println("\t\t\tcurrentObject = currentObject.getKey(" + getASAtomFromString(Constants.PARENT_KEY) + ");");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\treturn keyObject;");
@@ -1049,7 +1063,14 @@ public class JavaGeneration {
 		printMethodSignature(false, "public", false, Type.BOOLEAN.getJavaType(),
 				Constants.IS_CONTAINS_INHERITABLE_VALUE, "ASAtom key");
 		javaWriter.println("\t\tCOSObject currentObject = new COSObject(this.baseObject);");
+		javaWriter.println("\t\tSet<COSKey> visitedKeys = new HashSet<>();");
 		javaWriter.println("\t\twhile (currentObject != null && !currentObject.empty() && !currentObject.knownKey(key)) {");
+		javaWriter.println("\t\t\tif (currentObject.getKey() != null) {");
+		javaWriter.println("\t\t\t\tif (visitedKeys.contains(currentObject.getKey())) {");
+		javaWriter.println("\t\t\t\t\tbreak;");
+		javaWriter.println("\t\t\t\t}");
+		javaWriter.println("\t\t\t\tvisitedKeys.add(currentObject.getKey());");
+		javaWriter.println("\t\t\t}");
 		javaWriter.println("\t\t\tcurrentObject = currentObject.getKey(" + getASAtomFromString(Constants.PARENT_KEY) + ");");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\treturn currentObject != null && !currentObject.empty() && currentObject.knownKey(key);");

@@ -710,6 +710,9 @@ public class PredicatesParser {
 	}
 
 	public static boolean containsBrackets(String str) {
+		if (str.charAt(0) != '(' || str.charAt(str.length() - 1) != ')') {
+			return false;
+		}
 		int counter = 0;
 		for (int i = 0; i < str.length() - 1; i++) {
 			if (str.charAt(i) == '(') {
@@ -724,6 +727,32 @@ public class PredicatesParser {
 		return true;
 	}
 
+	public static boolean containsSquareBrackets(String str) {
+		if (str.charAt(0) != '[' || str.charAt(str.length() - 1) != ']') {
+			return false;
+		}
+		int counter = 0;
+		for (int i = 0; i < str.length() - 1; i++) {
+			if (str.charAt(i) == '[') {
+				counter++;
+			} else if (str.charAt(i) == ']') {
+				counter--;
+			}
+			if (counter <= 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static String removeSquareBrackets(String str) {
+		if (containsSquareBrackets(str)) {
+			System.out.println(str);
+			return str.substring(1, str.length() - 1);
+		}
+		return str;
+	}
+	
 	public static String removeBrackets(String str) {
 		if (containsBrackets(str)) {
 			return str.substring(1, str.length() - 1);

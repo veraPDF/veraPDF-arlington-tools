@@ -26,6 +26,7 @@ public class Constants {
 	public static final String NAME_TREE_NODE_NAMES_ARRAY = NAME_TREE_NODE + "Names" + "Array";
 	public static final String NUMBER_TREE_NODE_NUMS_ARRAY = NUMBER_TREE_NODE + "Nums" + "Array";
 	public static String ANNOT_WIDGET = "AnnotWidget";
+	public static String ADD_ACTION_WIDGET_ANNOTATION_FORM_FIELD = "AddActionWidgetAnnotationFormField";
 	public static final String TREE_NODE = "TreeNode";
 	public static final String XREF_STREAM = "XRefStream";
 	public static final String XREF_STM = "XRefStm";
