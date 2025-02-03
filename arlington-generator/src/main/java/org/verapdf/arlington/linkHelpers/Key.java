@@ -24,7 +24,11 @@ public class Key {
 	}
 
 	public Key(String keyName, Type type, Integer bit, boolean isInherited, String ... keyValues) {
-		this(keyName, type, bit, false, false, isInherited, keyValues);
+		this(keyName, type, bit, false, isInherited, keyValues);
+	}
+	
+	public Key(String keyName, Type type, Integer bit, boolean isDefault, boolean isInherited, String ... keyValues) {
+		this(keyName, type, bit, isDefault, false, isInherited, keyValues);
 	}
 
 	public Key(String keyName, Type type, boolean isDefault, boolean isParent, String ... keyValues) {

@@ -58,13 +58,13 @@ public class LinkHelper {
 
 		//widget annot + fields
 		helpers = new HashMap<>();
-		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 16, true, "0")));
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 16, true, true, "0")));
 		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Ff", Type.BITMASK, 16, true, "1")));
 		helpersList.add(helpers);
 
 		//widget annot + fields
 		helpers = new HashMap<>();
-		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 17, true, "0")));
+		helpers.put("AnnotWidgetFieldBtnCheckbox", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnCheckbox", new Key("Ff", Type.BITMASK, 17, true, true, "0")));
 		helpers.put("AnnotWidgetFieldBtnRadio", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnRadio", new Key("Ff", Type.BITMASK, 17, true, "0")));
 		helpers.put("AnnotWidgetFieldBtnPush", new DifferentKeysValuesLinkHelper("AnnotWidgetFieldBtnPush", new Key("Ff", Type.BITMASK, 17, true, "1")));
 		helpersList.add(helpers);
@@ -405,12 +405,12 @@ public class LinkHelper {
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("Ff", Type.BITMASK, 16, true, "0")));
+		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("Ff", Type.BITMASK, 16, true, true, "0")));
 		helpers.put("FieldBtnRadio", new DifferentKeysValuesLinkHelper("FieldBtnRadio", new Key("Ff", Type.BITMASK, 16, true, "1")));
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("Ff", Type.BITMASK, 17, true, "0")));
+		helpers.put("FieldBtnCheckbox", new DifferentKeysValuesLinkHelper("FieldBtnCheckbox", new Key("Ff", Type.BITMASK, 17, true, true, "0")));
 		helpers.put("FieldBtnRadio", new DifferentKeysValuesLinkHelper("FieldBtnRadio", new Key("Ff", Type.BITMASK, 17, true, "0")));
 		helpers.put("FieldBtnPush", new DifferentKeysValuesLinkHelper("FieldBtnPush", new Key("Ff", Type.BITMASK, 17, true, "1")));
 		helpersList.add(helpers);
