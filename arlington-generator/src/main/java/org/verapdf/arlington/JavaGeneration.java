@@ -1679,7 +1679,7 @@ public class JavaGeneration {
 		if (Constants.PARENT.equals(entryName)) {
 			return "this.parentObject";
 		}
-		String correctEntryName = Entry.getCorrectEntryName(entryName).replace(Constants.STAR, "Any");
+		String correctEntryName = Entry.getCorrectEntryName(entryName);
 		javaWriter.println("\t\tCOSObject " + correctEntryName + " = " + 
 				getMethodCall(getGetterName(Entry.getValuePropertyName(entryName))) + ";");
 		return correctEntryName;

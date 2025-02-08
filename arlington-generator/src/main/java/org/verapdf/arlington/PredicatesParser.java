@@ -13,15 +13,18 @@ public class PredicatesParser {
 	private static final String ENTRY_REGEX = "['A-Za-z:.@\\*\\d\\-_]+";
 
 	public static final String PREDICATE_PREFIX = "fn:";
+	public static final String BEFORE_VERSION_PREDICATE = "fn:BeforeVersion";
 	public static final String DEPRECATED_PREDICATE = "fn:Deprecated";
 	public static final String EVAL_PREDICATE = "fn:Eval";
 	public static final String EXTENSION_PREDICATE = "fn:Extension";
 	public static final String IGNORE_PREDICATE = "fn:Ignore";
+	public static final String IS_PDF_VERSION_PREDICATE = "fn:IsPDFVersion";
+	public static final String IS_REQUIRED_PREDICATE = "fn:IsRequired";
 	public static final String MUST_BE_DIRECT_PREDICATE = "fn:MustBeDirect";
 	public static final String MUST_BE_INDIRECT_PREDICATE = "fn:MustBeIndirect";
 	public static final String REQUIRED_VALUE_PREDICATE = "fn:RequiredValue";
+	public static final String SINCE_VERSION_PREDICATE = "fn:SinceVersion";
 	public static final String VALUE_ONLY_WHEN_PREDICATE = "fn:ValueOnlyWhen";
-	public static final String IS_REQUIRED_PREDICATE = "fn:IsRequired";
 
 	private boolean isProfile = true;//false if java code
 	protected boolean isDescription = false;
@@ -345,9 +348,9 @@ public class PredicatesParser {
 		PDFVersion version = PDFVersion.getPDFVersion(string);
 		if (version != null) {
 			if (PDFVersion.compare(this.version, version) >= 0) {
-				 return "true";
+				 return Constants.TRUE;
 			} else {
-				return "false";
+				return Constants.FALSE;
 			}
 		}
 		return string;
@@ -362,11 +365,11 @@ public class PredicatesParser {
 		}
 		if (isDefault() && EVAL_PREDICATE.equals(getCurrentFunction())) {
 			output.add(getNewPart(firstArgument, secondArgument));
-		} else if ("true".equals(firstString) || "true".equals(secondString)) {
-			output.add("true");
-		} else if ("false".equals(firstString) || Constants.UNDEFINED.equals(firstString)) {
+		} else if (Constants.TRUE.equals(firstString) || Constants.TRUE.equals(secondString)) {
+			output.add(Constants.TRUE);
+		} else if (Constants.FALSE.equals(firstString) || Constants.UNDEFINED.equals(firstString)) {
 			output.add(secondArgument);
-		} else if ("false".equals(secondString) || Constants.UNDEFINED.equals(secondString)) {
+		} else if (Constants.FALSE.equals(secondString) || Constants.UNDEFINED.equals(secondString)) {
 			output.add(firstArgument);
 		} else if (!isOriginal) {
 			output.add(getNewPart(firstArgument, "||", secondArgument));
@@ -388,11 +391,11 @@ public class PredicatesParser {
 	}
 
 	protected void and(Part firstArgument, Part secondArgument, boolean isOriginal) {
-		if ("false".equals(firstArgument.getString()) || "false".equals(secondArgument.getString())) {
-			output.add("false");
-		} else if ("true".equals(firstArgument.getString()) || Constants.UNDEFINED.equals(firstArgument.getString())) {
+		if (Constants.FALSE.equals(firstArgument.getString()) || Constants.FALSE.equals(secondArgument.getString())) {
+			output.add(Constants.FALSE);
+		} else if (Constants.TRUE.equals(firstArgument.getString()) || Constants.UNDEFINED.equals(firstArgument.getString())) {
 			output.add(secondArgument);
-		} else if ("true".equals(secondArgument.getString()) || Constants.UNDEFINED.equals(secondArgument.getString())) {
+		} else if (Constants.TRUE.equals(secondArgument.getString()) || Constants.UNDEFINED.equals(secondArgument.getString())) {
 			output.add(firstArgument);
 		} else if (!isOriginal) {
 			output.add(getNewPart(firstArgument, "&&", secondArgument));
@@ -431,10 +434,10 @@ public class PredicatesParser {
 			result.add(Entry.getHasTypePropertyName(undefinedEntry.getKey(), undefinedEntry.getValue()));
 			result.add("==");
 			if (and) {
-				result.add("false");
+				result.add(Constants.FALSE);
 				result.add("||");
 			} else {
-				result.add("true");
+				result.add(Constants.TRUE);
 				result.add("&&");
 			}
 		}
@@ -453,27 +456,27 @@ public class PredicatesParser {
 			output.add(Constants.UNDEFINED);
 			return;
 		}
-		if (("false".equals(firstArgument.getString()) && "true".equals(secondArgument.getString())) || ("true".equals(firstArgument.getString()) && "false".equals(secondArgument.getString()))) {
-			output.add("false");
+		if ((Constants.FALSE.equals(firstArgument.getString()) && Constants.TRUE.equals(secondArgument.getString())) || (Constants.TRUE.equals(firstArgument.getString()) && Constants.FALSE.equals(secondArgument.getString()))) {
+			output.add(Constants.FALSE);
 			return;
 		}
-		if (("false".equals(firstArgument.getString()) && "false".equals(secondArgument.getString())) || ("true".equals(firstArgument.getString()) && "true".equals(secondArgument.getString()))) {
-			output.add("true");
+		if ((Constants.FALSE.equals(firstArgument.getString()) && Constants.FALSE.equals(secondArgument.getString())) || (Constants.TRUE.equals(firstArgument.getString()) && Constants.TRUE.equals(secondArgument.getString()))) {
+			output.add(Constants.TRUE);
 			return;
 		}
-		if ("true".equals(secondArgument.getString()) && firstArgument.getString().contains(" ")) {
+		if (Constants.TRUE.equals(secondArgument.getString()) && firstArgument.getString().contains(" ")) {
 			output.add(firstArgument);
 			return;
 		}
-		if ("true".equals(firstArgument.getString()) && secondArgument.getString().contains(" ")) {
+		if (Constants.TRUE.equals(firstArgument.getString()) && secondArgument.getString().contains(" ")) {
 			output.add(secondArgument);
 			return;
 		}
-		if ("false".equals(firstArgument.getString()) && possibleNegative(secondArgument.getString())) {
+		if (Constants.FALSE.equals(firstArgument.getString()) && possibleNegative(secondArgument.getString())) {
 			output.add(getNegativePart(secondArgument));
 			return;
 		}
-		if ("false".equals(secondArgument.getString()) && possibleNegative(firstArgument.getString())) {
+		if (Constants.FALSE.equals(secondArgument.getString()) && possibleNegative(firstArgument.getString())) {
 			output.add(getNegativePart(firstArgument));
 			return;
 		}
@@ -489,29 +492,29 @@ public class PredicatesParser {
 			output.add(Constants.UNDEFINED);
 			return;
 		}
-		if (("false".equals(firstArgument.getString()) && "true".equals(secondArgument.getString())) ||
-				("true".equals(firstArgument.getString()) && "false".equals(secondArgument.getString()))) {
-			output.add("true");
+		if ((Constants.FALSE.equals(firstArgument.getString()) && Constants.TRUE.equals(secondArgument.getString())) ||
+				(Constants.TRUE.equals(firstArgument.getString()) && Constants.FALSE.equals(secondArgument.getString()))) {
+			output.add(Constants.TRUE);
 			return;
 		}
-		if (("false".equals(firstArgument.getString()) && "false".equals(secondArgument.getString())) ||
-				("true".equals(firstArgument.getString()) && "true".equals(secondArgument.getString()))) {
-			output.add("false");
+		if ((Constants.FALSE.equals(firstArgument.getString()) && Constants.FALSE.equals(secondArgument.getString())) ||
+				(Constants.TRUE.equals(firstArgument.getString()) && Constants.TRUE.equals(secondArgument.getString()))) {
+			output.add(Constants.FALSE);
 			return;
 		}
-		if ("false".equals(secondArgument.getString()) && firstArgument.getString().contains(" ")) {
+		if (Constants.FALSE.equals(secondArgument.getString()) && firstArgument.getString().contains(" ")) {
 			output.add(firstArgument);
 			return;
 		}
-		if ("false".equals(firstArgument.getString()) && secondArgument.getString().contains(" ")) {
+		if (Constants.FALSE.equals(firstArgument.getString()) && secondArgument.getString().contains(" ")) {
 			output.add(secondArgument);
 			return;
 		}
-		if ("true".equals(firstArgument.getString()) && possibleNegative(secondArgument.getString())) {
+		if (Constants.TRUE.equals(firstArgument.getString()) && possibleNegative(secondArgument.getString())) {
 			output.add(getNegativePart(secondArgument));
 			return;
 		}
-		if ("true".equals(secondArgument.getString()) && possibleNegative(firstArgument.getString())) {
+		if (Constants.TRUE.equals(secondArgument.getString()) && possibleNegative(firstArgument.getString())) {
 			output.add(getNegativePart(firstArgument));
 			return;
 		}
@@ -539,7 +542,7 @@ public class PredicatesParser {
 			case "fn:ArraySortAscending":
 				arraySortAscending();
 				break;
-			case "fn:BeforeVersion":
+			case BEFORE_VERSION_PREDICATE:
 				beforeVersion();
 				break;
 			case "fn:BitClear":
@@ -631,7 +634,7 @@ public class PredicatesParser {
 			case "fn:IsPDFTagged":
 				isPDFTagged();
 				break;
-			case "fn:IsPDFVersion":
+			case IS_PDF_VERSION_PREDICATE:
 				isPDFVersion();
 				break;
 			case "fn:IsPresent":
@@ -675,7 +678,7 @@ public class PredicatesParser {
 			case REQUIRED_VALUE_PREDICATE:
 				requiredValue();
 				break;
-			case "fn:SinceVersion":
+			case SINCE_VERSION_PREDICATE:
 				sinceVersion();
 				break;
 			case "fn:StreamLength":
@@ -772,7 +775,7 @@ public class PredicatesParser {
 	}
 
 	private void alwaysUnencrypted() {
-		output.push("true");//todo
+		output.push(Constants.TRUE);//todo
 	}
 
 	private void arrayLength() {
@@ -825,7 +828,7 @@ public class PredicatesParser {
 		if (isDefault()) {
 			if (PDFVersion.compare(this.version, version) < 0) {
 				if (arguments.size() == 2) {
-					processTokens("true", "?", type.getCreationCOSObject(arguments.get(1).getString()), ":");
+					processTokens(Constants.TRUE, "?", type.getCreationCOSObject(arguments.get(1).getString()), ":");
 				}
 			} else {
 				output.push("");
@@ -834,13 +837,13 @@ public class PredicatesParser {
 		}
 		if (PDFVersion.compare(this.version, version) < 0) {
 			if (arguments.size() == 1) {
-				output.push("true");
+				output.push(Constants.TRUE);
 			} else {
 				output.push(getNewPart(arguments.subList(1, arguments.size())));
 			}
 		} else {
 			if (arguments.size() == 1) {
-				output.push("false");
+				output.push(Constants.FALSE);
 			} else {
 				output.push(Constants.UNDEFINED);
 			}
@@ -934,11 +937,11 @@ public class PredicatesParser {
 				output.push("(" + getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)) + " == true)");
 				Main.extensionNames.add(extensionName);
 			} else {
-				output.push("false");
+				output.push(Constants.FALSE);
 			}
 		} else {
 			processTokens("(", "(", getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "==",
-					"true", ")", "&&", getNewPart(arguments.subList(1, arguments.size())), ")");
+					Constants.TRUE, ")", "&&", getNewPart(arguments.subList(1, arguments.size())), ")");
 			Main.extensionNames.add(extensionName);
 		}
 	}
@@ -1191,10 +1194,10 @@ public class PredicatesParser {
 				return;
 			}
 			if (arguments.size() == 1) {
-				processTokens("(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "true", ")");
+				processTokens("(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", Constants.TRUE, ")");
 			} else {
-				processTokens("(", "(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", "false",
-						")", "||", "(", getNewPart(arguments.subList(1, arguments.size())), ")", "==", "true", ")");
+				processTokens("(", "(", getPropertyOrMethodName(Entry.getContainsPropertyName(entryName)), "==", Constants.FALSE,
+						")", "||", "(", getNewPart(arguments.subList(1, arguments.size())), ")", "==", Constants.TRUE, ")");
 			}
 			if (entry != null) {
 				entry.setContainsProperty(true);
@@ -1212,12 +1215,12 @@ public class PredicatesParser {
 			}
 		} else {
 			if (output.size() > 1 && "fn:Not".equals(output.get(output.size() - 2).getString())) {
-				processTokens("(", "(", getNewPart(arguments), ")", "==", "true", "&&",
-						getPropertyOrMethodName(this.entry.getContainsPropertyName()), "==", "true", ")");
+				processTokens("(", "(", getNewPart(arguments), ")", "==", Constants.TRUE, "&&",
+						getPropertyOrMethodName(this.entry.getContainsPropertyName()), "==", Constants.TRUE, ")");
 				this.entry.setContainsProperty(true);
 			} else {
-				processTokens("(", "(", getNewPart(arguments), ")", "==", "false", "||",
-						getPropertyOrMethodName(this.entry.getContainsPropertyName()), "==", "true", ")");
+				processTokens("(", "(", getNewPart(arguments), ")", "==", Constants.FALSE, "||",
+						getPropertyOrMethodName(this.entry.getContainsPropertyName()), "==", Constants.TRUE, ")");
 				this.entry.setContainsProperty(true);
 			}
 		}
@@ -1232,8 +1235,8 @@ public class PredicatesParser {
 			output.push(Constants.UNDEFINED);
 			return;
 		}
-		processTokens("(", getPropertyOrMethodName(entry.getContainsPropertyName()), "==", "true", "||", "(",
-				part, ")", "==", "false", ")");
+		processTokens("(", getPropertyOrMethodName(entry.getContainsPropertyName()), "==", Constants.TRUE, "||", "(",
+				part, ")", "==", Constants.FALSE, ")");
 		entry.setContainsProperty(true);
 	}
 
@@ -1248,13 +1251,13 @@ public class PredicatesParser {
 		PDFVersion version = PDFVersion.getPDFVersion(getEntryName(arguments.get(0).getString()));
 		if (PDFVersion.compare(this.version, version) == 0) {
 			if (arguments.size() == 1) {
-				output.push("true");
+				output.push(Constants.TRUE);
 			} else {
 				output.push(getNewPart(arguments.subList(1, arguments.size())));
 			}
 		} else {
 			if (arguments.size() == 1) {
-				output.push("false");
+				output.push(Constants.FALSE);
 			} else {
 				output.push(Constants.UNDEFINED);
 			}
@@ -1265,18 +1268,18 @@ public class PredicatesParser {
 		if (arguments.size() < 1) {
 			output.push("(" + getPropertyOrMethodName(entry.getIndirectPropertyName()) + " == false)");
 		} else {
-			processTokens("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "false", "||", "(",
-					getNewPart(arguments), ")", "==", "false", ")");
+			processTokens("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", Constants.FALSE, "||", "(",
+					getNewPart(arguments), ")", "==", Constants.FALSE, ")");
 		}
 		entry.setIndirectProperty(true);
 	}
 
 	private void mustBeIndirect() {
 		if (arguments.size() < 1) {
-			processTokens("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "true", ")");
+			processTokens("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", Constants.TRUE, ")");
 		} else {
-			processTokens("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", "true", "||", "(",
-					getNewPart(arguments), ")", "==", "false", ")");
+			processTokens("(", getPropertyOrMethodName(entry.getIndirectPropertyName()), "==", Constants.TRUE, "||", "(",
+					getNewPart(arguments), ")", "==", Constants.FALSE, ")");
 		}
 		entry.setIndirectProperty(true);
 	}
@@ -1287,7 +1290,7 @@ public class PredicatesParser {
 	}
 
 	private void not() {
-		processTokens("(", getNewPart(arguments), ")", "!=", "true");
+		processTokens("(", getNewPart(arguments), ")", "!=", Constants.TRUE);
 	}
 
 	private void notStandard14Font() {
@@ -1357,7 +1360,7 @@ public class PredicatesParser {
 			return;
 		}
 		entry.addTypeValueProperty(type);
-		processTokens("(", "(", getNewPart(arguments.subList(0, arguments.size() - 1)), ")", "==", "false", "||",
+		processTokens("(", "(", getNewPart(arguments.subList(0, arguments.size() - 1)), ")", "==", Constants.FALSE, "||",
 				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "==", type.getValueWithSeparator(value), ")");
 	}
 
@@ -1368,13 +1371,13 @@ public class PredicatesParser {
 		PDFVersion version = PDFVersion.getPDFVersion(getEntryName(arguments.get(0).getString()));
 		if (PDFVersion.compare(this.version, version) >= 0) {
 			if (arguments.size() == 1) {
-				output.push("true");
+				output.push(Constants.TRUE);
 			} else {
 				output.push(getNewPart(arguments.subList(1, arguments.size())));
 			}
 		} else {
 			if (arguments.size() == 1) {
-				output.push("false");
+				output.push(Constants.FALSE);
 			} else {
 				output.push(Constants.UNDEFINED);
 			}
@@ -1423,7 +1426,7 @@ public class PredicatesParser {
 			return;
 		}
 		entry.addTypeValueProperty(type);
-		processTokens("(", "(", getNewPart(arguments.subList(1, arguments.size())), ")", "==", "true", "||",
+		processTokens("(", "(", getNewPart(arguments.subList(1, arguments.size())), ")", "==", Constants.TRUE, "||",
 				getPropertyOrMethodName(entry.getTypeValuePropertyName(type)), "!=", type.getValueWithSeparator(value), ")");
 	}
 
@@ -1588,7 +1591,7 @@ public class PredicatesParser {
 	private Part processComplexArgument(String argument) {
 		if (argument.startsWith("@") || argument.startsWith(PREDICATE_PREFIX) ||
 				argument.matches(Constants.NUMBER_REGEX) || Constants.STAR.equals(argument) ||
-				argument.matches(Constants.DOUBLE_REGEX) || "true".equals(argument) || "false".equals(argument)) {
+				argument.matches(Constants.DOUBLE_REGEX) || Constants.TRUE.equals(argument) || Constants.FALSE.equals(argument)) {
 			return new Part(argument);
 		}
 		List<String> array = new ArrayList<>(Arrays.asList(argument.split("::")));

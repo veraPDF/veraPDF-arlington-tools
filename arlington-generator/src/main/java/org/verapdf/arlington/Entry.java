@@ -183,7 +183,7 @@ public class Entry implements Comparable<Entry> {
 				PredicatesParser.getPredicateLastArgument(link) : link).collect(Collectors.toList());
 	}
 
-	public Map<Type,List<String>> getLinks() {
+	public Map<Type, List<String>> getLinks() {
 		return links;
 	}
 
@@ -233,7 +233,8 @@ public class Entry implements Comparable<Entry> {
 	}
 
 	public static String getCorrectEntryName(String entryName) {
-		String correctEntryName = entryName.replaceAll(":","").replaceAll("\\.","").replaceAll("@","");
+		String correctEntryName = entryName.replace(".","").replace("@","")
+				.replace("::" + Constants.STAR, "Any").replace(Constants.STAR, "Entry").replace(":","");
 		if (isCorrectEntryName(correctEntryName)) {
 			return correctEntryName;
 		}
@@ -321,7 +322,7 @@ public class Entry implements Comparable<Entry> {
 	}
 
 	public static String getValuePropertyName(String entryName) {
-		return getCorrectEntryName(entryName).replace("*", "Any") + "Value";
+		return getCorrectEntryName(entryName) + "Value";
 	}
 
 	public static String getTypeDefaultValuePropertyName(String entryName, Type type) {

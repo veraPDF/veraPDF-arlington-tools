@@ -357,13 +357,13 @@ public class ObjectCreation {
                 first.setName("0");
                 first.getTypes().add(Type.STRING);
                 first.getTypesPredicates().add("");
-                first.setRequired("true");
+                first.setRequired(Constants.TRUE);
 
                 Entry second = new Entry();
                 second.setName("1");
                 second.getTypes().add(Type.STRING);
                 second.getTypesPredicates().add("");
-                second.setRequired("true");
+                second.setRequired(Constants.TRUE);
 
                 SortedSet<Entry> entries = new TreeSet<>();
                 entries.add(first);
@@ -383,13 +383,13 @@ public class ObjectCreation {
                 first.setName("0");
                 first.getTypes().add(Type.INTEGER);
                 first.getTypesPredicates().add("");
-                first.setRequired("true");
+                first.setRequired(Constants.TRUE);
 
                 Entry second = new Entry();
                 second.setName("1");
                 second.getTypes().add(Type.INTEGER);
                 second.getTypesPredicates().add("");
-                second.setRequired("true");
+                second.setRequired(Constants.TRUE);
 
                 SortedSet<Entry> entries = new TreeSet<>();
                 entries.add(first);
@@ -409,11 +409,11 @@ public class ObjectCreation {
                 first.setName("0*");
                 first.getTypes().add(Type.STRING);
                 first.getTypesPredicates().add("");
-                first.setRequired("true");
+                first.setRequired(Constants.TRUE);
 
                 Entry second = new Entry();
                 second.setName("1*");
-                second.setRequired("true");
+                second.setRequired(Constants.TRUE);
 
                 SortedSet<Entry> entries = new TreeSet<>();
                 entries.add(first);
@@ -433,11 +433,11 @@ public class ObjectCreation {
                 first.setName("0*");
                 first.getTypes().add(Type.INTEGER);
                 first.getTypesPredicates().add("");
-                first.setRequired("true");
+                first.setRequired(Constants.TRUE);
 
                 Entry second = new Entry();
                 second.setName("1*");
-                second.setRequired("true");
+                second.setRequired(Constants.TRUE);
 
                 SortedSet<Entry> entries = new TreeSet<>();
                 entries.add(first);

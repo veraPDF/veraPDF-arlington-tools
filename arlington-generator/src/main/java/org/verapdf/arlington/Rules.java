@@ -587,7 +587,8 @@ public class Rules {
 			if (!propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE) &&
 					!propertyValue.contains(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE) &&
 					!propertyValue.contains(PredicatesParser.EXTENSION_PREDICATE) &&
-					!propertyValue.startsWith(PredicatesParser.DEPRECATED_PREDICATE)) {
+					!propertyValue.startsWith(PredicatesParser.DEPRECATED_PREDICATE) &&
+					!propertyValue.startsWith(PredicatesParser.SINCE_VERSION_PREDICATE)) {
 				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
 						" PossibleValues contains specialPredicate " + propertyValue);
 				possibleValue = new PredicatesParser(object, entry, version, type,
@@ -712,7 +713,7 @@ public class Rules {
 	private static boolean isDeprecatedValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue) {
 		String info = new PredicatesParser(object, entry, version, type, Constants.POSSIBLE_VALUES_COLUMN).parse(propertyValue);
 		if (info == null || !info.startsWith(PredicatesParser.DEPRECATED_PREDICATE.replace(":", "/")) ||
-				Objects.equals(PredicatesParser.DEPRECATED_PREDICATE.replace(":", "/") + "false", info)) {
+				Objects.equals(PredicatesParser.DEPRECATED_PREDICATE.replace(":", "/") + Constants.FALSE, info)) {
 			return false;
 		}
 		return true;
@@ -832,7 +833,7 @@ public class Rules {
 	private static void deprecatedEntry(PDFVersion version, Object object, Entry entry) {
 		String propertyName = Entry.getContainsPropertyName(entry.getName());
 		if (entry.getDeprecatedVersion() != null && PDFVersion.compare(entry.getDeprecatedVersion(), version) <= 0) {
-			String test = Constants.CURRENT_ENTRY.equals(entry.getName()) ? "false" : propertyName + " == false";
+			String test = Constants.CURRENT_ENTRY.equals(entry.getName()) ? Constants.FALSE : propertyName + " == false";
 			ProfileGeneration.writeRule(version, 5, object.getModelType(), getClause(object, entry), test,
 					String.format(DEPRECATED_ENTRY_DESCRIPTION,
 							ProfileGeneration.getErrorMessageStart(true, object, entry),

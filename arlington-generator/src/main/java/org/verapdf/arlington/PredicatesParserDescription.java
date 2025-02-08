@@ -61,13 +61,13 @@ public class PredicatesParserDescription extends PredicatesParser {
 		output.pop(); //pop "("
 		Part token = !output.isEmpty() ? output.pop() : new Part("");//pop possible functionName
 		switch (functionName) {
-			case "fn:BeforeVersion":
+			case BEFORE_VERSION_PREDICATE:
 				beforeVersion();
 				break;
-			case "fn:IsPDFVersion":
+			case IS_PDF_VERSION_PREDICATE:
 				isPDFVersion();
 				break;
-			case "fn:SinceVersion":
+			case SINCE_VERSION_PREDICATE:
 				sinceVersion();
 				break;
 			default:
