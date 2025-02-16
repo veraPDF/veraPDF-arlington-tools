@@ -939,6 +939,10 @@ public class PredicatesParser {
 			} else {
 				output.push(Constants.FALSE);
 			}
+		} else if (Constants.EXTENSION_VALUE_COLUMN.equals(columnName)) {
+			output.push("(" + getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)) + " == true) || " +
+					entry.getTypeValuePropertyName(type) + " != " + arguments.get(1).getString());
+			Main.extensionNames.add(extensionName);
 		} else {
 			processTokens("(", "(", getPropertyOrMethodName(Object.getHasExtensionPropertyName(extensionName)), "==",
 					Constants.TRUE, ")", "&&", getNewPart(arguments.subList(1, arguments.size())), ")");
@@ -1542,14 +1546,35 @@ public class PredicatesParser {
 		return predicate.substring(index + 1, lastIndex + 1).trim();
 	}
 
-	public static String getPredicateFirstArgument(String predicate) {
-		int index = predicate.indexOf("(");
-		int lastIndex = predicate.lastIndexOf(",");
-		return predicate.substring(index + 1, lastIndex).trim();
+	public static String getPredicateArgument(String predicate) {
+		return predicate.substring(predicate.indexOf("(") + 1, predicate.length() - 1);
 	}
 
-	public static String getPredicateArgument(String string, String predicate) {
-		return string.substring(predicate.length() + 1, string.length() - 1);
+	public static String getPredicateFirstArgument(String predicate) {
+		String arguments = getPredicateArgument(predicate);
+		int index = getIndexOfCommaBetweenArguments(arguments);
+		return arguments.substring(0, index).trim();
+	}
+
+	public static String getPredicateSecondArgument(String predicate) {
+		String arguments = getPredicateArgument(predicate);
+		int index = getIndexOfCommaBetweenArguments(arguments);
+		return arguments.substring(index + 1).trim();
+	}
+
+	private static Integer getIndexOfCommaBetweenArguments(String arguments) {
+		int counter = 0;
+		for (int i = 0; i < arguments.length() - 1; i++) {
+			if (arguments.charAt(i) == '(') {
+				counter++;
+			} else if (arguments.charAt(i) == ')') {
+				counter--;
+			}
+			if (arguments.charAt(i) == ',' && counter == 0) {
+				return i;
+			}
+		}
+		return null;
 	}
 
 	private Part processArgument(String argument) {
@@ -1622,7 +1647,8 @@ public class PredicatesParser {
 			initialObjects.add(Main.objectIdMap.get(Constants.PAGE_OBJECT));
 		} else if (Constants.CURRENT_ENTRY.equals(entry.getName()) && Constants.STAR.equals(array.get(0))) {
 			initialObjects.add(object.getMultiObject());
-			index += 1;
+			object.getEntry("");
+			index += 0;
 		} else {
 			initialObjects.add(object.getMultiObject());
 			while (Constants.PARENT.equals(array.get(index))) {
@@ -1648,6 +1674,9 @@ public class PredicatesParser {
 			List<Object> futureObjects = new LinkedList<>();
 			String entryName = array.get(index);
 			for (Object currentObject : currentObjects) {
+				if (Constants.STAR.equals(entryName)) {
+					entryName = Constants.CURRENT_ENTRY;
+				}
 				if (entryName.matches(Constants.NUMBER_REGEX) && !currentObject.getEntriesNames().contains(entryName) &&
 						currentObject.getEntriesNames().contains(Constants.STAR)) {
 					entryName = Constants.STAR;

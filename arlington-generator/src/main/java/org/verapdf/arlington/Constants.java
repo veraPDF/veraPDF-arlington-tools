@@ -45,6 +45,7 @@ public class Constants {
 	public static final String REQUIRED_COLUMN = "Required";
 	public static final String DEFAULT_VALUE_COLUMN = "DefaultValue";
 	public static final String POSSIBLE_VALUES_COLUMN = "PossibleValues";
+	public static final String EXTENSION_VALUE_COLUMN = "ExtensionValue";
 	public static final String REQUIRED_VALUE_COLUMN = "RequiredValue";
 	public static final String SPECIAL_CASE_COLUMN = "SpecialCase";
 	public static final String INDIRECT_REFERENCE_COLUMN = "IndirectReference";

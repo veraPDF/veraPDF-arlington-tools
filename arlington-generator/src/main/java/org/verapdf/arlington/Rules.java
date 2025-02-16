@@ -70,6 +70,9 @@ public class Rules {
 	private static final String DEPRECATED_VALUES_DESCRIPTION = "%s should not have one of deprecated values: %s";
 	private static final String DEPRECATED_VALUE_ERROR_MESSAGE = "%s has deprecated value %s";
 
+	private static final String EXTENSION_VALUE_DESCRIPTION = "%s should not have value %s, if extension %s does not chosen";
+	private static final String EXTENSION_VALUE_ERROR_MESSAGE = "%s has value %s";
+
 	private static final String ARRAY_SIZE_DESCRIPTION = "%s shall contain %d * n + %d elements";
 	private static final String ARRAY_SIZE_ERROR_MESSAGE = "%s contains %s element(s)";
 	private static final String CERTAIN_ARRAY_SIZE_DESCRIPTION = "%s shall contain exactly %d elements";
@@ -434,7 +437,7 @@ public class Rules {
 			String predicate = indirectReference.substring(0, indirectReference.indexOf("("));
 			if (PredicatesParser.MUST_BE_INDIRECT_PREDICATE.equals(predicate) ||
 					PredicatesParser.MUST_BE_DIRECT_PREDICATE.equals(predicate)) {
-				indirectReference = PredicatesParser.getPredicateArgument(indirectReference, predicate);
+				indirectReference = PredicatesParser.getPredicateArgument(indirectReference);
 				String result = new PredicatesParser(object, entry, version, type,
 						Constants.INDIRECT_REFERENCE_COLUMN).parse(indirectReference);
 				if (Constants.TRUE.equals(result)) {
@@ -513,7 +516,7 @@ public class Rules {
 		entry.addHasTypeProperty(type);
 		Set<String> possibleValues = new HashSet<>();
 		Set<String> deprecatedValues = new HashSet<>();
-		calculatePossibleAndDeprecatedValues(test, version, object, entry, type, propertyName, possibleValues, deprecatedValues);
+		calculatePossibleAndExtensionAndDeprecatedValues(test, version, object, entry, type, propertyName, possibleValues, deprecatedValues);
 		if (!deprecatedValues.isEmpty()) {
 			deprecatedValues(deprecatedValues, version, object, entry, type);
 		}
@@ -532,10 +535,25 @@ public class Rules {
 		}
 	}
 
-	private static void calculatePossibleAndDeprecatedValues(StringBuilder test, PDFVersion version, Object object,
-													  Entry entry, Type type, String propertyName,
-													  Set<String> possibleValues, Set<String> deprecatedValues) {
+	private static void calculatePossibleAndExtensionAndDeprecatedValues(StringBuilder test, PDFVersion version, Object object,
+																		 Entry entry, Type type, String propertyName,
+																		 Set<String> possibleValues, Set<String> deprecatedValues) {
 		for (String propertyValue : entry.getPossibleValues(type)) {
+			if (propertyValue.startsWith(PredicatesParser.IS_PDF_VERSION_PREDICATE)) {
+				PDFVersion predicateVersion = PDFVersion.getPDFVersion(PredicatesParser.getPredicateFirstArgument(propertyValue));
+				if (PDFVersion.compare(predicateVersion, version) == 0) {
+					propertyValue = PredicatesParser.getPredicateSecondArgument(propertyValue);
+				} else {
+					continue;
+				}
+			} else if (propertyValue.startsWith(PredicatesParser.SINCE_VERSION_PREDICATE)) {
+				PDFVersion predicateVersion = PDFVersion.getPDFVersion(PredicatesParser.getPredicateFirstArgument(propertyValue));
+				if (PDFVersion.compare(version, predicateVersion) >= 0) {
+					propertyValue = PredicatesParser.getPredicateSecondArgument(propertyValue);
+				} else {
+					continue;
+				}
+			}
 			if (!propertyValue.contains(PredicatesParser.PREDICATE_PREFIX)) {
 				propertyValue = PredicatesParser.removeQuotes(propertyValue);
 				test.append(propertyName).append(" == ").append(type.getValueWithSeparator(propertyValue)).append(" || ");
@@ -554,13 +572,6 @@ public class Rules {
 						" undefined value");
 				continue;
 			}
-			if (propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
-				if (propertyValue.startsWith(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
-					requiredValue(object, entry, version, type, propertyValue, possibleValue);
-				} else {
-					LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " required predicate");
-				}
-			}
 			if (propertyValue.contains(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE)) {
 				if (propertyValue.startsWith(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE)) {
 					valueOnlyWhen(object, entry, version, type, propertyValue, possibleValue);
@@ -570,18 +581,27 @@ public class Rules {
 			}
 			if (propertyValue.contains(PredicatesParser.EXTENSION_PREDICATE)) {
 				if (propertyValue.startsWith(PredicatesParser.EXTENSION_PREDICATE)) {
-					//add rule
+					extensionValue(object, entry, version, type, propertyValue, possibleValue);
 				} else {
 					LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " extension predicate");
 				}
 			}
+			boolean isDeprecated = false;
 			if (propertyValue.contains(PredicatesParser.DEPRECATED_PREDICATE)) {
 				if (propertyValue.startsWith(PredicatesParser.DEPRECATED_PREDICATE)) {
 					if (isDeprecatedValue(object, entry, version, type, propertyValue)) {
+						isDeprecated = true;
 						deprecatedValues.add(possibleValue);
 					}
 				} else {
 					LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " deprecated predicate");
+				}
+			}
+			if (propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
+				if (propertyValue.startsWith(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
+					requiredValue(object, entry, version, type, propertyValue, possibleValue);
+				} else if (!isDeprecated) {
+					LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " required predicate");
 				}
 			}
 			if (!propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE) &&
@@ -693,6 +713,21 @@ public class Rules {
 		}
 	}
 
+	private static void extensionValue(Object object, Entry entry, PDFVersion version, Type type, String propertyValue,
+									   String value) {
+		String extensionName = PredicatesParser.getPredicateFirstArgument(propertyValue);
+		String test = new PredicatesParser(object, entry, version, type, Constants.EXTENSION_VALUE_COLUMN).parse(propertyValue);
+		if (test == null || Constants.TRUE.equals(test)) {
+			return;
+		}
+		test = PredicatesParser.removeBrackets(test);
+		ProfileGeneration.writeRule(version, 27, object.getModelType(), getClause(object, entry, type, value), test,
+				String.format(EXTENSION_VALUE_DESCRIPTION, 
+						ProfileGeneration.getErrorMessageStart(true, object, entry, type), value, extensionName),
+				String.format(EXTENSION_VALUE_ERROR_MESSAGE,
+						ProfileGeneration.getErrorMessageStart(false, object, entry, type), value));
+	}
+
 	private static void valueOnlyWhen(Object object, Entry entry, PDFVersion version, Type type, String propertyValue,
 									  String value) {
 		String test = new PredicatesParser(object, entry, version, type, Constants.POSSIBLE_VALUES_COLUMN).parse(propertyValue);
@@ -795,8 +830,7 @@ public class Rules {
 			if (test == null || Constants.TRUE.equals(test)) {
 				return;
 			}
-			String requiredArgument = new PredicatesParserDescription(object, entry, version, null, Constants.REQUIRED_COLUMN).parse(PredicatesParser.getPredicateArgument(entry.getRequired(),
-					PredicatesParser.IS_REQUIRED_PREDICATE));
+			String requiredArgument = new PredicatesParserDescription(object, entry, version, null, Constants.REQUIRED_COLUMN).parse(PredicatesParser.getPredicateArgument(entry.getRequired()));
 			String result = new PredicatesParser(object, entry, version, null,
 					Constants.REQUIRED_COLUMN).parse(requiredArgument);
 			test = PredicatesParser.removeBrackets(test);
