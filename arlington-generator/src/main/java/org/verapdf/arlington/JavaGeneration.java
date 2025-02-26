@@ -25,7 +25,7 @@ public class JavaGeneration {
 		javaWriter.println();
 		javaWriter.println("\tprivate static final List<String> standardFonts = new LinkedList<>();");
 		javaWriter.println("\tprivate static final ThreadLocal<Set<COSKey>> keysSet = new ThreadLocal<>();");
-		javaWriter.println("\tprivate static final ThreadLocal<Set<COSKey>> afKeysSet = new ThreadLocal<>();");
+//		javaWriter.println("\tprivate static final ThreadLocal<Set<COSKey>> afKeysSet = new ThreadLocal<>();");
 		javaWriter.println("\tprotected static final String PDF_DATE_FORMAT_REGEX = \"(D:)?(\\\\d\\\\d){2,7}(([Z+-]\\\\d\\\\d'(\\\\d\\\\d'?)?)?|Z)\";");
 
 		javaWriter.println("\tprotected final COSBase baseObject;");
@@ -37,9 +37,9 @@ public class JavaGeneration {
 		javaWriter.println("\t\tsuper(objectType);");
 		javaWriter.println("\t\tthis.baseObject = baseObject;");
 		javaWriter.println("\t\tthis.parentObject = parentObject;");
-		javaWriter.println("\t\tif (baseObject != null && baseObject.getType() == COSObjType.COS_DICT && baseObject.knownKey(ASAtom.AF)) {");
-		javaWriter.println("\t\t\tprocessAF(baseObject);");
-		javaWriter.println("\t\t}");
+//		javaWriter.println("\t\tif (baseObject != null && baseObject.getType() == COSObjType.COS_DICT && baseObject.knownKey(ASAtom.AF)) {");
+//		javaWriter.println("\t\t\tprocessAF(baseObject);");
+//		javaWriter.println("\t\t}");
 		javaWriter.println("\t}");
 		javaWriter.println();
 
@@ -109,8 +109,8 @@ public class JavaGeneration {
 		addGetInheritable();
 		addPageObjectMethod();
 		addContainsInheritableValueMethod();
-		addProcessAFMethod();
-		addIsAssociatedFileMethod();
+//		addProcessAFMethod();
+//		addIsAssociatedFileMethod();
 		for (String extensionName : Main.extensionNames) {
 			addHasExtensionMethod(extensionName);
 		}
@@ -132,22 +132,22 @@ public class JavaGeneration {
 		javaWriter.println("\t}");
 		javaWriter.println();
 
-		javaWriter.println("\tpublic static Set<COSKey> getAFKeysSet() {");
-		javaWriter.println("\t\tif (afKeysSet.get() == null) {");
-		javaWriter.println("\t\t\tafKeysSet.set(new HashSet<>());");
-		javaWriter.println("\t\t}");
-		javaWriter.println("\t\treturn afKeysSet.get();");
-		javaWriter.println("\t}");
-		javaWriter.println();
+//		javaWriter.println("\tpublic static Set<COSKey> getAFKeysSet() {");
+//		javaWriter.println("\t\tif (afKeysSet.get() == null) {");
+//		javaWriter.println("\t\t\tafKeysSet.set(new HashSet<>());");
+//		javaWriter.println("\t\t}");
+//		javaWriter.println("\t\treturn afKeysSet.get();");
+//		javaWriter.println("\t}");
+//		javaWriter.println();
 
-		javaWriter.println("\tpublic static void setAFKeysSet(Set<COSKey> afKeysSet) {");
-		javaWriter.println("\t\tGFAObject.afKeysSet.set(afKeysSet);");
-		javaWriter.println("\t}");
-		javaWriter.println();
+//		javaWriter.println("\tpublic static void setAFKeysSet(Set<COSKey> afKeysSet) {");
+//		javaWriter.println("\t\tGFAObject.afKeysSet.set(afKeysSet);");
+//		javaWriter.println("\t}");
+//		javaWriter.println();
 
 		javaWriter.println("\tpublic static void clearAllContainers() {");
 		javaWriter.println("\t\tkeysSet.set(new HashSet<>());");
-		javaWriter.println("\t\tafKeysSet.set(new HashSet<>());");
+//		javaWriter.println("\t\tafKeysSet.set(new HashSet<>());");
 		javaWriter.println("\t}");
 		javaWriter.println();
 
@@ -1825,9 +1825,9 @@ public class JavaGeneration {
 		String returnObjectType = Constants.OBJECT.equals(returnType) ? Constants.BASE_MODEL_OBJECT_PATH : returnType;
 		printMethodSignature(false, "private", false, "List<" + returnObjectType + ">",
 				getGetterName(linkName));
-		if (Constants.PAGE_OBJECT.equals(objectName) && "Contents".equals(entryName)) {
-			javaWriter.println("\t\tprocessAFKeys();");
-		}
+//		if (Constants.PAGE_OBJECT.equals(objectName) && "Contents".equals(entryName)) {
+//			javaWriter.println("\t\tprocessAFKeys();");
+//		}
 		if (versions.size() == 1 && versions.get(0).size() == PDFVersion.values().length) {
 			javaWriter.println("\t\treturn " + getMethodCall(getGetterName(linkName +
 					versions.get(0).get(0).getStringWithUnderScore())) + ";");

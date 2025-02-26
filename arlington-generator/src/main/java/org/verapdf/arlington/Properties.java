@@ -63,12 +63,12 @@ public class Properties {
 		if (multiObject.getPageContainsStructContentItemsProperty()) {
 			addPageContainsStructContentItems(multiObject);
 		}
-		if (Constants.PAGE_OBJECT.equals(multiObject.getObjectName())) {
-			multiObject.getJavaGeneration().addProcessAFKeysMethod();
-		}
-		if ("EmbeddedFileParameter".equals(multiObject.getObjectName())) {
-			multiObject.getJavaGeneration().addIsAssociatedFile();
-		}
+//		if (Constants.PAGE_OBJECT.equals(multiObject.getObjectName())) {
+//			multiObject.getJavaGeneration().addProcessAFKeysMethod();
+//		}
+//		if ("EmbeddedFileParameter".equals(multiObject.getObjectName())) {
+//			multiObject.getJavaGeneration().addIsAssociatedFile();
+//		}
 		if (multiObject.getImageIsStructContentItemProperty()) {
 			addImageIsStructContentItem(multiObject);
 		}
