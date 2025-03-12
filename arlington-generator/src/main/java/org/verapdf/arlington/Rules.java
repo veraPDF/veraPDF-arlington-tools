@@ -401,8 +401,8 @@ public class Rules {
 					Constants.SIZE);
 		} else if (numberOfRequiredElementsWithStar > 0 && numberOfRequiredElementsWithStar == numbersWithStar.size() &&
 				!containsStar) {
-			ProfileGeneration.writeRule(version, 3, object.getModelType(), getClause(object),
-					Constants.SIZE + " > 0 && " + Constants.SIZE + " % " + numberOfRequiredElementsWithStar + " == " +
+			ProfileGeneration.writeRule(version, 3, object.getModelType(), getClause(object), 
+					Constants.SIZE + " % " + numberOfRequiredElementsWithStar + " == " +
 							numberOfRequiredElements,
 					String.format(numberOfRequiredElements > 0 ? ARRAY_SIZE_DESCRIPTION : MULTIPLY_ARRAY_SIZE_DESCRIPTION,
 							object.getId(), numberOfRequiredElementsWithStar, numberOfRequiredElements),
