@@ -73,6 +73,7 @@ veraPDF adds extra logic to the Arlington model. Namely, it:
   - wrong use of fn:InNameTree predicate. See https://github.com/pdf-association/arlington-pdf-model/issues/49
   - incorrect required condition for AS entry in Widget annotations. See https://github.com/pdf-association/arlington-pdf-model/issues/61
   - null in array of structure elements. See https://github.com/pdf-association/arlington-pdf-model/issues/90
+  - entry A in Target. See https://github.com/pdf-association/arlington-pdf-model/issues/57
 
 - supports some [future Arlington model predicates](https://github.com/pdf-association/arlington-pdf-model/blob/master/INTERNAL_GRAMMAR.md#proposals-for-future-predicates):
   - ValueOnlyWhen. See https://github.com/pdf-association/arlington-pdf-model/issues/74

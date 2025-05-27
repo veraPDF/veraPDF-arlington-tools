@@ -21,6 +21,7 @@ public class MultiObject extends Object {
 	private final Set<String> containsEntriesProperties = new TreeSet<>();
 	private final Map<String, Type> entriesValuesProperties = new TreeMap<>();
 	private final Map<String, Type> entriesHasTypeProperties = new TreeMap<>();
+	private final Map<String, String> findNMValueInArrayProperties = new TreeMap<>();
 	private final Map<String, String> entryNameToArlingtonObjectMap = new HashMap<>();
 	private final Set<String> complexObjectProperties = new TreeSet<>();
 
@@ -113,6 +114,11 @@ public class MultiObject extends Object {
 	@Override
 	public Map<String, Type> getEntriesHasTypeProperties() {
 		return entriesHasTypeProperties;
+	}
+
+	@Override
+	public Map<String, String> getFindNMValueInArrayProperties() {
+		return findNMValueInArrayProperties;
 	}
 
 	@Override

@@ -202,6 +202,10 @@ public class Object {
 		return multiObject.getEntriesHasTypeProperties();
 	}
 
+	public Map<String, String> getFindNMValueInArrayProperties() {
+		return multiObject.getFindNMValueInArrayProperties();
+	}
+
 	public Set<String> getContainsEntriesProperties() {
 		return multiObject.getContainsEntriesProperties();
 	}

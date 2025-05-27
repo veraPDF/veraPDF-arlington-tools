@@ -93,11 +93,14 @@ public class Properties {
 		for (String entryName : multiObject.getKeysStringProperties()) {
 			addKeysString(multiObject, entryName);
 		}
-		for (Map.Entry<String,Type> entry : multiObject.getEntriesValuesProperties().entrySet()) {
+		for (Map.Entry<String, Type> entry : multiObject.getEntriesValuesProperties().entrySet()) {
 			addgetValue(multiObject, entry.getKey(), entry.getValue());
 		}
-		for (Map.Entry<String,Type> entry : multiObject.getEntriesHasTypeProperties().entrySet()) {
+		for (Map.Entry<String, Type> entry : multiObject.getEntriesHasTypeProperties().entrySet()) {
 			addHasType(multiObject, entry.getKey(), entry.getValue());
+		}
+		for (Map.Entry<String, String> entry : multiObject.getFindNMValueInArrayProperties().entrySet()) {
+			addFindNMValueInArray(multiObject, entry.getKey(), entry.getValue());
 		}
 		for (String entryName : multiObject.getContainsEntriesProperties()) {
 			addContains(multiObject, entryName);
@@ -195,6 +198,11 @@ public class Properties {
 	private static void addHasType(MultiObject multiObject, String entryName, Type type) {
 		ModelGeneration.addProperty(Entry.getHasTypePropertyName(entryName, type), Type.BOOLEAN.getModelType());
 		multiObject.getJavaGeneration().addHasTypeMethod(multiObject, entryName, type);
+	}
+
+	private static void addFindNMValueInArray(MultiObject multiObject, String name1, String name2) {
+		ModelGeneration.addProperty(Entry.getFindNMValueInArrayPropertyName(name1, name2), Type.BOOLEAN.getModelType());
+		multiObject.getJavaGeneration().addFindNMValueInArrayMethod(multiObject, name1, name2);
 	}
 
 	private static void addEntryType(MultiObject multiObject, String entryName) {

@@ -353,6 +353,10 @@ public class Entry implements Comparable<Entry> {
 		return getCorrectEntryName("is" + entryName) + "HexString";
 	}
 
+	public static String getFindNMValueInArrayPropertyName(String entryName1, String entryName2) {
+		return getCorrectEntryName("FindNMValue" + entryName2 + "InArray" + entryName1);
+	}
+
 	public static String getKeysStringPropertyName(String entryName) {
 		return getCorrectEntryName("keysString" + entryName);
 	}

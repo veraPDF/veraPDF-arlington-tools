@@ -572,6 +572,9 @@ public class PredicatesParser {
 			case EXTENSION_PREDICATE:
 				extension();
 				break;
+			case "fn:FindNMValueInArray":
+				findNMValueInArray();
+				break;
 			case "fn:FileSize":
 				fileSize();
 				break;
@@ -950,6 +953,15 @@ public class PredicatesParser {
 		}
 	}
 
+	private void findNMValueInArray() {
+		if (arguments.size() != 2) {
+			throw new RuntimeException("Invalid number of arguments of findNMValueInArray");
+		}
+		output.push("(" + getPropertyOrMethodName(Entry.getFindNMValueInArrayPropertyName(arguments.get(0).getString(), 
+				arguments.get(1).getString())) + " == true)");
+		object.getFindNMValueInArrayProperties().put(arguments.get(0).getString(), arguments.get(1).getString());
+	}
+	
 	private void fileSize() {
 		output.push(getPropertyOrMethodName(Constants.FILE_SIZE));
 	}

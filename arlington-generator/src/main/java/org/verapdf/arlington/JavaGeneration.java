@@ -672,6 +672,29 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
+	public void addFindNMValueInArrayMethod(Object multiObject, String name1, String name2) {
+		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
+				getGetterName(Entry.getFindNMValueInArrayPropertyName(name1, name2)));
+		String correctName1 = Entry.getCorrectEntryName(name1);
+		String correctName2 = Entry.getCorrectEntryName(name2);
+		javaWriter.println("\t\tCOSObject " + correctName1 + " = " + getMethodCall(getGetterName(Entry.getValuePropertyName(name1))) + ";");
+		javaWriter.println("\t\tif (" + correctName1 + ".getType() != " + Type.ARRAY.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\treturn false;");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\tCOSObject " + correctName2 + " = " + getMethodCall(getGetterName(Entry.getValuePropertyName(name2))) + ";");
+		javaWriter.println("\t\tfor (COSObject entry : ((COSArray)" + correctName1 + ".getDirectBase())) {");
+		javaWriter.println("\t\t\tif (entry.getType() == " + Type.DICTIONARY.getCosObjectType() + ") {");
+		javaWriter.println("\t\t\t\tCOSObject NM = entry.getKey(" + getASAtomFromString("NM") + ");");
+		javaWriter.println("\t\t\t\tif (Objects.equals(NM.getString(), " + correctName2 + ".getString())) {");
+		javaWriter.println("\t\t\t\t\treturn true;");
+		javaWriter.println("\t\t\t\t}");
+		javaWriter.println("\t\t\t}");
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn false;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+	}
+
 	private void checkComplexObjectLastEntry(String objectName, String finalEntryName) {
 		if (finalEntryName.matches(Constants.NUMBER_REGEX)) {
 			javaWriter.println("\t\tif (" + objectName + " == null || " + objectName +
