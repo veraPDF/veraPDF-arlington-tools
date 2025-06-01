@@ -8,8 +8,6 @@ import java.util.logging.Logger;
 
 public class Links {
 
-	private static final Logger LOGGER = Logger.getLogger(Links.class.getCanonicalName());
-
 	private static Map<String, String> getLinksEntries(Object object) {
 		Map<String, String> entries = new HashMap<>();
 		for (Entry entry : object.getEntries()) {
@@ -33,6 +31,7 @@ public class Links {
 	}
 
 	public static void addLinks(MultiObject multiObject) {
+		//todo: calculate commonEntries instead of entries?
 		SortedMap<String, String> commonEntries = new TreeMap<>();
 		for (PDFVersion version : PDFVersion.values()) {
 			Object object = version.getObjectIdMap().get(multiObject.getId());
@@ -210,7 +209,7 @@ public class Links {
 		SortedMap<Integer, String> resultMap = new TreeMap<>();
 		for (String link : correctLinks) {
 			if (link.contains(PredicatesParser.PREDICATE_PREFIX)) {
-				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " link contains predicate");
+				Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " link contains predicate");
 			}
 			SizeLinkHelper helper = (SizeLinkHelper)map.get(link);
 			if (helper != null) {

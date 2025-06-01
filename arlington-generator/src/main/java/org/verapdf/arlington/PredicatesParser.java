@@ -8,8 +8,6 @@ import java.util.logging.Logger;
 
 public class PredicatesParser {
 
-	private static final Logger LOGGER = Logger.getLogger(PredicatesParser.class.getCanonicalName());
-
 	private static final String ENTRY_REGEX = "['A-Za-z:.@\\*\\d\\-_]+";
 
 	public static final String PREDICATE_PREFIX = "fn:";
@@ -81,7 +79,7 @@ public class PredicatesParser {
 				return null;
 			}
 			if (result.contains("@") || Entry.isComplexEntry(result)) {
-				LOGGER.log(Level.WARNING, getString() + " result: " + result + " original: " + str);
+				Main.LOGGER.log(Level.WARNING, getString() + " result: " + result + " original: " + str);
 				return null;
 			}
 			if (result.contains(PREDICATE_PREFIX)) {
@@ -89,7 +87,7 @@ public class PredicatesParser {
 			}
 			return result;
 		} catch (RuntimeException e) {
-			LOGGER.log(Level.WARNING, getString() + ": " + str + ". Error: " + e.getMessage());
+			Main.LOGGER.log(Level.WARNING, getString() + ": " + str + ". Error: " + e.getMessage());
 		}
 		return null;
 	}
@@ -753,7 +751,6 @@ public class PredicatesParser {
 
 	public static String removeSquareBrackets(String str) {
 		if (containsSquareBrackets(str)) {
-			System.out.println(str);
 			return str.substring(1, str.length() - 1);
 		}
 		return str;
@@ -1609,10 +1606,11 @@ public class PredicatesParser {
 		}
 		Entry entry = object.getEntry(entryName);
 		if (entry != null && entry.getUniqPropertyTypes().size() != 1) {
-			LOGGER.log(Level.WARNING, getString() + " " + entry.getName() + " several property types");
+			Main.LOGGER.log(Level.WARNING, getString() + " " + entry.getName() + " several property types");
 		}
 		if (entry == null || entry.getUniqPropertyTypes().size() != 1) {
 			return new Part(argument);
+			//todo
 		}
 		Type type = entry.getUniqPropertyTypes().iterator().next();
 		entry.addTypeValueProperty(type);
@@ -1764,9 +1762,9 @@ public class PredicatesParser {
 			}
 		}
 		if (types.size() < 1) {
-			LOGGER.log(Level.WARNING, getString() + " " + entryName + " Types not found");
+			Main.LOGGER.log(Level.WARNING, getString() + " " + entryName + " Types not found");
 		} else if (types.size() > 1) {
-			LOGGER.log(Level.WARNING, getString() + " " + entryName + " Several types found");
+			Main.LOGGER.log(Level.WARNING, getString() + " " + entryName + " Several types found");
 		} else {
 			Type type = types.iterator().next();
 			object.getEntriesValuesProperties().put(argument, type);

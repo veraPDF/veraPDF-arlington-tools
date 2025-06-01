@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 
 public class JavaGeneration {
 
-	private static final Logger LOGGER = Logger.getLogger(JavaGeneration.class.getCanonicalName());
-
 	private final PrintWriter javaWriter;
 
 	public JavaGeneration(PrintWriter javaWriter) {
@@ -20,6 +18,7 @@ public class JavaGeneration {
 	}
 
 	public void addGFAObject() {
+		//todo separate all methods in different functions
 		addPackageAndImportsToClass(Constants.OBJECT);
 		javaWriter.println("public class GFAObject extends GenericModelObject implements AObject {");
 		javaWriter.println();
@@ -590,7 +589,7 @@ public class JavaGeneration {
 		String defaultLink = null;
 		for (String link : entry.getLinks(type)) {
 			if (link.contains(PredicatesParser.PREDICATE_PREFIX)) {
-				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " link contains predicate");
+				Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " link contains predicate");
 			}
 			KeyNameLinkHelper helper = (KeyNameLinkHelper)map.get(link);
 			if (helper != null) {
@@ -814,7 +813,7 @@ public class JavaGeneration {
 				javaWriter.println("\t\t\t}");
 			} else {
 				javaWriter.println("\t\t\tList<" + Constants.BASE_MODEL_OBJECT_PATH + "> list = Collections.emptyList();");
-				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
+				Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
 						" Several dictionaries/streams " + String.join(",", entry.getLinks(type)));
 			}
 		}
@@ -903,7 +902,7 @@ public class JavaGeneration {
 				javaWriter.println("\t\t\t\t}");
 			} else {
 				javaWriter.println("\t\t\t\t//todo");
-				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
+				Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
 						" Several dictionaries/streams/arrays " + String.join(",", entry.getLinks(type)));
 			}
 		}

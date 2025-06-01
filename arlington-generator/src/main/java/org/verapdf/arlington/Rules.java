@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 public class Rules {
 
-	private static final Logger LOGGER = Logger.getLogger(Rules.class.getCanonicalName());
-
 	//descriptions and error messages
 	private static final String SPECIAL_CASE_DESCRIPTION = "%s shall satisfy special case: %s";
 	private static final String SPECIAL_CASE_ERROR_MESSAGE = "%s does not satisfy special case: %s";
@@ -135,40 +133,7 @@ public class Rules {
 		if (linkTypes.isEmpty()) {
 			return;
 		}
-		if (entry.isStar()) {
-//			if (!object.isNumberTree() && !object.isNameTree()) {
-//				return;
-//			}
-//			List<String> links = new LinkedList<>();
-//			for (List<String> currentLinks : entry.getLinks().values()) {
-//				links.addAll(currentLinks);
-//			}
-//			String objectsString = String.join(", ", links);
-//			StringBuilder test = new StringBuilder();
-//			test.append("Entries_size == ");
-//			if (object.isArray() || object.isNumberTree() || object.isNameTree() || (object.getEntries().size() == 1 &&
-//					object.getEntries().iterator().next().isStar())) {
-//				test.append("size");
-//				if (object.getEntries().size() > 1) {
-//					test.append(" - ").append(object.getEntries().size() - 1);
-//				}
-//			} else {
-//				List<String> values = new LinkedList<>();
-//				for (Entry currentEntry : object.getEntries()) {
-//					if (!currentEntry.isStar()) {
-//						values.add("'" + currentEntry.getName() + "'");
-//					}
-//				}
-//				test.append("(keysString == '' ? 0 : ").append(ProfileGeneration.split("keysString",
-//						false, values)).append(")");
-//			}
-//			ProfileGeneration.writeRule(version, 18, object.getModelType(), getClause(object, entry, null),
-//					test.toString(),
-//					String.format(links.size() == 1 ? LINK_DESCRIPTION : LINKS_DESCRIPTION,
-//							ProfileGeneration.getErrorMessageStart(true, object, entry), objectsString),
-//					String.format(links.size() == 1 ? LINK_ERROR_MESSAGE : LINKS_ERROR_MESSAGE,
-//							ProfileGeneration.getErrorMessageStart(false, object, entry), objectsString));
-		} else {
+		if (!entry.isStar()) {
 			for (Type type : linkTypes) {
 				List<String> links = entry.getLinks(type);
 				if (links.isEmpty() || (links.size() == 1 && !links.get(0).contains(PredicatesParser.PREDICATE_PREFIX))) {
@@ -372,7 +337,7 @@ public class Rules {
 			} else if (entry.isNumberWithStar()) {
 				numbersWithStar.add(entry.getNumberWithStar());
 			} else if (!Constants.SUB_ARRAYS.equals(name)) {
-				LOGGER.log(Level.SEVERE, Main.getString(version, object, entry) + " contains wrong entry");
+				Main.LOGGER.log(Level.SEVERE, Main.getString(version, object, entry) + " contains wrong entry");
 			}
 		}
 		int numberOfRequiredElements = 0;
@@ -426,6 +391,7 @@ public class Rules {
 					String.format(ARRAY_SIZE_ERROR_MESSAGE, object.getId(), "%1"),
 					Constants.SIZE);
 		}
+		//any number of elements
 	}
 
 	private static void indirectAndDirect(PDFVersion version, Object object, Entry entry, Type type) {
@@ -568,7 +534,7 @@ public class Rules {
 				possibleValue = PredicatesParser.removeQuotes(possibleValue);
 			}
 			if (possibleValue == null || Constants.UNDEFINED.equals(possibleValue)) {
-				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " " + propertyValue +
+				Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " " + propertyValue +
 						" undefined value");
 				continue;
 			}
@@ -576,14 +542,14 @@ public class Rules {
 				if (propertyValue.startsWith(PredicatesParser.VALUE_ONLY_WHEN_PREDICATE)) {
 					valueOnlyWhen(object, entry, version, type, propertyValue, possibleValue);
 				} else {
-					LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " valueOnlyWhen predicate");
+					Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " valueOnlyWhen predicate");
 				}
 			}
 			if (propertyValue.contains(PredicatesParser.EXTENSION_PREDICATE)) {
 				if (propertyValue.startsWith(PredicatesParser.EXTENSION_PREDICATE)) {
 					extensionValue(object, entry, version, type, propertyValue, possibleValue);
 				} else {
-					LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " extension predicate");
+					Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " extension predicate");
 				}
 			}
 			boolean isDeprecated = false;
@@ -594,14 +560,14 @@ public class Rules {
 						deprecatedValues.add(possibleValue);
 					}
 				} else {
-					LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " deprecated predicate");
+					Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " deprecated predicate");
 				}
 			}
 			if (propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
 				if (propertyValue.startsWith(PredicatesParser.REQUIRED_VALUE_PREDICATE)) {
 					requiredValue(object, entry, version, type, propertyValue, possibleValue);
 				} else if (!isDeprecated) {
-					LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " required predicate");
+					Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " required predicate");
 				}
 			}
 			if (!propertyValue.contains(PredicatesParser.REQUIRED_VALUE_PREDICATE) &&
@@ -609,7 +575,7 @@ public class Rules {
 					!propertyValue.contains(PredicatesParser.EXTENSION_PREDICATE) &&
 					!propertyValue.startsWith(PredicatesParser.DEPRECATED_PREDICATE) &&
 					!propertyValue.startsWith(PredicatesParser.SINCE_VERSION_PREDICATE)) {
-				LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
+				Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
 						" PossibleValues contains specialPredicate " + propertyValue);
 				possibleValue = new PredicatesParser(object, entry, version, type,
 						Constants.POSSIBLE_VALUES_COLUMN).parse(propertyValue);
@@ -645,7 +611,7 @@ public class Rules {
 			for (int i = 0; i < values.length; i++) {
 				String elementValue = values[i];
 				if (!elementValue.matches(Constants.NUMBER_REGEX)) {
-					LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
+					Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) +
 							" possible array value contains non-integer element(s)");
 					return;
 				}
@@ -784,7 +750,7 @@ public class Rules {
 			} else if (typeString.contains(PredicatesParser.EXTENSION_PREDICATE)) {
 				extensionType(version, object, entry, type, typeString);
 			} else {
-				LOGGER.log(Level.INFO, Main.getString(version, object, entry, type) +
+				Main.LOGGER.log(Level.INFO, Main.getString(version, object, entry, type) +
 						" column Type contains predicate different from " + PredicatesParser.DEPRECATED_PREDICATE +
 						" and " + PredicatesParser.EXTENSION_PREDICATE);
 			}

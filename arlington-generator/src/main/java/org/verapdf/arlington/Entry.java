@@ -470,6 +470,10 @@ public class Entry implements Comparable<Entry> {
 		return sinceString;
 	}
 
+	public void setSinceString(String sinceString) {
+		this.sinceString = sinceString;
+	}
+
 	public static Boolean isInheritable(String objectName, String entryName) {
 		Boolean isInheritable = null;
 		for (PDFVersion version : PDFVersion.values()) {

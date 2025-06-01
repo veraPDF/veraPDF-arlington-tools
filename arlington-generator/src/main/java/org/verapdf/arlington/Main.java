@@ -11,11 +11,22 @@ import org.verapdf.arlington.json.JSONValue;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
 
+	public static final Logger LOGGER = Logger.getLogger(Main.class.getCanonicalName());
+	private static final LogsHandler LOGS_HANDLER = new LogsHandler();
+	private static final int EXPECTED_LOGS_NUMBER = 64;
+
+	static {
+		LOGGER.addHandler(LOGS_HANDLER);
+	}
+
 	public static final SortedSet<String> objectNames = new TreeSet<>();
 	public static final SortedSet<String> extensionNames = new TreeSet<>();
+	public static final int EXPECTED_EXTENSIONS_NUMBER = 18;
 	public static final Map<String, MultiObject> objectIdMap = new HashMap<>();
 	private static final Map<PDFVersion, Set<String>> activeObjectNames = new HashMap<>();
 	private static final String VALIDATION_RESULT_FOLDER = "result_validation/";
@@ -39,6 +50,13 @@ public class Main {
 		for (PDFVersion version : PDFVersion.values()) {
 			ProfileGeneration.endProfile(version.getProfileWriter());
 			version.getProfileWriter().close();
+		}
+		if (extensionNames.size() != EXPECTED_EXTENSIONS_NUMBER) {
+			Main.LOGGER.log(Level.WARNING, String.format("Number of logs is changed. Should be %s instead of %s", EXPECTED_EXTENSIONS_NUMBER, extensionNames.size()));
+			System.out.println(Main.extensionNames);
+		}
+		if (LOGS_HANDLER.logsNumber != EXPECTED_LOGS_NUMBER) {
+			LOGGER.log(Level.WARNING, String.format("Number of logs is changed. Should be %s instead of %s", EXPECTED_LOGS_NUMBER, LOGS_HANDLER.logsNumber));
 		}
 	}
 
@@ -177,10 +195,3 @@ public class Main {
 		return activeObjectNames;
 	}
 }
-
-//add extra context not to all items, only for * entries?
-
-//improve message of 11,16 rule
-
-//extension possible values rule, links other cases rules
-

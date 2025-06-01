@@ -6,8 +6,6 @@ import java.util.logging.Logger;
 
 public class PredicatesParserDescription extends PredicatesParser {
 
-	private static final Logger LOGGER = Logger.getLogger(PredicatesParserDescription.class.getCanonicalName());
-
 	public PredicatesParserDescription(Object object, Entry entry, PDFVersion version, Type type, String columnName) {
 		super(object, entry, version, type, columnName, true);
 		isDescription = true;
@@ -25,7 +23,7 @@ public class PredicatesParserDescription extends PredicatesParser {
 			}
 			return result;
 		} catch (RuntimeException e) {
-			LOGGER.log(Level.WARNING, getString() + ": " + str + ". Error: " + e.getMessage());
+			Main.LOGGER.log(Level.WARNING, getString() + ": " + str + ". Error: " + e.getMessage());
 		}
 		return str;
 	}

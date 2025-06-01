@@ -599,6 +599,7 @@ public class ObjectCreation {
                 for (Map.Entry<Type, String> entry : originalEntry.getIndirectReference().entrySet()) {
                     newEntry.getIndirectReference().put(entry.getKey(), replace(entry.getValue(), numbers.get(0), numbers.size()));
                 }
+                //todo other fields, replace d* in all fields
                 for (Map.Entry<Type, String> entry : originalEntry.getSpecialCases().entrySet()) {
                     newEntry.getSpecialCases().put(entry.getKey(), replace(entry.getValue(), numbers.get(0), numbers.size()));
                 }

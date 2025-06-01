@@ -59,7 +59,7 @@ public class ItemDeserializer extends StdDeserializer<JSONValue> {
 			}
 		}
 		if (node.isContainerNode()) {
-			return null;
+			return null;//todo
 		}
 		return new JSONValue(new ArrayList<>());
 	}
