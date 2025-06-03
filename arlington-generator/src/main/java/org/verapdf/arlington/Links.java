@@ -4,7 +4,6 @@ import org.verapdf.arlington.linkHelpers.*;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Links {
 
@@ -88,26 +87,29 @@ public class Links {
 				if (correctLinks.size() <= 1) {
 					continue;
 				}
-				Map<String, LinkHelper> map = LinkHelper.getMap(correctLinks);
+				List<Integer> oldMapsIndexes = new LinkedList<>();
+				Map<String, LinkHelper> map = LinkHelper.getMap(correctLinks, oldMapsIndexes);
 				if (map == null) {
 					continue;
 				}
-				addGetter(map, object, entry, type, version, 0, "");
+				addGetter(map, oldMapsIndexes, object, entry, type, version, 0, "");
 			}
 		}
 	}
 
-	public static void addGetter(Map<String, LinkHelper> map, Object object, Entry entry,
+	public static void addGetter(Map<String, LinkHelper> map, List<Integer> oldMapsIndexes, Object object, Entry entry,
 								  Type type, PDFVersion version, Integer index, String methodNamePostfix) {
 		LinkHelper linkHelper = map.values().iterator().next();
 		if (linkHelper instanceof DifferentKeysValuesLinkHelper)  {
-			object.getJavaGeneration().addLinkGetterByKeyValues(map, object, entry, type, version, index, methodNamePostfix);
+			object.getJavaGeneration().addLinkGetterByKeyValues(map, oldMapsIndexes, object, entry, type, version, index, methodNamePostfix);
 		} else if (linkHelper instanceof SizeLinkHelper) {
-			object.getJavaGeneration().addLinkGetterBySize(map, object, entry, type, version);
+			object.getJavaGeneration().addLinkGetterBySize(map, oldMapsIndexes, object, entry, type, version, index, methodNamePostfix);
 		} else if (linkHelper instanceof DifferentKeysLinkHelper) {
-			object.getJavaGeneration().addLinkGetterByDifferentKeys(map, object, entry, type, version, index, methodNamePostfix);
+			object.getJavaGeneration().addLinkGetterByDifferentKeys(map, oldMapsIndexes, object, entry, type, version, index, methodNamePostfix);
 		} else if (linkHelper instanceof KeyNameLinkHelper) {
-			object.getJavaGeneration().addLinkGetterByKeyName(map, object, entry, type, version);
+			object.getJavaGeneration().addLinkGetterByKeyName(map, oldMapsIndexes, object, entry, type, version);
+		} else if (linkHelper instanceof KeyTypeLinkHelper) {
+			object.getJavaGeneration().addLinkGetterByKeyType(map, oldMapsIndexes, object, entry, type, version, index, methodNamePostfix);
 		}
 	}
 
@@ -204,16 +206,34 @@ public class Links {
 		return resultMap;
 	}
 
-	public static SortedMap<Integer, String> getSizeLinksMap(PDFVersion version, Object object, Entry entry, Type type,
+	public static SortedMap<Type, Set<String>> getDifferentKeysTypesLinksMap(List<String> correctLinks,
+																				Map<String, LinkHelper> map) {
+		SortedMap<Type, Set<String>> resultMap = new TreeMap<>();
+		for (String link : correctLinks) {
+			KeyTypeLinkHelper helper = (KeyTypeLinkHelper)map.get(link);
+			for (Type type : helper.getTypes()) {
+				if (resultMap.containsKey(type)) {
+					resultMap.get(type).add(link);
+				} else {
+					Set<String> valuesMap = new HashSet<>();
+					valuesMap.add(link);
+					resultMap.put(type, valuesMap);
+				}
+			}
+		}
+		return resultMap;
+	}
+
+	public static SortedMap<Integer, Set<String>> getSizeLinksMap(PDFVersion version, Object object, Entry entry, Type type,
 															 List<String> correctLinks, Map<String, LinkHelper> map) {
-		SortedMap<Integer, String> resultMap = new TreeMap<>();
+		SortedMap<Integer, Set<String>> resultMap = new TreeMap<>();
 		for (String link : correctLinks) {
 			if (link.contains(PredicatesParser.PREDICATE_PREFIX)) {
 				Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry, type) + " link contains predicate");
 			}
 			SizeLinkHelper helper = (SizeLinkHelper)map.get(link);
 			if (helper != null) {
-				resultMap.put(helper.getSize(), link);
+				resultMap.computeIfAbsent(helper.getSize(), x -> new HashSet<>()).add(link);
 			}
 		}
 		return resultMap;

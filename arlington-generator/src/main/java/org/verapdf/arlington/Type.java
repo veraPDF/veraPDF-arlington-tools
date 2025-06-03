@@ -81,6 +81,10 @@ public enum Type {
 		return cosObjectType != null ? "COSObjType." + cosObjectType : null;
 	}
 
+	public String getCosObjectTypeWithoutQualifier() {
+		return cosObjectType;
+	}
+
 	public String getParserClassName() {
 		return parserClassName;
 	}

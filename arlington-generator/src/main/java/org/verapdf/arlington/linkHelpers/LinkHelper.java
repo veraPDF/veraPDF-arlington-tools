@@ -14,9 +14,11 @@ public class LinkHelper {
 		this.objectName = objectName;
 	}
 
-	public static Map<String, LinkHelper> getMap(Set<String> values) {
-		for (Map<String, LinkHelper> map : helpersList) {
-			if (map.keySet().containsAll(values)) {
+	public static Map<String, LinkHelper> getMap(Set<String> values, List<Integer> oldMapsIndexes) {
+		for (int index = 0; index < helpersList.size(); index++) {
+			Map<String, LinkHelper> map = helpersList.get(index);
+			if (map.keySet().containsAll(values) && !oldMapsIndexes.contains(index)) {
+				oldMapsIndexes.add(index);
 				return map;
 			}
 		}
@@ -350,6 +352,57 @@ public class LinkHelper {
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
+		helpers.put("Dest0StructArray", new SizeLinkHelper("Dest0StructArray", 2));
+		helpers.put("Dest1StructArray", new SizeLinkHelper("Dest1StructArray", 3));
+		helpers.put("DestXYZStructArray", new SizeLinkHelper("DestXYZStructArray", 5));
+		helpers.put("Dest4StructArray", new SizeLinkHelper("Dest4StructArray", 6));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("Dest0Array", new KeyTypeLinkHelper("Dest0Array", "0", new Type[]{Type.ARRAY, Type.NUMBER}, true));
+		helpers.put("Dest0StructArray", new KeyTypeLinkHelper("Dest0StructArray", "0", new Type[]{Type.ARRAY, Type.STRING_BYTE, Type.NAME}, true));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("Dest1Array", new KeyTypeLinkHelper("Dest1Array", "0", new Type[]{Type.ARRAY, Type.NUMBER}, true));
+		helpers.put("Dest1StructArray", new KeyTypeLinkHelper("Dest1StructArray", "0", new Type[]{Type.ARRAY, Type.STRING_BYTE, Type.NAME}, true));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("DestXYZArray", new KeyTypeLinkHelper("DestXYZArray", "0", new Type[]{Type.ARRAY, Type.NUMBER}, true));
+		helpers.put("DestXYZStructArray", new KeyTypeLinkHelper("DestXYZStructArray", "0", new Type[]{Type.ARRAY, Type.STRING_BYTE, Type.NAME}, true));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("Dest4Array", new KeyTypeLinkHelper("Dest4Array", "0", new Type[]{Type.ARRAY, Type.NUMBER}, true));
+		helpers.put("Dest4StructArray", new KeyTypeLinkHelper("Dest4StructArray", "0", new Type[]{Type.ARRAY, Type.STRING_BYTE, Type.NAME}, true));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("Dest0Array", new DifferentKeysLinkHelper("Dest0Array", ""));
+		helpers.put("Dest0StructArray", new DifferentKeysLinkHelper("Dest0StructArray", "0::S"));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("Dest1Array", new DifferentKeysLinkHelper("Dest1Array", ""));
+		helpers.put("Dest1StructArray", new DifferentKeysLinkHelper("Dest1StructArray", "0::S"));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("DestXYZArray", new DifferentKeysLinkHelper("DestXYZArray", ""));
+		helpers.put("DestXYZStructArray", new DifferentKeysLinkHelper("DestXYZStructArray", "0::S"));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("Dest4Array", new DifferentKeysLinkHelper("Dest4Array", ""));
+		helpers.put("Dest4StructArray", new DifferentKeysLinkHelper("Dest4StructArray", "0::S"));
+		helpersList.add(helpers);
+
+		helpers = new HashMap<>();
+		helpers.put("Dest0Array", new SizeLinkHelper("Dest0Array", 2));
+		helpers.put("Dest1Array", new SizeLinkHelper("Dest1Array", 3));
+		helpers.put("DestXYZArray", new SizeLinkHelper("DestXYZArray", 5));
+		helpers.put("Dest4Array", new SizeLinkHelper("Dest4Array", 6));
 		helpers.put("Dest0StructArray", new SizeLinkHelper("Dest0StructArray", 2));
 		helpers.put("Dest1StructArray", new SizeLinkHelper("Dest1StructArray", 3));
 		helpers.put("DestXYZStructArray", new SizeLinkHelper("DestXYZStructArray", 5));

@@ -6,7 +6,6 @@ import org.verapdf.arlington.linkHelpers.*;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class JavaGeneration {
@@ -401,7 +400,7 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	public void addLinkGetterByDifferentKeys(Map<String, LinkHelper> map, Object object, Entry entry, Type type,
+	public void addLinkGetterByDifferentKeys(Map<String, LinkHelper> map, List<Integer> oldMapsIndexes, Object object, Entry entry, Type type,
 											 PDFVersion version, int index, String methodNamePostfix) {
 		String linkName = Links.getLinkName(entry.getName());
 		printMethodSignature(false, "private", false,
@@ -426,7 +425,28 @@ public class JavaGeneration {
 			if (mapEntry.getKey().isEmpty()) {
 				continue;
 			}
-			javaWriter.println("\t\tif (" + string + ".knownKey(" + getASAtomFromString(mapEntry.getKey()) + ")) {");//merge cases
+			String finalEntryName;
+			String objectName = string;
+			if (mapEntry.getKey().contains("::")) {
+				String[] objects = mapEntry.getKey().split("::");
+				for (int i = 0; i < objects.length - 1; i++) {
+					String obj = objects[i];
+					if (Entry.isNumber(obj)) {
+						javaWriter.println("\t\tCOSObject " + Entry.getCorrectEntryName(obj) + " = " + objectName + ".at("+ obj + ");");
+					} else {
+						javaWriter.println("\t\tCOSObject" + Entry.getCorrectEntryName(obj) + " = " + objectName + ".getKey(" + getASAtomFromString(obj) + "));");
+					}
+					objectName = Entry.getCorrectEntryName(obj);
+				}
+				finalEntryName = objects[objects.length - 1];
+			} else {
+				finalEntryName = mapEntry.getKey();
+			}
+			if (Entry.isNumber(finalEntryName)) {
+				javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".size() > " + finalEntryName + ") {");
+			} else {
+				javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".knownKey(" + getASAtomFromString(finalEntryName) + ")) {");//merge cases
+			}
 			if (mapEntry.getValue().size() != 1) {
 				javaWriter.println("\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() + methodNamePostfix +
 						mapEntry.getKey() + version.getStringWithUnderScore()), "base", "keyName") + ";");
@@ -436,9 +456,15 @@ public class JavaGeneration {
 			}
 			javaWriter.println("\t\t}");
 		}
-		if (newMap.get("") != null) {
-			javaWriter.println("\t\treturn " + constructorGFAObject(entry.getName(), newMap.get("").iterator().next(),
-					"base", "this.baseObject", "keyName") + ";");
+		Set<String> defaultSet = newMap.get("");
+		if (defaultSet != null) {
+			if (defaultSet.size() != 1) {
+				javaWriter.println("\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() + 
+						methodNamePostfix + "_" + version.getStringWithUnderScore()), "base", "keyName") + ";");
+			} else {
+				javaWriter.println("\t\treturn " + constructorGFAObject(entry.getName(), defaultSet.iterator().next(),
+						"base", "this.baseObject", "keyName") + ";");
+			}
 		} else {
 			javaWriter.println("\t\treturn null;");
 		}
@@ -446,15 +472,17 @@ public class JavaGeneration {
 		javaWriter.println();
 		for (Map.Entry<String, Set<String>> mapEntry : newMap.entrySet()) {
 			if (mapEntry.getValue().size() != 1) {
-				Map<String, LinkHelper> newHelperMap = LinkHelper.getMap(mapEntry.getValue());
+				Map<String, LinkHelper> newHelperMap = LinkHelper.getMap(mapEntry.getValue(), oldMapsIndexes);
 				if (newHelperMap != null) {
-					addLinkGetterByKeyValues(newHelperMap, object, entry, type, version, index + 1, methodNamePostfix + mapEntry.getKey());
+					Links.addGetter(newHelperMap, 
+							new LinkedList<>(oldMapsIndexes), object, entry, type, version, index + 1, 
+							methodNamePostfix + (mapEntry.getKey().isEmpty() ? "_" : mapEntry.getKey()));
 				}
 			}
 		}
 	}
 
-	public void addLinkGetterByKeyValues(Map<String, LinkHelper> map, Object object, Entry entry, Type type,
+	public void addLinkGetterByKeyValues(Map<String, LinkHelper> map, List<Integer> oldMapsIndexes, Object object, Entry entry, Type type,
 										 PDFVersion version, int index, String methodNamePostfix) {
 		String linkName = Links.getLinkName(entry.getName());
 		printMethodSignature(false, "private", false, Constants.BASE_MODEL_OBJECT_PATH,
@@ -475,11 +503,11 @@ public class JavaGeneration {
 		javaWriter.println();
 		for (Map.Entry<String, Set<String>> mapEntry : newMap.entrySet()) {
 			if (mapEntry.getValue().size() != 1) {
-				Links.addGetter(LinkHelper.getMap(mapEntry.getValue()), object, entry, type, version, index + 1, methodNamePostfix + mapEntry.getKey());
+				Links.addGetter(LinkHelper.getMap(mapEntry.getValue(), oldMapsIndexes), new LinkedList<>(oldMapsIndexes), object, entry, type, version, index + 1, methodNamePostfix + mapEntry.getKey());
 			}
 		}
 		if (defaultSet.size() > 1) {
-			Links.addGetter(LinkHelper.getMap(defaultSet), object, entry, type, version, index + 1, methodNamePostfix + "Default");
+			Links.addGetter(LinkHelper.getMap(defaultSet, oldMapsIndexes), new LinkedList<>(oldMapsIndexes), object, entry, type, version, index + 1, methodNamePostfix + "Default");
 		}
 	}
 
@@ -578,7 +606,7 @@ public class JavaGeneration {
 		return newMap;
 	}
 
-	public void addLinkGetterByKeyName(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
+	public void addLinkGetterByKeyName(Map<String, LinkHelper> map, List<Integer> oldMapsIndexes, Object object, Entry entry, Type type, PDFVersion version) {
 		String linkName = Links.getLinkName(entry.getName());
 		printMethodSignature(false, "private", false, Constants.BASE_MODEL_OBJECT_PATH,
 				getGetterName(linkName + type.getType() + version.getStringWithUnderScore()),
@@ -612,6 +640,48 @@ public class JavaGeneration {
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t}");
 		javaWriter.println();
+	}
+
+	public void addLinkGetterByKeyType(Map<String, LinkHelper> map, List<Integer> oldMapsIndexes, Object object, Entry entry, Type type, 
+									   PDFVersion version, int index, String methodNamePostfix) {
+		String linkName = Links.getLinkName(entry.getName());
+		printMethodSignature(false, "private", false, Constants.BASE_MODEL_OBJECT_PATH,
+				getGetterName(linkName + type.getType() + methodNamePostfix + version.getStringWithUnderScore()),
+				"COSBase base", "String keyName");
+		List<String> links = entry.getLinks(type).stream().filter(link -> map.containsKey(link.contains(PredicatesParser.PREDICATE_PREFIX) ?
+				PredicatesParser.getPredicateLastArgument(link) : link)).collect(Collectors.toList());
+		List<String> correctLinks = entry.getLinksWithoutPredicatesList(links);
+		String name = ((KeyTypeLinkHelper)map.values().iterator().next()).getKeyName();
+		if (Entry.isNumber(name)) {
+			javaWriter.println("\t\tCOSObject key = base.at(" + name + ");");
+		} else {
+			javaWriter.println("\t\tCOSObject key = base.getKey(" + getASAtomFromString(name) + ");");
+		}
+		javaWriter.println("\t\tswitch (key.getType()) {");
+		SortedMap<Type, Set<String>> newMap = Links.getDifferentKeysTypesLinksMap(correctLinks, map);
+		for (Map.Entry<Type, Set<String>> mapEntry : newMap.entrySet()) {
+			javaWriter.println("\t\t\tcase " + mapEntry.getKey().getCosObjectTypeWithoutQualifier() + ":");
+			if (mapEntry.getValue().size() > 1) {
+				javaWriter.println("\t\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() + methodNamePostfix +
+						mapEntry.getKey().getType() + version.getStringWithUnderScore()), "base", "keyName") + ";");
+			} else {
+				javaWriter.println("\t\t\t\treturn " + constructorGFAObject(entry.getName(), mapEntry.getValue().iterator().next(), "base",
+						"this.baseObject", "keyName") + ";");
+			}
+		}
+		javaWriter.println("\t\t}");
+		javaWriter.println("\t\treturn null;");
+		javaWriter.println("\t}");
+		javaWriter.println();
+		for (Map.Entry<Type, Set<String>> mapEntry : newMap.entrySet()) {
+			if (mapEntry.getValue().size() > 1) {
+				Map<String, LinkHelper> newHelperMap = LinkHelper.getMap(mapEntry.getValue(), oldMapsIndexes);
+				if (newHelperMap != null) {
+					Links.addGetter(newHelperMap, new LinkedList<>(oldMapsIndexes), object, entry, type, version,
+							index + 1, methodNamePostfix + mapEntry.getKey().getType());
+				}
+			}
+		}
 	}
 	
 	public void addEntryTypeMethod(String entryName) {
@@ -735,23 +805,39 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	public void addLinkGetterBySize(Map<String, LinkHelper> map, Object object, Entry entry, Type type, PDFVersion version) {
+	public void addLinkGetterBySize(Map<String, LinkHelper> map, List<Integer> oldMapsIndexes, Object object, Entry entry, 
+									Type type, PDFVersion version, Integer index, String methodNamePostfix) {
 		String linkName = Links.getLinkName(entry.getName());
 		printMethodSignature(false, "private", false,
-				Constants.BASE_MODEL_OBJECT_PATH, getGetterName(linkName + type.getType() +
+				Constants.BASE_MODEL_OBJECT_PATH, getGetterName(linkName + type.getType() + methodNamePostfix +
 						version.getStringWithUnderScore()), "COSBase base", "String keyName");
 		javaWriter.println("\t\tswitch (base.size()) {");
-		SortedMap<Integer, String> linksMap = Links.getSizeLinksMap(version, object, entry, type, entry.getLinks(type), map);
-		for (Map.Entry<Integer, String> mapEntry : linksMap.entrySet()) {
+		SortedMap<Integer, Set<String>> linksMap = Links.getSizeLinksMap(version, object, entry, type, entry.getLinks(type), map);
+		for (Map.Entry<Integer, Set<String>> mapEntry : linksMap.entrySet()) {
 			javaWriter.println("\t\t\tcase " + mapEntry.getKey() + ":");
-			javaWriter.println("\t\t\t\treturn " + constructorGFAObject(entry.getName(), mapEntry.getValue(),
-					"base", "this.baseObject", "keyName") + ";");
+			if (mapEntry.getValue().size() > 1) {
+				javaWriter.println("\t\t\t\treturn " + getMethodCall(getGetterName(linkName + type.getType() + methodNamePostfix +
+						mapEntry.getKey() + version.getStringWithUnderScore()), "base", "keyName") + ";");
+			} else {
+				javaWriter.println("\t\t\t\treturn " + constructorGFAObject(entry.getName(), mapEntry.getValue().iterator().next(),
+						"base", "this.baseObject", "keyName") + ";");
+			}
 		}
 		javaWriter.println("\t\t\tdefault:");
 		javaWriter.println("\t\t\t\treturn null;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t}");
 		javaWriter.println();
+		for (Map.Entry<Integer, Set<String>> mapEntry : linksMap.entrySet()) {
+			if (mapEntry.getValue().size() != 1) {
+				Map<String, LinkHelper> newHelperMap = LinkHelper.getMap(mapEntry.getValue(), oldMapsIndexes);
+				if (newHelperMap != null) {
+					Links.addGetter(newHelperMap,
+							new LinkedList<>(oldMapsIndexes), object, entry, type, version, index + 1,
+							methodNamePostfix + mapEntry.getKey());
+				}
+			}
+		}
 	}
 
 	public void addOneLink(Object object, Entry entry, String returnType, PDFVersion version) {
@@ -803,7 +889,7 @@ public class JavaGeneration {
 					type.getParserClassName() + ")object.getDirectBase()", parentObject, entryName) + ");");
 		} else {
 			Set<String> correctLinks = entry.getLinksWithoutPredicatesSet(type);
-			if (LinkHelper.getMap(correctLinks) != null) {
+			if (LinkHelper.getMap(correctLinks, new LinkedList<>()) != null) {
 				javaWriter.println("\t\t\t" + Constants.BASE_MODEL_OBJECT_PATH + " result = " +
 						getMethodCall(getGetterName(linkName + type.getType() + version.getStringWithUnderScore()),
 								"object.getDirectBase()", entryName) + ";");
@@ -893,7 +979,7 @@ public class JavaGeneration {
 					"(" + type.getParserClassName() + ")object.getDirectBase()",
 					"this.parentObject", keyName) + ");");
 		} else {
-			if (LinkHelper.getMap(links) != null) {
+			if (LinkHelper.getMap(links, new LinkedList<>()) != null) {
 				javaWriter.println("\t\t\t\t" + Constants.BASE_MODEL_OBJECT_PATH + " result = " +
 						getMethodCall(getGetterName(linkName + type.getType() +
 								version.getStringWithUnderScore()), "object.getDirectBase()", keyName) + ";");
