@@ -359,23 +359,23 @@ public class LinkHelper {
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("Dest0Array", new KeyTypeLinkHelper("Dest0Array", "0", new Type[]{Type.ARRAY, Type.NUMBER}, true));
-		helpers.put("Dest0StructArray", new KeyTypeLinkHelper("Dest0StructArray", "0", new Type[]{Type.ARRAY, Type.STRING_BYTE, Type.NAME}, true));
+		helpers.put("Dest0Array", new KeyTypeLinkHelper("Dest0Array", "0", new Type[]{Type.DICTIONARY, Type.NUMBER}, true));
+		helpers.put("Dest0StructArray", new KeyTypeLinkHelper("Dest0StructArray", "0", new Type[]{Type.DICTIONARY, Type.STRING_BYTE, Type.NAME}, true));
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("Dest1Array", new KeyTypeLinkHelper("Dest1Array", "0", new Type[]{Type.ARRAY, Type.NUMBER}, true));
-		helpers.put("Dest1StructArray", new KeyTypeLinkHelper("Dest1StructArray", "0", new Type[]{Type.ARRAY, Type.STRING_BYTE, Type.NAME}, true));
+		helpers.put("Dest1Array", new KeyTypeLinkHelper("Dest1Array", "0", new Type[]{Type.DICTIONARY, Type.NUMBER}, true));
+		helpers.put("Dest1StructArray", new KeyTypeLinkHelper("Dest1StructArray", "0", new Type[]{Type.DICTIONARY, Type.STRING_BYTE, Type.NAME}, true));
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("DestXYZArray", new KeyTypeLinkHelper("DestXYZArray", "0", new Type[]{Type.ARRAY, Type.NUMBER}, true));
-		helpers.put("DestXYZStructArray", new KeyTypeLinkHelper("DestXYZStructArray", "0", new Type[]{Type.ARRAY, Type.STRING_BYTE, Type.NAME}, true));
+		helpers.put("DestXYZArray", new KeyTypeLinkHelper("DestXYZArray", "0", new Type[]{Type.DICTIONARY, Type.NUMBER}, true));
+		helpers.put("DestXYZStructArray", new KeyTypeLinkHelper("DestXYZStructArray", "0", new Type[]{Type.DICTIONARY, Type.STRING_BYTE, Type.NAME}, true));
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
-		helpers.put("Dest4Array", new KeyTypeLinkHelper("Dest4Array", "0", new Type[]{Type.ARRAY, Type.NUMBER}, true));
-		helpers.put("Dest4StructArray", new KeyTypeLinkHelper("Dest4StructArray", "0", new Type[]{Type.ARRAY, Type.STRING_BYTE, Type.NAME}, true));
+		helpers.put("Dest4Array", new KeyTypeLinkHelper("Dest4Array", "0", new Type[]{Type.DICTIONARY, Type.NUMBER}, true));
+		helpers.put("Dest4StructArray", new KeyTypeLinkHelper("Dest4StructArray", "0", new Type[]{Type.DICTIONARY, Type.STRING_BYTE, Type.NAME}, true));
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
