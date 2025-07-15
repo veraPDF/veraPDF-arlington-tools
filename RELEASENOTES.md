@@ -1,8 +1,15 @@
+Version 1.28.2 (July 15, 2025)
+================================
+
+- implements Arlington model as of the release date (latest commit https://github.com/pdf-association/arlington-pdf-model/commit/b7d880b).
+- upgraded veraPDF parser to version 1.28.2 (see [release notes](https://github.com/veraPDF/veraPDF-library/blob/rel/1.28/RELEASENOTES.md#pdf-parser))
+- added rule about the A entry in Target object ([commit](https://github.com/veraPDF/veraPDF-library/commit/39b849c))
+
 Version 1.28 (May  5, 2025)
 =================================
 
 - implements Arlington model as of the release date (latest commit https://github.com/pdf-association/arlington-pdf-model/commit/7ac625c).
-- upgraded veraPDF parser to version 1.28.1 (see [release notes](https://github.com/veraPDF/veraPDF-library/blob/rel/1.28/RELEASENOTES.md#pdf-parser))
+- upgraded veraPDF parser to version 1.28.1 (see [release notes](https://github.com/veraPDF/veraPDF-library/blob/rel/1.28/RELEASENOTES.md#pdf-parser-1))
 - added extension-specific permitted values and links
 - fixed processing of AA entry in merged Widget annotation and Form field dictionaries
 - fixed checkbox processing with no Ff entry
