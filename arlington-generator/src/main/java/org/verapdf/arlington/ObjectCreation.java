@@ -36,12 +36,12 @@ public class ObjectCreation {
                 if (Object.isField(object.getObjectName())) {
                     SortedSet<Entry> entries = new TreeSet<>();
                     for (Entry entry : object.getEntries()) {
-                        if (!"Kids".equals(entry.getName())) {
+                        if (!Constants.KIDS.equals(entry.getName())) {
                             entries.add(new Entry(entry));
                         }
                     }
                     for (Entry entry : widgetAnnot.getEntries()) {
-                        if (!"Kids".equals(entry.getName())) {
+                        if (!Constants.KIDS.equals(entry.getName())) {
                             entries.add(new Entry(entry));
                         }
                     }
@@ -61,6 +61,9 @@ public class ObjectCreation {
         for (PDFVersion version : PDFVersion.values()) {
             for (Object object : version.getObjectIdMap().values()) {
                 for (Entry entry : object.getEntries()) {
+                    if (Constants.ANNOT_WIDGET.equals(object.getObjectName()) && Constants.PARENT_KEY.equals(entry.getName())) {
+                        continue;
+                    }
                     for (Type type : Type.values()) {
                         List<String> links = entry.getLinksWithoutPredicatesList(type);
                         for (String link : links) {
@@ -218,7 +221,7 @@ public class ObjectCreation {
             if (PDFVersion.compare(version, PDFVersion.VERSION1_2) >= 0) {
 
                 Entry kids = new Entry();
-                kids.setName("Kids");
+                kids.setName(Constants.KIDS);
                 kids.getTypes().add(Type.ARRAY);
                 List<String> kidsLinks = new LinkedList<>();
                 kidsLinks.add(Constants.NAME_TREE_NODES_ARRAY);
@@ -264,7 +267,7 @@ public class ObjectCreation {
             if (PDFVersion.compare(version, PDFVersion.VERSION1_3) >= 0) {
 
                 Entry kids = new Entry();
-                kids.setName("Kids");
+                kids.setName(Constants.KIDS);
                 kids.getTypes().add(Type.ARRAY);
                 List<String> kidsLinks = new LinkedList<>();
                 kidsLinks.add(Constants.NUMBER_TREE_NODES_ARRAY);

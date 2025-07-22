@@ -25,8 +25,8 @@ public class Constants {
 	public static final String NUMBER_TREE_NODE_LIMITS_ARRAY = NUMBER_TREE_NODE + "Limits" + "Array";
 	public static final String NAME_TREE_NODE_NAMES_ARRAY = NAME_TREE_NODE + "Names" + "Array";
 	public static final String NUMBER_TREE_NODE_NUMS_ARRAY = NUMBER_TREE_NODE + "Nums" + "Array";
-	public static String ANNOT_WIDGET = "AnnotWidget";
-	public static String ADD_ACTION_WIDGET_ANNOTATION_FORM_FIELD = "AddActionWidgetAnnotationFormField";
+	public static final String ANNOT_WIDGET = "AnnotWidget";
+	public static final String ADD_ACTION_WIDGET_ANNOTATION_FORM_FIELD = "AddActionWidgetAnnotationFormField";
 	public static final String TREE_NODE = "TreeNode";
 	public static final String XREF_STREAM = "XRefStream";
 	public static final String XREF_STM = "XRefStm";
@@ -34,6 +34,7 @@ public class Constants {
 	public static final String ARRAY_OF_DECODE_PARAMS_ENTRY = "ArrayOfDecodeParamsEntry";
 	public static final String PAGE_OBJECT = "PageObject";
 	public static final String PARENT_KEY = "Parent";
+	public static final String KIDS = "Kids";
 	public static final String PARENT = "parent";
 	public static final String TRAILER = "trailer";
 	public static final String CATALOG = "Catalog";
