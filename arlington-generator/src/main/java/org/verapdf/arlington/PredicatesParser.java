@@ -4,11 +4,10 @@ import javafx.util.Pair;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PredicatesParser {
 
-	private static final String ENTRY_REGEX = "['A-Za-z:.@\\*\\d\\-_]+";
+	private static final String ENTRY_REGEX = "['A-Za-z//:.@\\*\\d\\-_]+";
 
 	public static final String PREDICATE_PREFIX = "fn:";
 	public static final String BEFORE_VERSION_PREDICATE = "fn:BeforeVersion";

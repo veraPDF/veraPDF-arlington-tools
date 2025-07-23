@@ -2,7 +2,6 @@ package org.verapdf.arlington;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PredicatesParserDescription extends PredicatesParser {
 
