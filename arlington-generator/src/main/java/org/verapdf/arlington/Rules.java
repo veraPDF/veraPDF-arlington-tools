@@ -25,7 +25,7 @@ public class Rules {
 	private static final String DEPRECATED_TYPE_DESCRIPTION = "%s should not have deprecated type %s";
 	private static final String DEPRECATED_TYPE_ERROR_MESSAGE = "%s is present";
 
-	private static final String EXTENSION_TYPE_DESCRIPTION = "%s should not have type %s, if extension %s does not chosen";
+	private static final String EXTENSION_TYPE_DESCRIPTION = "%s should not have type %s unless extension %s is enabled";
 	private static final String EXTENSION_TYPE_ERROR_MESSAGE = "%s is present";
 
 	private static final String POSSIBLE_VALUE_CONDITION_DESCRIPTION = "%s shall satisfy possible value predicate: %s";
