@@ -494,8 +494,8 @@ public class JavaGeneration {
 		DifferentKeysValuesLinkHelper helper = (DifferentKeysValuesLinkHelper)map.get(correctLinks.iterator().next());
 		Key key = helper.getKey();
 		calculateSubtype(object, entry, key);
-		javaWriter.println("\t\t" + key.getType().getJavaType() + " subtypeValue = subtype" +
-				key.getType().getParserMethod() + ";");
+		javaWriter.println("\t\t" + key.getType().getJavaType() + " subtypeValue = subtype != null ? subtype" +
+				key.getType().getParserMethod() + " : null;");
 		Set<String> defaultSet = addDefaultCaseLinkGetterByKeyValues(map, version, entry, type, linkName, correctLinks, methodNamePostfix);
 		SortedMap<String, Set<String>> newMap = addSwitchLinkGetterByKeyValues(map, version, object, entry, type, key, links,
 				correctLinks, linkName, methodNamePostfix);
@@ -544,9 +544,6 @@ public class JavaGeneration {
 			javaWriter.println("\t\t\tparent = parent.getKey(" + getASAtomFromString(Constants.PARENT_KEY) + ");");
 			javaWriter.println("\t\t}");
 		}
-		javaWriter.println("\t\tif (subtype == null) {");
-		javaWriter.println("\t\t\treturn null;");
-		javaWriter.println("\t\t}");
 	}
 
 	private Set<String> addDefaultCaseLinkGetterByKeyValues(Map<String, LinkHelper> map, PDFVersion version, Entry entry,
@@ -578,7 +575,7 @@ public class JavaGeneration {
 																		  List<String> correctLinks, String linkName, 
 																		  String methodNamePostfix) {
 		if (key.getBit() != null) {
-			javaWriter.println("\t\tswitch (subtypeValue.intValue() >> " + (key.getBit() - 1) + ") {");
+			javaWriter.println("\t\tswitch (subtypeValue.intValue() >> " + (key.getBit() - 1) + " & 1) {");
 		} else if (Type.INTEGER == key.getType()) {
 			javaWriter.println("\t\tswitch (subtypeValue.intValue()) {");
 		} else {
