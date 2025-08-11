@@ -67,7 +67,7 @@ public class Rules {
 	private static final String DEPRECATED_VALUES_DESCRIPTION = "%s should not have one of deprecated values: %s";
 	private static final String DEPRECATED_VALUE_ERROR_MESSAGE = "%s has deprecated value %s";
 
-	private static final String EXTENSION_VALUE_DESCRIPTION = "%s should not have value %s, if extension %s does not chosen";
+	private static final String EXTENSION_VALUE_DESCRIPTION = "%s should not have value %s unless extension %s is enabled";
 	private static final String EXTENSION_VALUE_ERROR_MESSAGE = "%s has value %s";
 
 	private static final String ARRAY_SIZE_DESCRIPTION = "%s shall contain %d * n + %d elements";
