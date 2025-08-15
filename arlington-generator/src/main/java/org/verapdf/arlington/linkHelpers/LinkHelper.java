@@ -342,6 +342,9 @@ public class LinkHelper {
 		helpers.put("CalRGBColorSpace", new DifferentKeysValuesLinkHelper("CalRGBColorSpace", new Key("0", Type.NAME, "CalRGB")));
 		helpers.put("DeviceNColorSpace", new DifferentKeysValuesLinkHelper("DeviceNColorSpace", new Key("0", Type.NAME, "DeviceN")));
 		helpers.put("ICCBasedColorSpace", new DifferentKeysValuesLinkHelper("ICCBasedColorSpace", new Key("0", Type.NAME, "ICCBased")));
+		helpers.put("DeviceGrayColorSpace", new DifferentKeysValuesLinkHelper("DeviceGrayColorSpace", new Key("0", Type.NAME, "DeviceGray")));
+		helpers.put("DeviceRGBColorSpace", new DifferentKeysValuesLinkHelper("DeviceRGBColorSpace", new Key("0", Type.NAME, "DeviceRGB")));
+		helpers.put("DeviceCMYKColorSpace", new DifferentKeysValuesLinkHelper("DeviceCMYKColorSpace", new Key("0", Type.NAME, "DeviceCMYK")));
 		helpersList.add(helpers);
 
 		helpers = new HashMap<>();
