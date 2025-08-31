@@ -297,13 +297,31 @@ public class JavaGeneration {
 			javaWriter.println("\tprivate static final Logger LOGGER = Logger.getLogger(" + object.getJavaClassName() + ".class.getCanonicalName());");
 			javaWriter.println();
 		}
-		if (Constants.FONT_FILE_2.equals(object.getId())) {
+		if (Constants.FONT_FILE_2.equals(object.getId()) || Constants.RICH_MEDIA_ACTIVATION.equals(object.getId())) {
 			javaWriter.println("\tprivate final COSBase parentParentObject;");
 			javaWriter.println();
 			javaWriter.println("\tpublic " + object.getJavaClassName() +
 					"(COSBase baseObject, COSBase parentObject, COSBase parentParentObject, String keyName) {");
 			javaWriter.println("\t\tsuper(baseObject, parentObject, keyName, \"" + object.getModelType() + "\");");
 			javaWriter.println("\t\tthis.parentParentObject = parentParentObject;");
+		} else if (Constants.ARRAY_OF_INDIRECT_FILE_SPECIFICATIONS.equals(object.getId())) {
+			javaWriter.println("\tprivate final COSBase parentParentParentObject;");
+			javaWriter.println();
+			javaWriter.println("\tpublic " + object.getJavaClassName() +
+					"(COSBase baseObject, COSBase parentObject, COSBase parentParentParentObject, String keyName) {");
+			javaWriter.println("\t\tsuper(baseObject, parentObject, keyName, \"" + object.getModelType() + "\");");
+			javaWriter.println("\t\tthis.parentParentParentObject = parentParentParentObject;");
+		} else if (Constants.ARRAY_OF_INDIRECT_FILE_SPECIFICATIONS_ENTRY.equals(object.getId())) {
+			javaWriter.println("\tprivate final COSBase parentParentParentParentObject;");
+			javaWriter.println("\tprivate final COSBase parentParentObject;");
+			javaWriter.println("\tprivate final String collectionName;");
+			javaWriter.println();
+			javaWriter.println("\tpublic " + object.getJavaClassName() +
+					"(COSBase baseObject, COSBase parentObject, COSBase parentParentObject, COSBase parentParentParentParentObject, String collectionName, String keyName) {");
+			javaWriter.println("\t\tsuper(baseObject, parentObject, keyName, \"" + object.getModelType() + "\");");
+			javaWriter.println("\t\tthis.parentParentParentParentObject = parentParentParentParentObject;");
+			javaWriter.println("\t\tthis.parentParentObject = parentParentObject;");
+			javaWriter.println("\t\tthis.collectionName = collectionName;");
 		} else if (object.isEntry()) {
 			javaWriter.println("\tprivate final COSBase parentParentObject;");
 			javaWriter.println("\tprivate final String collectionName;");
@@ -1842,8 +1860,13 @@ public class JavaGeneration {
 			i = 2;
 		} else if (Constants.PARENT.equals(entriesNames.get(0))) {
 			if (entriesNames.size() > 1 && Constants.PARENT.equals(entriesNames.get(1))) {
-				currentObjectName = "this.parentParentObject";
-				i = 2;
+				if (entriesNames.size() > 2 && Constants.PARENT.equals(entriesNames.get(2))) {
+					currentObjectName = object.isEntry() ? "this.parentParentParentParentObject" : "this.parentParentParentObject";
+					i = 3;	
+				} else {
+					currentObjectName = object.isEntry() ? "this.parentParentParentObject" : "this.parentParentObject";
+					i = 2;
+				}
 			} else {
 				currentObjectName = object.isEntry() ? "this.parentParentObject" : "this.parentObject";
 				i = 1;
@@ -2055,10 +2078,15 @@ public class JavaGeneration {
 		List<String> arguments = new LinkedList<>();
 		arguments.add(objectName);
 		arguments.add(parentObject);
-		if (Constants.FONT_FILE_2.equals(arlingtonObjectName)) {
+		if (Constants.FONT_FILE_2.equals(arlingtonObjectName) || Constants.RICH_MEDIA_ACTIVATION.equals(arlingtonObjectName)) {
 			arguments.add("this.parentObject");
+		} else if (Constants.ARRAY_OF_INDIRECT_FILE_SPECIFICATIONS.equals(arlingtonObjectName)) {
+			arguments.add("this.parentParentObject");
 		} else if (Constants.STAR.equals(entryName)) {
 			arguments.add("this.parentObject");
+			if (Constants.ARRAY_OF_INDIRECT_FILE_SPECIFICATIONS_ENTRY.equals(arlingtonObjectName)) {
+				arguments.add("this.parentParentParentObject");
+			}
 			arguments.add("keyName");
 		}
 		arguments.add(keyName);

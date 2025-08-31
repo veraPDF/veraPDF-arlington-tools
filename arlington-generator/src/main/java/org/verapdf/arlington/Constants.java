@@ -11,6 +11,9 @@ public class Constants {
 	public static final String STREAM = "Stream";
 	public static final String STRUCTURE_ATTRIBUTE_DICTIONARY = "StructureAttributesDict";
 	public static final String FONT_FILE_2 = "FontFile2";
+	public static final String RICH_MEDIA_ACTIVATION = "RichMediaActivation";
+	public static final String ARRAY_OF_INDIRECT_FILE_SPECIFICATIONS = "ArrayOfIndirectFileSpecifications";
+	public static final String ARRAY_OF_INDIRECT_FILE_SPECIFICATIONS_ENTRY = ARRAY_OF_INDIRECT_FILE_SPECIFICATIONS + "Entry";
 	public static final String FILE_TRAILER = "FileTrailer";
 	public static final String DOCUMENT = "Document";
 	public static final String OBJECT_REFERENCE = "ObjectReference";
