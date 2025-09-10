@@ -479,8 +479,8 @@ public class Rules {
 		String propertyHasType = entry.getHasTypePropertyName(type);
 		test.append(propertyHasType).append(" != " + Constants.TRUE + " || ");
 		entry.addHasTypeProperty(type);
-		Set<String> possibleValues = new HashSet<>();
-		Set<String> deprecatedValues = new HashSet<>();
+		Set<String> possibleValues = new LinkedHashSet<>();
+		Set<String> deprecatedValues = new LinkedHashSet<>();
 		calculatePossibleAndExtensionAndDeprecatedValues(test, version, object, entry, type, propertyName, possibleValues, deprecatedValues);
 		if (!deprecatedValues.isEmpty()) {
 			deprecatedValues(deprecatedValues, version, object, entry, type);
