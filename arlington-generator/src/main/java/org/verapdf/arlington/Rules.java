@@ -104,6 +104,9 @@ public class Rules {
 				containsFutureEntries(version, object);
 			}
 			for (Entry entry : object.getEntries()) {
+				if (entry.getName().endsWith(Constants.TREE_NODE)) {
+					continue;
+				}
 				checkLinks(version, object, entry);
 				if (entry.isStar() || entry.isNumberWithStar()) {
 					continue;
