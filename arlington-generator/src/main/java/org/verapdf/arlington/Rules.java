@@ -19,7 +19,7 @@ public class Rules {
 	private static final String DEPRECATED_ENTRY_DESCRIPTION = "%s is deprecated since PDF %s";
 	private static final String DEPRECATED_ENTRY_ERROR_MESSAGE = "%s is present";
 
-	private static final String SINCE_DESCRIPTION = "%s can only be present, if satisfy predicate %s";
+	private static final String SINCE_DESCRIPTION = "%s can only be present, if the predicate %s is satisfied";
 	private static final String SINCE_ERROR_MESSAGE = "%s is present";
 
 	private static final String DEPRECATED_TYPE_DESCRIPTION = "%s should not have deprecated type %s";
@@ -39,7 +39,7 @@ public class Rules {
 	private static final String INDIRECT_DESCRIPTION = "%s shall be indirect";
 	private static final String INDIRECT_ERROR_MESSAGE = "%s is direct";
 
-	private static final String EXTRA_ENTRIES_DESCRIPTION = "%s shall not contain entries except %s";
+	private static final String EXTRA_ENTRIES_DESCRIPTION = "%s shall not contain entries except %s and 2nd/3rd class names";
 	private static final String EXTRA_ENTRIES_ERROR_MESSAGE = "%s contains entry(ies) %s";
 
 	private static final String DOCUMENT_FUTURE_ENTRIES_DESCRIPTION = "%s shall not contain %s in PDF %s";
