@@ -392,6 +392,7 @@ public class JavaGeneration {
 		Main.addImport(javaWriter, "org.verapdf.model.alayer.*");
 		Main.addImport(javaWriter, "org.verapdf.gf.model.impl.containers.StaticContainers");
 		if (Constants.OBJECT.equals(objectName)) {
+			Main.addImport(javaWriter, "org.verapdf.containers.StaticCoreContainers");
 			Main.addImport(javaWriter, "org.verapdf.extensions.ExtensionObjectType");
 			Main.addImport(javaWriter, "org.verapdf.model.GenericModelObject");
 			Main.addImport(javaWriter, "org.verapdf.pd.PDDocument");
