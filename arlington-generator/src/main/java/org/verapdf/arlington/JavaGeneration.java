@@ -1641,7 +1641,7 @@ public class JavaGeneration {
 	public void addHasExtensionMethod(String extensionName) {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Object.getHasExtensionPropertyName(extensionName)));
-		javaWriter.println("\t\treturn StaticContainers.getEnabledExtensions().contains(ExtensionObjectType." + extensionName + ");");
+		javaWriter.println("\t\treturn StaticCoreContainers.getEnabledExtensions().contains(ExtensionObjectType." + extensionName + ");");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
