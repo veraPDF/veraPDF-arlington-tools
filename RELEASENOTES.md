@@ -1,7 +1,13 @@
+Version 1.30.2 (June 17, 2026)
+================================
+- implements Arlington model as of the release date (latest commit https://github.com/pdf-association/arlington-pdf-model/commit/5a8639424495c27a30df30bb9491a346f9316014).
+- upgraded veraPDF parser to version 1.30.2 (see [release notes](https://github.com/veraPDF/veraPDF-library/blob/rel/1.30/RELEASENOTES.md#pdf-parser))
+- included information about extensions to reports
+
 Version 1.30.1 (April 17, 2026)
 ================================
 - implements Arlington model as of the release date (latest commit https://github.com/pdf-association/arlington-pdf-model/commit/5a8f8ee446d295a6ebb710027c99b1f989096e7c).
-- upgraded veraPDF parser to version 1.30.1 (see [release notes](https://github.com/veraPDF/veraPDF-library/blob/rel/1.30/RELEASENOTES.md#pdf-parser))
+- upgraded veraPDF parser to version 1.30.1 (see [release notes](https://github.com/veraPDF/veraPDF-library/blob/rel/1.30/RELEASENOTES.md#pdf-parser-1))
 
 Version 1.30 RC (February 10, 2026)
 ================================
