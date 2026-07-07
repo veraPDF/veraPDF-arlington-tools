@@ -1147,7 +1147,7 @@ public class JavaGeneration {
 		printMethodSignature(true, "public", false, Type.BOOLEAN.getJavaType(),
 				getGetterName(Entry.getContainsPropertyName(entryName)));
 		int index = entryName.lastIndexOf("::");
-		String objectName = index != -1 ? getComplexObject(entryName.substring(0, index)) : "this.baseObject";
+		String objectName = index != -1 ? getComplexObject(entryName.substring(0, index), object) : "this.baseObject";
 		String finalEntryName = index != -1 ? entryName.substring(index + 2) : entryName;
 		if (finalEntryName.endsWith(Constants.TREE_NODE)) {
 			finalEntryName = finalEntryName.substring(0, finalEntryName.length() - 8);
@@ -1799,14 +1799,21 @@ public class JavaGeneration {
 		javaWriter.println();
 	}
 
-	private String getComplexObject(String entryName) {
+	private String getComplexObject(String entryName, Object object) {
 		if (Constants.PARENT.equals(entryName)) {
+			if (object != null && object.isEntry()) {
+				return "this.parentParentObject";
+			}
 			return "this.parentObject";
 		}
 		String correctEntryName = Entry.getCorrectEntryName(entryName);
 		javaWriter.println("\t\tCOSObject " + correctEntryName + " = " + 
 				getMethodCall(getGetterName(Entry.getValuePropertyName(entryName))) + ";");
 		return correctEntryName;
+	}
+
+	private String getComplexObject(String entryName) {
+		return getComplexObject(entryName, null);
 	}
 	
 	private String getComplexObject(Object object, String entryName) {
