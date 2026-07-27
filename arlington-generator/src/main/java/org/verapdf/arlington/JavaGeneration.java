@@ -24,7 +24,7 @@ public class JavaGeneration {
 		javaWriter.println("\tprivate static final List<String> standardFonts = new LinkedList<>();");
 		javaWriter.println("\tprivate static final ThreadLocal<Set<COSKey>> keysSet = new ThreadLocal<>();");
 //		javaWriter.println("\tprivate static final ThreadLocal<Set<COSKey>> afKeysSet = new ThreadLocal<>();");
-		javaWriter.println("\tprotected static final String PDF_DATE_FORMAT_REGEX = \"(D:)?(\\\\d\\\\d){2,7}(([Z+-]\\\\d\\\\d'(\\\\d\\\\d'?)?)?|Z)\";");
+		javaWriter.println("\tprotected static final Pattern PDF_DATE_FORMAT_REGEX_PATTERN = Pattern.compile(\"(D:)?(\\\\d\\\\d){2,7}(([Z+-]\\\\d\\\\d'(\\\\d\\\\d'?)?)?|Z)\");");
 
 		javaWriter.println("\tprotected final COSBase baseObject;");
 		javaWriter.println("\tprotected COSBase parentObject;");
@@ -261,7 +261,7 @@ public class JavaGeneration {
 			javaWriter.println("\t\treturn " + objectName + " != null && " + objectName + ".getType().isNumber();");
 		} else if (type == Type.DATE) {
 			javaWriter.println("\t\treturn " + objectName + " != null && " + objectName + ".getType() == " +
-					type.getCosObjectType() + " && " + objectName + ".getString().matches(PDF_DATE_FORMAT_REGEX);");
+					type.getCosObjectType() + " && PDF_DATE_FORMAT_REGEX_PATTERN.matcher(" + objectName + ".getString()).matches();");
 		} else if (type == Type.RECTANGLE || type == Type.MATRIX) {
 			javaWriter.println("\t\tif (" + objectName + " == null || " + objectName + ".getType() != " +
 					type.getCosObjectType() + " || " + objectName + ".size() != " + (type == Type.MATRIX ? 6 : 4) + ") {");
@@ -398,6 +398,7 @@ public class JavaGeneration {
 			Main.addImport(javaWriter, "org.verapdf.pd.PDDocument");
 			Main.addImport(javaWriter, "org.verapdf.pd.PDCatalog");
 			Main.addImport(javaWriter, "org.verapdf.pd.PDNamesDictionary");
+			Main.addImport(javaWriter, "java.util.regex.Pattern");
 		}
 		Main.addImport(javaWriter, "org.verapdf.tools.StaticResources");
 		Main.addImport(javaWriter, "java.util.*");
@@ -805,7 +806,7 @@ public class JavaGeneration {
 			javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType().isNumber()) {");
 		} else if (type == Type.DATE) {
 			javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " +
-					type.getCosObjectType() + " && " + objectName + ".getString().matches(GFAObject.PDF_DATE_FORMAT_REGEX)) {");
+					type.getCosObjectType() + " && PDF_DATE_FORMAT_REGEX_PATTERN.matcher(" + objectName + ".getString()).matches()) {");
 		} else {
 			javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " +
 					type.getCosObjectType() + ") {");
