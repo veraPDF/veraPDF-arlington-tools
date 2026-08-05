@@ -85,6 +85,8 @@ veraPDF adds extra logic to the Arlington model. Namely, it:
 
 - contains additional rule about **PageLabel** number tree. See https://github.com/pdf-association/arlington-pdf-model/issues/118
 
+- contains additional rule about **Pg** in structure element dictionary. See https://github.com/pdf-association/arlington-pdf-model/issues/170
+
 - custom structure attribute names of the standard structure attribute owners (Table 376) defined by external specifications (such as `HTML-3.20`, `HTML-4.01`, `CSS-1`, `CSS-2`, etc.) will be reported as deviations (i.e. veraPDF does not implement an implicit understanding of those external specifications)
 
 - the PDF Metadata (clause 14.3) and Associated Files (clause 14.13) features are documented as being permitted on _any_ PDF object, however ISO 32000-2:2020 only formally documents the presence of the **Metadata** and **AF** keys on a few specific objects. Because the Arlington model accurately reflects the specification as written, it only defines support for those explicit objects in the TSV data. As a result, veraPDF will report deviations when a  **Metadata** or **AF** keys occurs in other objects, which may or may not be an issue. 
@@ -96,5 +98,7 @@ veraPDF adds extra logic to the Arlington model. Namely, it:
 - veraPDF only operates as a "_PDF 1.5 processor_" and will always process both conventional cross-reference sections and all cross-reference streams that are present in hybrid-reference PDF files.
     -  Thus veraPDF will _not_ report issues that a pre-PDF 1.5 processor may experience when processing the same hybrid-reference PDF file (i.e. when objects defined in cross-reference streams are not present). See clause 7.5.8.4.
 
-- the set of enabled extensions in the Arlington model (predicate `fn:Extension(...)`) will influence the deviations reported by veraPDF. Currently this is configurable in veraPDF via the CLI and GUI, but not yet the REST implementation.
+- the set of enabled extensions in the Arlington model (predicate `fn:Extension(...)`) will influence the deviations reported by veraPDF. This is configurable in veraPDF via the CLI, GUI and REST implementations. There is also a mechanism for auto-detection extensions that are presented in the document:
+  - ISO and ADBE extensions automatically set to enabled, when present in Extensions dictionary in Catalog. 
+  - WTPDF and ISO_19005_3 extensions automatically set to enabled, when document metadata contains WTPDF declaration(s) or PDF/A-3 Identification Schema.
 
