@@ -22,9 +22,11 @@ The Arlington PDF model utilizes an [expanded set of types](https://github.com/p
     - Entry **Kids** in NameTreeNode is required, when `fn:Not(fn:IsPresent(Names))`.
     - Entry **Kids** with type Array in NameTreeNode shall satisfy special case: `fn:Not(fn:IsPresent(fn:IsPresent(Names)))`
     - Entry **Limits** in NameTreeNode shall have type Array.
+    - Entry **Limits** in NameTreeNode is required, when `fn:IsPresent(parent::Kids)`
+    - Entry **Limits** with type Array in NameTreeNode shall satisfy special case: `fn:Not(fn:IsPresent(fn:Not(fn:IsPresent(parent::Kids))))`
     - Entry **Names** in NameTreeNode shall have type Array.
     - Entry **Names** in NameTreeNode is required, when `fn:Not(fn:IsPresent(Kids))`.
-    - Entry **Names** with type Array in NameTreeNode shall satisfy special case: `fn:Not(fn:IsPresent(fn:IsPresent(Kids)))`
+    - Entry **Names** with type Array in NameTreeNode shall satisfy special case: `fn:Not(fn:IsPresent(fn:IsPresent(Kids))) && fn:ArraySortAscending(Names, 2)`
     - NameTreeNodeLimitsArray shall contain exactly 2 elements.
     - Entry 0 in NameTreeNodeLimitsArray shall have type String.
     - Entry 1 in NameTreeNodeLimitsArray shall have type String.
@@ -39,6 +41,8 @@ The Arlington PDF model utilizes an [expanded set of types](https://github.com/p
     - Entry **Kids** with type Array in NumberTreeNode shall satisfy special case: `fn:Not(fn:IsPresent(fn:IsPresent(Nums)))`
     - Entry **Limits** in NumberTreeNode shall have type Array
     - Entry **Nums** in NumberTreeNode shall have type Array
+    - Entry **Limits** in NumberTreeNode is required, when `fn:IsPresent(parent::Kids)`
+    - Entry **Limits** with type Array in NumberTreeNode shall satisfy special case: `fn:Not(fn:IsPresent(fn:Not(fn:IsPresent(parent::Kids))))`
     - Entry **Nums** in NumberTreeNode is required, when `fn:Not(fn:IsPresent(Kids))`
     - Entry **Nums** with type Array in NumberTreeNode shall satisfy special case: `fn:Not(fn:IsPresent(fn:IsPresent(Kids))) && fn:ArraySortAscending(Nums,2)`
     - NumberTreeNodeLimitsArray shall contain exactly 2 elements
