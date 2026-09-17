@@ -26,7 +26,7 @@ public class Main {
 
 	public static final SortedSet<String> objectNames = new TreeSet<>();
 	public static final SortedSet<String> extensionNames = new TreeSet<>();
-	public static final int EXPECTED_EXTENSIONS_NUMBER = 18;
+	public static final int EXPECTED_EXTENSIONS_NUMBER = 19;
 	public static final Map<String, MultiObject> objectIdMap = new HashMap<>();
 	private static final Map<PDFVersion, Set<String>> activeObjectNames = new HashMap<>();
 	private static final String VALIDATION_RESULT_FOLDER = "result_validation/";
@@ -52,7 +52,7 @@ public class Main {
 			version.getProfileWriter().close();
 		}
 		if (extensionNames.size() != EXPECTED_EXTENSIONS_NUMBER) {
-			Main.LOGGER.log(Level.WARNING, String.format("Number of logs is changed. Should be %s instead of %s", EXPECTED_EXTENSIONS_NUMBER, extensionNames.size()));
+			Main.LOGGER.log(Level.WARNING, String.format("Number of extensions is changed. Should be %s instead of %s", EXPECTED_EXTENSIONS_NUMBER, extensionNames.size()));
 			System.out.println(Main.extensionNames);
 		}
 		if (LOGS_HANDLER.logsNumber != EXPECTED_LOGS_NUMBER) {
