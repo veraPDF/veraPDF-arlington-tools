@@ -247,8 +247,8 @@ public class ObjectCreation {
                 limitsLinks.add(Constants.NAME_TREE_NODE_LIMITS_ARRAY);
                 limits.getLinks().put(Type.ARRAY, limitsLinks);
                 limits.getTypesPredicates().add("");
-                limits.setRequired("fn:IsRequired(fn:IsPresent(parent::Kids))");
-                limits.getSpecialCases().put(Type.ARRAY, "fn:Not(fn:IsPresent(fn:Not(fn:IsPresent(parent::Kids))))");
+                limits.setRequired("fn:IsRequired(fn:IsArray(parent))");
+                limits.getSpecialCases().put(Type.ARRAY, "fn:Not(fn:IsPresent(fn:Not(fn:IsArray(parent))))");
 
                 SortedSet<Entry> entries = new TreeSet<>();
                 entries.add(kids);
@@ -292,8 +292,8 @@ public class ObjectCreation {
                 limitsLinksList.add(Constants.NUMBER_TREE_NODE_LIMITS_ARRAY);
                 limits.getLinks().put(Type.ARRAY, limitsLinksList);
                 limits.getTypesPredicates().add("");
-                limits.setRequired("fn:IsRequired(fn:IsPresent(parent::Kids))");
-                limits.getSpecialCases().put(Type.ARRAY, "fn:Not(fn:IsPresent(fn:Not(fn:IsPresent(parent::Kids))))");
+                limits.setRequired("fn:IsRequired(fn:IsArray(parent))");
+                limits.getSpecialCases().put(Type.ARRAY, "fn:Not(fn:IsPresent(fn:Not(fn:IsArray(parent))))");
 
                 SortedSet<Entry> entries = new TreeSet<>();
                 entries.add(kids);

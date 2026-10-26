@@ -1813,9 +1813,9 @@ public class JavaGeneration {
 	private String getComplexObject(String entryName, Object object) {
 		if (Constants.PARENT.equals(entryName)) {
 			if (object != null && object.isEntry()) {
-				return "this.parentParentObject";
+				return "new COSObject(this.parentParentObject)";
 			}
-			return "this.parentObject";
+			return "new COSObject(this.parentObject)";
 		}
 		String correctEntryName = Entry.getCorrectEntryName(entryName);
 		javaWriter.println("\t\tCOSObject " + correctEntryName + " = " + 

@@ -597,6 +597,9 @@ public class PredicatesParser {
 //			case "fn:InNameTree":
 //				inNameTree();
 //				break;
+			case "fn:IsArray":
+				isArray();
+				break;
 			case "fn:IsAssociatedFile":
 				isAssociatedFile();
 				break;
@@ -1029,6 +1032,24 @@ public class PredicatesParser {
 		}
 	}
 
+	private void isArray() {
+		if (arguments.size() != 1) {
+			throw new RuntimeException("Invalid number of arguments of isArray");
+		}
+		String entryName = getEntryName(arguments.get(0).getString());
+		Entry entry = object.getEntry(entryName);
+		if (entry != null) {
+			output.push(getPropertyOrMethodName(Entry.getHasTypePropertyName(entryName, Type.ARRAY)) + " == true");
+			entry.setFieldNameProperty(true);
+		} else if (Entry.isComplexEntry(entryName)) {
+			output.push(getPropertyOrMethodName(Entry.getHasTypePropertyName(entryName, Type.ARRAY)) + " == true");
+			object.getEntriesHasTypeProperties().put(entryName, Type.ARRAY);
+			object.getComplexObjectProperties().add(entryName);
+		} else {
+			throw new RuntimeException("Invalid argument of isArray");
+		}
+	}
+	
 	private void isAssociatedFile() {
 		output.push(getPropertyOrMethodName(Constants.IS_ASSOCIATED_FILE));
 	}

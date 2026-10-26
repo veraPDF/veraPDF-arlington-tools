@@ -362,7 +362,7 @@ public class Entry implements Comparable<Entry> {
 	}
 	
 	public static boolean isComplexEntry(String entryName) {
-		return entryName.contains("::");
+		return entryName.contains("::") || "parent".equals(entryName);
 	}
 
 	public void setName(String name) {
