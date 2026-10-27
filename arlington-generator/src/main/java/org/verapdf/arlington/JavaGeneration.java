@@ -236,7 +236,7 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\tif (dests == null) {");
 		javaWriter.println("\t\t\t\treturn null;");
 		javaWriter.println("\t\t\t}");
-		javaWriter.println("\t\t\tobject = dests.getObject(object" + Type.STRING_BYTE.getParserMethod() + ");");
+		javaWriter.println("\t\t\tobject = dests.getObject((COSString)object.getDirectBase());");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tLong pageNumber = null;");
 		javaWriter.println("\t\tif (object != null && object.getType() == " + Type.INTEGER.getCosObjectType() + ") {");
@@ -1051,7 +1051,7 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tLong previousNumber = null;");
-		javaWriter.println("\t\tString previousString = null;");
+		javaWriter.println("\t\tCOSString previousString = null;");
 		javaWriter.println("\t\tfor (int i = 0; i < object.size(); i += number) {");
 		javaWriter.println("\t\t\tCOSObject elem = object.at(i);");
 		javaWriter.println("\t\t\tif (elem == null) {");
@@ -1063,10 +1063,10 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\t\t}");
 		javaWriter.println("\t\t\t\tpreviousNumber = elem.getInteger();");
 		javaWriter.println("\t\t\t} else if (elem.getType() == " + Type.STRING.getCosObjectType() + ") {");
-		javaWriter.println("\t\t\t\tif (previousString != null && previousString.compareTo(elem.getString()) >= 0) {");
+		javaWriter.println("\t\t\t\tif (previousString != null && COSString.compare(previousString, (COSString)elem.getDirectBase()) >= 0) {");
 		javaWriter.println("\t\t\t\t\treturn false;");
 		javaWriter.println("\t\t\t\t}");
-		javaWriter.println("\t\t\t\tpreviousString = elem.getString();");
+		javaWriter.println("\t\t\t\tpreviousString = (COSString)elem.getDirectBase();");
 		javaWriter.println("\t\t\t} else {");
 		javaWriter.println("\t\t\t\treturn false;");
 		javaWriter.println("\t\t\t}");
@@ -1747,7 +1747,7 @@ public class JavaGeneration {
 		javaWriter.println("\t\t\treturn false;");
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\tPDNameTreeNode nameTreeNode = PDNameTreeNode.create(" + nameTreeObjectName + ");");
-		javaWriter.println("\t\treturn nameTreeNode.containsKey(" + objectName + Type.STRING_BYTE.getParserMethod() + ");");
+		javaWriter.println("\t\treturn nameTreeNode.containsKey((COSString)" + objectName + ".getDirectBase());");
 		javaWriter.println("\t}");
 		javaWriter.println();
 	}
