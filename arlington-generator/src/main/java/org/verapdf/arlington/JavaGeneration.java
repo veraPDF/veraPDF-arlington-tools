@@ -9,6 +9,8 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class JavaGeneration {
+	
+	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(JavaGeneration.class.getName());
 
 	private final PrintWriter javaWriter;
 
@@ -1471,7 +1473,15 @@ public class JavaGeneration {
 		String objectName = getObjectByEntryName(entry.getName());
 		javaWriter.println("\t\tif (" + objectName + " != null && " + objectName + ".getType() == " + 
 				Type.STRING.getCosObjectType() + ") {");
-		javaWriter.println("\t\t\treturn (long) " + objectName + ".getString().length();");
+		if (entry.getTypes().contains(Type.STRING_BYTE)) {
+			if (entry.getTypes().contains(Type.STRING_ASCII) || entry.getTypes().contains(Type.STRING_TEXT) || 
+					entry.getTypes().contains(Type.STRING)) {
+				LOGGER.log(Level.WARNING, "Entry " + entry.getName() + " has multiple string types. Using getInteger() for length.");
+			}		
+			javaWriter.println("\t\t\treturn " + objectName + ".getInteger();");
+		} else {
+			javaWriter.println("\t\t\treturn (long) " + objectName + ".getString().length();");
+		}
 		javaWriter.println("\t\t}");
 		javaWriter.println("\t\treturn null;");
 		javaWriter.println("\t}");
