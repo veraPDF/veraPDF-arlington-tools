@@ -506,6 +506,8 @@ public class Rules {
 	private static void calculatePossibleAndExtensionAndDeprecatedValues(StringBuilder test, PDFVersion version, Object object,
 																		 Entry entry, Type type, String propertyName,
 																		 Set<String> possibleValues, Set<String> deprecatedValues) {
+		Set<String> baseValues = new HashSet<>();
+		Map<String, String> extensionValues = new LinkedHashMap<>();
 		for (String propertyValue : entry.getPossibleValues(type)) {
 			if (propertyValue.startsWith(PredicatesParser.IS_PDF_VERSION_PREDICATE)) {
 				PDFVersion predicateVersion = PDFVersion.getPDFVersion(PredicatesParser.getPredicateFirstArgument(propertyValue));
@@ -526,6 +528,7 @@ public class Rules {
 				propertyValue = PredicatesParser.removeQuotes(propertyValue);
 				test.append(propertyName).append(" == ").append(type.getValueWithSeparator(propertyValue)).append(" || ");
 				possibleValues.add(propertyValue);
+				baseValues.add(propertyValue);
 				entry.addTypeValueProperty(type);
 				continue;
 			} else if (propertyValue.contains(PredicatesParser.EVAL_PREDICATE)) {
@@ -549,7 +552,7 @@ public class Rules {
 			}
 			if (propertyValue.contains(PredicatesParser.EXTENSION_PREDICATE)) {
 				if (propertyValue.startsWith(PredicatesParser.EXTENSION_PREDICATE)) {
-					extensionValue(object, entry, version, type, propertyValue, possibleValue);
+					extensionValues.put(propertyValue, possibleValue);
 				} else {
 					Main.LOGGER.log(Level.WARNING, Main.getString(version, object, entry) + " extension predicate");
 				}
@@ -594,6 +597,13 @@ public class Rules {
 			test.append(propertyName).append(" == ").append(type.getValueWithSeparator(possibleValue)).append(" || ");
 			possibleValues.add(possibleValue);
 			entry.addTypeValueProperty(type);
+		}
+		// One name can be both an extension in an older edition and a base
+		// value in this edition. Check all alternatives before emitting rule 27.
+		for (Map.Entry<String, String> extension : extensionValues.entrySet()) {
+			if (!baseValues.contains(extension.getValue())) {
+				extensionValue(object, entry, version, type, extension.getKey(), extension.getValue());
+			}
 		}
 	}
 
