@@ -79,7 +79,9 @@ public class Constants {
 	public static final String NUMBER_REGEX = "\\d+";
 	public static final String DOUBLE_REGEX = "\\d+\\.\\d+";
 	public static final String NUMBER_WITH_STAR_REGEX = "\\d+\\*";
-	public static final String SECOND_OR_THIRD_CLASS_NAME_REGEX = "^(XX|(.{4}[_:]))";
+	// ISO 32000-2 Annex E.2: a four-byte prefix can contain the delimiter
+	// (ISO_, _Y4Y), or the delimiter can immediately follow it (ITXT_).
+	public static final String SECOND_OR_THIRD_CLASS_NAME_REGEX = "^(XX|(?=.{4}).{0,4}[_:])";
 
 	public static final String STAR = "*";
 	public static final String TRUE = "true";
